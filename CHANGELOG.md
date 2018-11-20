@@ -1,6 +1,7 @@
 # Change Log
 
 # 2.0.2
+* MOVE REPOSITORY WITHOUT HISTORY FROM Transkribs to CITlabRostock AND MAKE OPENSOURCE
 * bugfix: check System.getenv() instead of System.getProperty() for $PYTHONPATH
 * bugfix: do not set train_size_per_epoch instad of "-1"
 * bugfix: add process listener to TrainHTRPlus to make status/process observable
