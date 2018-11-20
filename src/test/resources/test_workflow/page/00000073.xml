@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
+    <Metadata>
+        <Creator>TRP
+NCSR LineSegmentationTool, v0.3.0 (17_3_2015)</Creator>
+        <Created>2015-09-04T16:40:30.794+02:00</Created>
+        <LastChange>2016-06-16T15:58:59.232+02:00</LastChange>
+        <TranskribusMetadata docId="1" pageId="1" pageNr="1" tsid="1" status="GT" userId="1" imgUrl="" xmlUrl="" imageId="1"/>
+    </Metadata>
+    <Page imageFilename="00000073.tif" imageWidth="3169" imageHeight="5243">
+        <ReadingOrder>
+            <OrderedGroup id="ro_1466085538987" caption="Regions reading order">
+                <RegionRefIndexed index="0" regionRef="region_1466085427264_48"/>
+                <RegionRefIndexed index="1" regionRef="r1"/>
+            </OrderedGroup>
+        </ReadingOrder>
+        <TextRegion id="region_1466085427264_48" custom="readingOrder {index:0;}">
+            <Coords points="2859,148 3011,148 3011,292 2859,292"/>
+            <TextLine id="line_1466085432762_49" custom="readingOrder {index:0;}">
+                <Coords points="2889,214 3000,214 3000,264 2889,264"/>
+                <Baseline points="2889,259 3000,259"/>
+                <TextEquiv>
+                    <Unicode>36</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextEquiv>
+                <Unicode>36</Unicode>
+            </TextEquiv>
+        </TextRegion>
+        <TextRegion id="r1" custom="readingOrder {index:1;}">
+            <Coords points="78,411 3113,411 3113,3806 78,3806"/>
+            <TextLine id="r1l1" custom="readingOrder {index:0;}">
+                <Coords points="2116,438 1460,442 832,455 614,577 595,625 595,632 598,640 792,687 2018,680 2413,645 2444,592 2445,586 2444,580 2314,464 2117,438"/>
+                <Baseline points="595,632 903,606 1211,582 1519,587 1827,599 2445,540"/>
+                <TextEquiv>
+                    <Unicode>Magnifice Academiae Rector,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l2" custom="readingOrder {index:1;} abbrev {offset:15; length:8;} abbrev {offset:24; length:4;} abbrev {offset:29; length:7;}">
+                <Coords points="2141,975 1524,976 689,999 520,1107 504,1152 503,1160 503,1167 506,1177 524,1188 1208,1138 1215,1149 1353,1147 1586,1155 1593,1178 1587,1187 1587,1195 1592,1197 1597,1197 1629,1172 1809,1140 1984,1141 2256,1159 2277,1146 2435,1152 2566,1186 2747,1190 2882,1159 3114,1060 3114,1052 3094,998 2142,975"/>
+                <Baseline points="503,1144 937,1118 1372,1115 1806,1104 2241,1104 3114,1094"/>
+                <TextEquiv>
+                    <Unicode>Da es mittelst Conclus. Ven. Concil. ausgemacht</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l3" custom="readingOrder {index:2;}">
+                <Coords points="1205,1139 789,1171 587,1192 527,1285 527,1294 528,1301 534,1311 1042,1352 1086,1320 1148,1336 1151,1365 1156,1366 1237,1312 1346,1326 1571,1282 1756,1308 1924,1278 1972,1342 2080,1285 2129,1331 2262,1329 2283,1309 2592,1258 2627,1301 2691,1301 2701,1309 2693,1322 2692,1335 2681,1350 2984,1264 3004,1216 3010,1163 3009,1156 3001,1147 2876,1162 2743,1191 2562,1187 2435,1151 2276,1148 2261,1158 1981,1142 1809,1141 1627,1174 1596,1198 1588,1197 1586,1189 1591,1181 1593,1171 1348,1142 1218,1152 1210,1139 1206,1139"/>
+                <Baseline points="527,1284 940,1270 1354,1253 1767,1243 2181,1246 3010,1224"/>
+                <TextEquiv>
+                    <Unicode>worden, daß singuli bey Wahlsachen auch in </Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l4" custom="readingOrder {index:3;}">
+                <Coords points="2585,1259 2294,1303 2264,1328 2124,1329 2085,1285 1996,1347 1943,1283 1756,1309 1703,1282 1350,1324 1343,1327 1245,1309 1157,1367 1146,1362 1148,1338 1085,1322 1038,1352 904,1317 616,1328 520,1424 508,1463 508,1471 512,1480 808,1506 934,1521 1138,1463 1271,1510 1365,1460 1622,1452 2014,1454 2021,1460 2021,1464 2020,1465 2020,1467 2018,1470 2018,1475 2433,1442 2952,1428 2972,1443 3025,1405 3038,1348 3037,1343 3033,1335 2694,1354 2692,1322 2701,1309 2690,1300 2634,1317 2596,1260 2586,1259"/>
+                <Baseline points="508,1448 929,1426 1350,1402 1771,1397 2192,1391 3038,1381"/>
+                <TextEquiv>
+                    <Unicode>Abwesenehit ihr Votum abgeben können,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l5" custom="readingOrder {index:4;} abbrev {offset:13; length:3;}">
+                <Coords points="2934,1437 2427,1443 2022,1482 2018,1470 2018,1468 2019,1467 2019,1465 2020,1464 2020,1460 2012,1454 1617,1452 1367,1460 1278,1510 1191,1466 933,1522 630,1473 490,1564 459,1702 461,1707 466,1707 621,1624 660,1677 809,1610 828,1656 1019,1700 1237,1668 1251,1659 1426,1587 1590,1590 1635,1651 1711,1624 1836,1644 1913,1597 2080,1606 2080,1613 2080,1615 2198,1566 2203,1568 2178,1641 2227,1661 2265,1635 2539,1697 2574,1693 2759,1619 3034,1571 3035,1556 3033,1544 3007,1459 2948,1437 2935,1437"/>
+                <Baseline points="459,1602 888,1583 1317,1568 1746,1558 2175,1565 3035,1545"/>
+                <TextEquiv>
+                    <Unicode>so zeige ich Ew. Magnificence hiedurch schul-</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l6" custom="readingOrder {index:5;}">
+                <Coords points="2196,1567 2082,1617 2079,1614 2079,1607 2079,1605 1912,1593 1837,1644 1717,1622 1649,1654 1600,1593 1433,1587 1239,1667 1228,1672 1018,1694 832,1667 822,1626 672,1690 643,1636 493,1734 486,1753 486,1759 563,1830 577,1822 613,1804 617,1809 617,1821 618,1828 703,1787 991,1784 1183,1833 1380,1827 1773,1750 1780,1750 1996,1750 2115,1813 2237,1757 2280,1752 2319,1780 2315,1809 2331,1813 2371,1793 2378,1800 2442,1767 2571,1762 2595,1783 2596,1805 2754,1769 2802,1814 2917,1765 3001,1803 3056,1676 3053,1666 2993,1608 2767,1616 2572,1695 2539,1698 2264,1636 2226,1662 2179,1638 2203,1571 2197,1567"/>
+                <Baseline points="486,1759 914,1776 1342,1726 1770,1728 2198,1736 3056,1737"/>
+                <TextEquiv>
+                    <Unicode>digst an, daß fals die Wahl zur substi-</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l7" custom="readingOrder {index:6;}">
+                <Coords points="1770,1751 1380,1822 1183,1834 1174,1833 1089,1785 703,1788 621,1832 616,1822 616,1810 614,1806 567,1831 491,1858 483,1928 484,1937 495,1951 1172,1966 1179,1963 1208,1962 1218,1948 1581,1965 1859,1913 1875,1914 1891,1925 1887,1962 1973,1967 2946,1905 2965,1857 2965,1851 2940,1770 2804,1815 2767,1772 2609,1816 2592,1768 2442,1765 2376,1798 2371,1793 2333,1813 2323,1818 2290,1755 2275,1753 2231,1757 2120,1813 1996,1751 1985,1751 1771,1751"/>
+                <Baseline points="483,1924 896,1908 1309,1890 1722,1881 2135,1872 2965,1871"/>
+                <TextEquiv>
+                    <Unicode>tution des academischen Tanz Meisters im</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l8" custom="readingOrder {index:7;}">
+                <Coords points="1848,1914 1579,1955 1218,1950 1211,1961 1180,1963 1169,1968 606,1950 500,1985 389,2211 391,2221 397,2221 578,2132 693,2201 868,2112 1557,2103 2130,2103 2288,2087 2288,2090 2290,2093 2506,2089 2729,2156 2756,2153 2966,2021 2982,1971 2979,1963 2862,1937 2025,1964 1965,1968 1932,1965 1895,1959 1887,1917 1849,1914"/>
+                <Baseline points="389,2104 820,2089 1252,2066 1683,2057 2115,2047 2982,2032"/>
+                <TextEquiv>
+                    <Unicode>heutigen Pleno vorkommen sollte, ich</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l9" custom="readingOrder {index:8;} abbrev {offset:4; length:2;} person {offset:7; length:4;}">
+                <Coords points="2283,2086 1552,2104 877,2112 696,2196 584,2133 463,2249 459,2263 461,2271 805,2334 2094,2279 2485,2263 2721,2286 3036,2207 3041,2198 3041,2189 3040,2184 2982,2101 2754,2154 2726,2157 2686,2150 2706,2108 2708,2108 2718,2110 2728,2095 2710,2089 2288,2091 2288,2088 2284,2086"/>
+                <Baseline points="459,2256 889,2244 1319,2229 1749,2209 2179,2188 3041,2187"/>
+                <TextEquiv>
+                    <Unicode>dem H. Amor hiezu mein votum gebe.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_1443602202636_12" custom="readingOrder {index:9;}">
+                <Coords points="472,2302 3063,2302 3063,2540 472,2540"/>
+                <Baseline points="502,2477 3042,2421 3054,2427"/>
+                <TextEquiv>
+                    <Unicode>Der ich die Ehre habe hochachtungsvoll </Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_1443602213135_13" custom="readingOrder {index:10;}">
+                <Coords points="458,2495 1387,2495 1387,2754 458,2754"/>
+                <Baseline points="472,2635 1330,2575 1330,2575 1330,2575"/>
+                <TextEquiv>
+                    <Unicode>zu beharren</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l11" custom="readingOrder {index:11;} abbrev {offset:0; length:3;} abbrev {offset:4; length:7;}">
+                <Coords points="2264,2624 1883,2660 1652,2768 1620,2868 1620,2873 1621,2878 1676,2904 2344,2884 2601,2874 2834,2794 2847,2662 2846,2656 2265,2624"/>
+                <Baseline points="1620,2811 1824,2832 2028,2791 2232,2773 2436,2792 2847,2680"/>
+                <TextEquiv>
+                    <Unicode>Ew. Magnif:</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l12" custom="readingOrder {index:12;} abbrev {offset:0; length:8;} place {offset:0; length:8;} abbrev {offset:9; length:2;} date {offset:12; length:10;} abbrev {offset:15; length:7;} abbrev {offset:23; length:7;}">
+                <Coords points="1199,3316 302,3319 240,3337 140,3434 103,3597 106,3604 515,3588 546,3543 1399,3581 1736,3576 1820,3533 2049,3511 2641,3527 2810,3394 2816,3369 2812,3360 2407,3320 1200,3316"/>
+                <Baseline points="103,3502 554,3474 1006,3442 1457,3445 1909,3452 2816,3417"/>
+                <TextEquiv>
+                    <Unicode>Greifsw. d. 4. Septbr. Gehors. Diener</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l13" custom="readingOrder {index:13;} date {offset:0; length:4;}">
+                <Coords points="2044,3512 1821,3521 1734,3577 1397,3582 615,3535 527,3568 510,3601 517,3642 624,3688 727,3688 1787,3652 1858,3626 1861,3624 1863,3624 1869,3629 1907,3638 1908,3639 1908,3641 1905,3644 1904,3643 1903,3648 1905,3652 1952,3643 1952,3645 1953,3645 1956,3648 1978,3632 1995,3618 1994,3617 1995,3616 1995,3612 1997,3611 2006,3619 2006,3620 2027,3631 2030,3639 2060,3632 2084,3607 2083,3606 2083,3600 2084,3599 2092,3598 2102,3607 2121,3614 2125,3618 2125,3620 2129,3624 2168,3607 2288,3609 2297,3624 2317,3626 2326,3607 2326,3601 2323,3591 2198,3523 2045,3512"/>
+                <Baseline points="510,3623 812,3631"/>
+                <TextEquiv>
+                    <Unicode>1794.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="r1l14" custom="readingOrder {index:14;} person {offset:0; length:9;}">
+                <Coords points="2088,3597 2084,3600 2084,3606 2083,3607 2061,3631 2032,3643 2026,3631 2006,3620 2001,3615 1996,3612 1996,3616 1993,3619 1994,3620 1963,3644 1956,3649 1952,3645 1952,3643 1903,3651 1902,3647 1907,3641 1907,3639 1906,3638 1868,3629 1865,3626 1861,3625 1860,3626 1848,3630 1787,3655 1771,3698 1772,3706 1817,3743 2614,3683 2629,3701 2674,3652 2675,3642 2673,3632 2500,3597 2327,3599 2327,3607 2321,3625 2299,3628 2288,3610 2179,3605 2128,3624 2124,3620 2124,3618 2121,3614 2101,3607 2091,3598 2089,3597"/>
+                <Baseline points="1771,3705 1921,3697 2071,3684 2221,3680 2371,3678 2675,3673"/>
+                <TextEquiv>
+                    <Unicode>Haselberg</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextEquiv>
+                <Unicode>Magnifice Academiae Rector,
+Da es mittelst Conclus. Ven. Concil. ausgemacht
+worden, daß singuli bey Wahlsachen auch in 
+Abwesenehit ihr Votum abgeben können,
+so zeige ich Ew. Magnificence hiedurch schul-
+digst an, daß fals die Wahl zur substi-
+tution des academischen Tanz Meisters im
+heutigen Pleno vorkommen sollte, ich
+dem H. Amor hiezu mein votum gebe.
+Der ich die Ehre habe hochachtungsvoll 
+zu beharren
+Ew. Magnif:
+Greifsw. d. 4. Septbr. Gehors. Diener
+1794.
+Haselberg</Unicode>
+            </TextEquiv>
+        </TextRegion>
+    </Page>
+</PcGts>

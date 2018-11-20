@@ -1,0 +1,10 @@
+/.settings/
+/.classpath
+/.project
+/etc/
+/target/
+/logs/
+/nb-configuration.xml
+#/nbactions.xml
+/nbproject/
+*~
