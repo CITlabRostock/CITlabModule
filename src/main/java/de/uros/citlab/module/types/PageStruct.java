@@ -1,14 +1,11 @@
 package de.uros.citlab.module.types;
 
-import com.achteck.misc.log.Logger;
 import de.uros.citlab.module.util.PageXmlUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
-import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.interfaces.types.Image;
+
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import javax.xml.bind.JAXBException;
 
 /**
  * Container for pathes to image and xml. Both, The structure can load the
@@ -24,11 +21,14 @@ public class PageStruct {
     private final File pathImg;
 
     public PageStruct(File pathXml, File pathImg) {
+        this(pathXml,pathImg,true);
+    }
+    public PageStruct(File pathXml, File pathImg, boolean forceExistance) {
         if (pathImg == null && pathXml == null) {
             throw new RuntimeException("path to image and xml is null");
         }
-        this.pathXml = pathXml != null ? pathXml : PageXmlUtil.getXmlPath(pathImg, true);
-        this.pathImg = pathImg != null ? pathImg : PageXmlUtil.getImagePath(pathXml,true);
+        this.pathXml = pathXml != null ? pathXml : PageXmlUtil.getXmlPath(pathImg, forceExistance);
+        this.pathImg = pathImg != null ? pathImg : PageXmlUtil.getImagePath(pathXml,forceExistance);
     }
 
     public PageStruct(File pathXml, Image img) {

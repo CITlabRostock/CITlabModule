@@ -16,7 +16,6 @@
 package de.uros.citlab.module;
 
 import com.achteck.misc.log.Logger;
-import de.uros.citlab.errorrate.costcalculator.CostCalculatorDft;
 import de.uros.citlab.errorrate.htr.ErrorModuleDynProg;
 import de.uros.citlab.errorrate.types.Count;
 import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
@@ -181,7 +180,7 @@ public class TestWorkflow {
             double corRate, corRateB2P;
             {
                 String recoLaHtr = PageXmlUtils.getFulltextFromLines(PageXmlUtil.unmarshal(testXmlFile_LA_HTR));
-                ErrorModuleDynProg errorModule = new ErrorModuleDynProg(new CostCalculatorDft(), new CategorizerCharacterDft(), null, Boolean.FALSE);
+                ErrorModuleDynProg errorModule = new ErrorModuleDynProg( new CategorizerCharacterDft(), null, Boolean.FALSE);
                 errorModule.calculate(recoLaHtr, recoRef);
                 Map<Count, Long> map = errorModule.getCounter().getMap();
                 long gt = map.get(Count.GT);
@@ -193,7 +192,7 @@ public class TestWorkflow {
             }
             {
                 String recoLaB2PHtr = PageXmlUtils.getFulltextFromLines(PageXmlUtil.unmarshal(testXmlFile_LA_B2P_HTR));
-                ErrorModuleDynProg errorModule = new ErrorModuleDynProg(new CostCalculatorDft(), new CategorizerCharacterDft(), null, Boolean.FALSE);
+                ErrorModuleDynProg errorModule = new ErrorModuleDynProg(new CategorizerCharacterDft(), null, Boolean.FALSE);
                 errorModule.calculate(recoLaB2PHtr, recoRef);
                 Map<Count, Long> map = errorModule.getCounter().getMap();
                 long gt = map.get(Count.GT);

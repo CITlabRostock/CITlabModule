@@ -10,22 +10,22 @@ import com.achteck.misc.log.Logger;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
+import de.uros.citlab.errorrate.HtrError;
+import de.uros.citlab.errorrate.types.Count;
+import de.uros.citlab.errorrate.types.Result;
+import de.uros.citlab.errorrate.util.ObjectCounter;
 import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.workflow.HomeDir;
-import de.uros.citlab.errorrate.HtrError;
-import de.uros.citlab.errorrate.htr.ErrorRateCalcer;
-import de.uros.citlab.errorrate.types.Count;
-import de.uros.citlab.errorrate.util.ObjectCounter;
+import org.apache.commons.io.FileUtils;
+
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -98,7 +98,7 @@ public class EvaluateT2I extends ParamTreeOrganizer {
         FileUtil.writeLines(fileRef, refs);
         FileUtil.writeLines(fileReco, recos);
         HtrError erp = new HtrError();
-        ErrorRateCalcer.Result run = erp.run(("ref.lst reco.lst" + (wer ? " -w" : "")).split(" "));
+        Result run = erp.run(("ref.lst reco.lst" + (wer ? " -w" : "")).split(" "));
         FileUtils.deleteQuietly(fileRef);
         FileUtils.deleteQuietly(fileReco);
         ObjectCounter<Count> map = run.getCounts();

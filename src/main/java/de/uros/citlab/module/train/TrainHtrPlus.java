@@ -158,6 +158,60 @@ public class TrainHtrPlus extends TrainHtr {
         return tmpDir;
     }
 
+    private String[] getTrainingProperties(
+            int gpu,
+            String learningRate,
+            double dropout,
+            int trainSizePerEpoch,
+            int numEpochs,
+            String pathToModelsOut,
+            int minibatch,
+            File charMap,
+            File fileListTrain,
+            File fileListVal) {
+        String[] propsTraining = null;
+        propsTraining = PropertyUtil.setProperty(propsTraining, "inference", gpu >= 0 ? "InferenceLayers3_3_cu" : "InferenceLayers3_3");
+        propsTraining = PropertyUtil.setProperty(propsTraining, "learning_rate", learningRate);
+        propsTraining = PropertyUtil.setProperty(propsTraining, "dropout_out", dropout);
+        propsTraining = PropertyUtil.setProperty(propsTraining, "train_steps_per_epoch", trainSizePerEpoch);
+        propsTraining = PropertyUtil.setProperty(propsTraining, "gpu_device", gpu);
+        propsTraining = PropertyUtil.setProperty(propsTraining, "epochs", numEpochs);
+        propsTraining = PropertyUtil.setProperty(propsTraining, "override_export", "true");
+        propsTraining = PropertyUtil.setProperty(propsTraining, "export_dir", pathToModelsOut);
+        propsTraining = PropertyUtil.setProperty(propsTraining, "checkpoint_dir", pathToModelsOut);
+        propsTraining = PropertyUtil.setProperty(propsTraining, "batch_size", minibatch);
+        propsTraining = PropertyUtil.setProperty(propsTraining, "charmap", charMap.getAbsolutePath());
+//        propsTraining = PropertyUtil.setProperty(propsTraining, "dtype_cfg", new File(fileHtrOut, NAME_DTYPE_CFG).getAbsolutePath());
+        if (fileListTrain != null) {
+            propsTraining = PropertyUtil.setProperty(propsTraining, "train_list", fileListTrain.getAbsolutePath());
+        }
+        if (fileListVal != null) {
+            propsTraining = PropertyUtil.setProperty(propsTraining, "val_list", fileListVal.getAbsolutePath());
+        }
+        return propsTraining;
+
+    }
+
+    private String[] getFurtherTrainingProperties(
+            String[] propsTraining,
+            int numEpochs,
+            boolean finetuneOnlyLogits,
+            boolean continueTraining) {
+        propsTraining = PropertyUtil.copy(propsTraining);
+        propsTraining = PropertyUtil.setProperty(propsTraining, "epochs", numEpochs);
+        if (continueTraining) {
+            propsTraining = PropertyUtil.setProperty(propsTraining, "continue_point", PropertyUtil.getProperty(propsTraining, "checkpoint_dir"));
+        }
+        if (finetuneOnlyLogits) {
+            //if charMap changed we have to reinitialize the last layer
+            propsTraining = PropertyUtil.setProperty(propsTraining, "train_scopes", "logits");
+            propsTraining = PropertyUtil.setProperty(propsTraining, "not_to_load", "logits");
+        }
+//        propsTraining = PropertyUtil.setProperty(propsTraining, "dtype_cfg", new File(fileHtrOut, NAME_DTYPE_CFG).getAbsolutePath());
+        return propsTraining;
+    }
+
+
     @Override
     public void trainHtr(String pathToModelsIn, String pathToModelsOut, String inputTrainDir, String inputValDir, String[] props) {
         if (System.getenv("PYTHONPATH") == null || System.getenv("PYTHONPATH").isEmpty()) {
@@ -165,15 +219,17 @@ public class TrainHtrPlus extends TrainHtr {
         }
         File fileHtrOut = new File(pathToModelsOut);
         File fileHtrIn = new File(pathToModelsIn);
-        String minibatch = PropertyUtil.getProperty(props, Key.MINI_BATCH, 16);
-        String trainSizePerEpoch = PropertyUtil.getProperty(props, Key.TRAINSIZE, null);
-        String numEpochs = PropertyUtil.getProperty(props, Key.EPOCHS, "1");
+        int minibatch = Integer.valueOf(PropertyUtil.getProperty(props, Key.MINI_BATCH, 16));
+        int trainSizePerEpoch = Integer.valueOf(PropertyUtil.getProperty(props, Key.TRAINSIZE, 1024 * 8));
+        int numEpochs = Integer.valueOf(PropertyUtil.getProperty(props, Key.EPOCHS, 1));
+        double dropout = PropertyUtil.isProperty(props, Key.NOISE, "both", "net") ? 0.5 : 0.0;
         String learningRate = PropertyUtil.getProperty(props, Key.LEARNINGRATE, "1e-3");
         File tmpDir = getTmpDir(props);
+        File charMap = new File(fileHtrOut, Key.GLOBAL_CHARMAP);
         if (!fileHtrIn.equals(fileHtrOut)) {
             if (fileHtrOut.exists()) {
-                if (new File(fileHtrOut, Key.GLOBAL_CHARMAP).exists()) {
-                    LOG.debug("delete all files in folder " + fileHtrOut);
+                if (charMap.exists()) {
+                    LOG.warn("delete all files in folder {}", fileHtrOut);
                     FileUtils.deleteQuietly(fileHtrOut);
                     fileHtrOut.mkdir();
                 }
@@ -196,41 +252,63 @@ public class TrainHtrPlus extends TrainHtr {
             fileListTrain = new File(folderLists, "train.lst");
             FileUtil.writeLines(fileListTrain, FileUtil.getStringList(FileUtil.listFiles(new File(inputTrainDir), FileUtil.IMAGE_SUFFIXES, true)));
         }
-        File charMap = new File(new File(pathToModelsOut), Key.GLOBAL_CHARMAP);
-        String[] propsTraining = null;
         int gpu = getGPU(props);
-        propsTraining = PropertyUtil.setProperty(propsTraining, "inference", gpu >= 0 ? "InferenceLayers3_3_cu" : "InferenceLayers3_3");
-        propsTraining = PropertyUtil.setProperty(propsTraining, "learning_rate", learningRate);
-        propsTraining = PropertyUtil.setProperty(propsTraining, "dropout_out", PropertyUtil.isProperty(props, Key.NOISE, "both", "net") ? 0.5 : 0.0);
-        if (trainSizePerEpoch != null) {
-            propsTraining = PropertyUtil.setProperty(propsTraining, "train_steps_per_epoch", trainSizePerEpoch);
+
+        String[] trainingProperties = getTrainingProperties(gpu,
+                learningRate, dropout,
+                trainSizePerEpoch, numEpochs, pathToModelsOut, minibatch, charMap, fileListTrain, fileListVal);
+
+        //check, if training is based on a further training or is a new training - different training strategies have to be done.
+        boolean hasBaseModel = new File(fileHtrOut, "export").exists();
+        LOG.info("found base model = {}", hasBaseModel);
+        if (hasBaseModel) {
+            boolean reinitLogits = reinitLogits(charMap, new File(new File(fileHtrOut, "export"), Key.GLOBAL_CHARMAP));
+            //train further! -> 2 option:
+            // 1. CharMap changed => reinit logits and train with continue point
+            // 2. CharMap unchanged => train with continue point
+            LOG.info("re-initialize upper layer because CharMap changed = {}", reinitLogits);
+            if (reinitLogits) {
+                LOG.info("apply training one epoch only on the logit layer.");
+                if (PythonUtil.runPythonFromFile("tf_htsr/models/trainer/trainer.py",
+                        getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props),
+                        getFurtherTrainingProperties(trainingProperties, 1, true, true)
+                ) != 0) {
+                    LOG.error("training of HTR+ ends with status !=0");
+                    throw new RuntimeException("training of HTR+ ends with status !=0");
+                }
+                numEpochs--;
+            }
+            LOG.info("apply training {} epoch(s) on all layer.", numEpochs);
+            if (PythonUtil.runPythonFromFile("tf_htsr/models/trainer/trainer.py",
+                    getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props),
+                    getFurtherTrainingProperties(trainingProperties, numEpochs, false, true)
+            ) != 0) {
+                LOG.error("training of HTR+ ends with status !=0");
+                throw new RuntimeException("training of HTR+ ends with status !=0");
+            }
+        } else {
+            LOG.info("apply new training {} epoch(s).", numEpochs);
+            //train without continue point
+            if (PythonUtil.runPythonFromFile("tf_htsr/models/trainer/trainer.py",
+                    getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props),
+                    trainingProperties
+            ) != 0) {
+                LOG.error("training of HTR+ ends with status !=0");
+                throw new RuntimeException("training of HTR+ ends with status !=0");
+            }
         }
-        propsTraining = PropertyUtil.setProperty(propsTraining, "gpu_device", gpu);
-        propsTraining = PropertyUtil.setProperty(propsTraining, "epochs", numEpochs);
-        propsTraining = PropertyUtil.setProperty(propsTraining, "override_export", "true");
-        propsTraining = PropertyUtil.setProperty(propsTraining, "export_dir", pathToModelsOut);
-        propsTraining = PropertyUtil.setProperty(propsTraining, "checkpoint_dir", pathToModelsOut);
-//        propsTraining = PropertyUtil.setProperty(propsTraining, "continue_point", pathToModelsOut);
-        propsTraining = PropertyUtil.setProperty(propsTraining, "batch_size", minibatch);
-        propsTraining = PropertyUtil.setProperty(propsTraining, "charmap", charMap.getAbsolutePath());
-//        propsTraining = PropertyUtil.setProperty(propsTraining, "dtype_cfg", new File(fileHtrOut, NAME_DTYPE_CFG).getAbsolutePath());
-        if (fileListTrain != null) {
-            propsTraining = PropertyUtil.setProperty(propsTraining, "train_list", fileListTrain.getAbsolutePath());
+    }
+
+    private boolean reinitLogits(File charMapNew, File charMapExport) {
+        if (!charMapExport.exists()) {
+            return false;
         }
-        if (fileListVal != null) {
-            propsTraining = PropertyUtil.setProperty(propsTraining, "val_list", fileListVal.getAbsolutePath());
+        if (!charMapNew.exists()) {
+            throw new RuntimeException("charmap " + charMapNew.getAbsolutePath() + " not found");
         }
-        if (PythonUtil.runPythonFromFile("tf_htsr/models/trainer/trainer.py",
-                getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props),
-                propsTraining
-        ) != 0) {
-            LOG.error("training of HTR+ ends with status !=0");
-            throw new RuntimeException("training of HTR+ ends with status !=0");
-        }
-//        if (PythonUtil.runPythonFromResource("scripts/freezeIt.py", null, "dir", pathToModelsOut) != 0) {
-//            LOG.error("freezing the HTR+ ends with status !=0");
-//            throw new RuntimeException("freezing the HTR+ ends with status !=0");
-//        }
+        //reinitialize logits, if charmap changed.
+        return !CharMapUtil.loadCharMap(charMapNew).equals(CharMapUtil.loadCharMap(charMapExport));
+
     }
 
     private int getGPU(String[] properties) {
@@ -254,22 +332,11 @@ public class TrainHtrPlus extends TrainHtr {
     }
 
     private PythonUtil.ProcessListener getProcessListener(String inputTrainDir, String inputValDir, File fileHtrOut, String[] props) {
-//        PythonUtil.ProcessListener p1 = null, p2 = null;
-//        if (PropertyUtil.isPropertyTrue(props, "test")) {
-//            p1 = new ProcessListenerReco();
-//        }
         if (isValid(inputTrainDir) || isValid(inputValDir)) {
             return new ProcessListener(isValid(inputTrainDir) ? new File(fileHtrOut, Key.GLOBAL_CER_TRAIN) : null,
                     isValid(inputValDir) ? new File(fileHtrOut, Key.GLOBAL_CER_VAL) : null, this);
         }
         throw new RuntimeException("not trainDir and ValDir is set");
-//        if (p1 == null) {
-//            return p2;
-//        }
-//        if (p2 == null) {
-//            return p1;
-//        }
-//        return new ProcessListenerModules(p1, p2);
     }
 
     private boolean isValid(String str) {
@@ -292,18 +359,6 @@ public class TrainHtrPlus extends TrainHtr {
     }
 
     private IImagePreProcess getPreProcDft(String[] props) {
-//        if (PropertyUtil.hasProperty(props, Key.PYTHON_REPO_PATH)) {
-//            File f = new File(PythonUtil.getPythonFolder(), "resources/preprocs/preproc_deploy_A.bin");
-//            IImagePreProcess pp;
-//            try {
-//                pp = (IImagePreProcess) IO.load(f);
-//            } catch (IOException | ClassNotFoundException ex) {
-//                throw new RuntimeException("Cannot load Preprocess from path " + f.getAbsolutePath(), ex);
-//            }
-//            pp.setParamSet(pp.getDefaultParamSet(null));
-//            pp.init();
-//            return pp;
-//        }
         try {
             return getPreProcess(64, 0.5, 24);
         } catch (RuntimeException ex) {
@@ -362,15 +417,6 @@ public class TrainHtrPlus extends TrainHtr {
         return height;
     }
 
-    //    private void saveDataTypeConfig(File folderHtr, IImagePreProcess pp) {
-//        int height = getPreProcHeight(pp);
-//        List<String> config = new LinkedList<>();
-//        config.add("[data_type_params]");
-//        config.add("data_type_idx=1");
-//        config.add("height=" + height);
-//        config.add("transpose=0");
-//        FileUtil.writeLines(new File(folderHtr, NAME_DTYPE_CFG), config);
-//    }
     private static class ProcessListenerModules implements PythonUtil.ProcessListener {
 
         public ProcessListenerModules() {

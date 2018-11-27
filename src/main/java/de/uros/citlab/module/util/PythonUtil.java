@@ -92,7 +92,7 @@ public class PythonUtil {
             Process p = pb.start();
             Long aLong = SysUtils.processId(p);
             if (aLong != null) {
-                listener.setProcessID(aLong.intValue());
+                listener.setProcessID(aLong);
             }
             final BufferedReader errMsg = new BufferedReader(new InputStreamReader(p.getErrorStream()));
             BufferedReader outMsg = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -174,7 +174,7 @@ public class PythonUtil {
                 res = 1;
             }
             if (res != 0) {
-                LOGPYTHON.error("process ended with return value = " + res);
+                LOGPYTHON.error("end python script '{}' with return value = {}", script, res);
             } else {
                 LOGPYTHON.info("end python script '{}' with return value = 0 ", script);
             }

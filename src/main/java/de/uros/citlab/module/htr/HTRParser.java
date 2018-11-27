@@ -18,6 +18,9 @@ import de.planet.langmod.types.ILangMod;
 import de.planet.math.geom2d.types.Polygon2DInt;
 import de.planet.reco.types.SNetwork;
 import de.planet.util.types.DictOccurrence;
+import de.uros.citlab.languagemodel.decoder.LanguageDecoderLM;
+import de.uros.citlab.languagemodel.lmtypes.ILM;
+import de.uros.citlab.languagemodel.lmtypes.LMBerkleyChar;
 import de.uros.citlab.module.interfaces.IHtrCITlab;
 import de.uros.citlab.module.kws.ConfMatContainer;
 import de.uros.citlab.module.la.BaselineGenerationHist;
@@ -86,6 +89,14 @@ public class HTRParser implements IHtrCITlab {
     public static ILangMod getLangMod(String pathLanguageModel, CharMap<Integer> cm, String[] props) {
 //so far a dictionary is a langmod - this changes later
         if (useDict(pathLanguageModel)) {
+            if (pathLanguageModel.endsWith(".arp")) {
+                //use better version of LM
+                ILM langModImpl = new LMBerkleyChar(pathLanguageModel);
+                langModImpl.setParamSet(langModImpl.getDefaultParamSet(null));
+                langModImpl.init();
+                LanguageDecoderLM res = new LanguageDecoderLM(langModImpl);
+                return res;
+            }
             String[] subTreeProperty = PropertyUtil.getSubTreeProperty(props, "sf");
             ISortingFunction sf = new SortingFunctionDA();
             ParamSet psSF = sf.getDefaultParamSet(new ParamSet());
@@ -103,11 +114,20 @@ public class HTRParser implements IHtrCITlab {
             {
                 String propMaxLength = PropertyUtil.getProperty(props, Key.MAX_ANZ, "-1");
                 if (pathLanguageModel.endsWith(".csv") || pathLanguageModel.endsWith(".txt") || pathLanguageModel.endsWith(".dict")) {
-                    ido = new DictOccurrence(pathLanguageModel, ",", 1, 0, false);
-                    ParamSet defaultParamSet = ido.getDefaultParamSet(new ParamSet());
-                    defaultParamSet.getParam(DictOccurrence.P_MAXANZ).set(Integer.parseInt(propMaxLength));
-                    ido.setParamSet(defaultParamSet);
-                    ido.init();
+                    try {
+                        ido = new DictOccurrence(pathLanguageModel, ",", 1, 0, false);
+                        ParamSet defaultParamSet = ido.getDefaultParamSet(new ParamSet());
+                        defaultParamSet.getParam(DictOccurrence.P_MAXANZ).set(Integer.parseInt(propMaxLength));
+                        ido.setParamSet(defaultParamSet);
+                        ido.init();
+                    } catch (RuntimeException ex) {
+                        LOG.info("cannot load dict without header and with , as seperator - assume header and ; as selerator", ex);
+                        ido = new DictOccurrence(pathLanguageModel, ";", 1, 0, true);
+                        ParamSet defaultParamSet = ido.getDefaultParamSet(new ParamSet());
+                        defaultParamSet.getParam(DictOccurrence.P_MAXANZ).set(Integer.parseInt(propMaxLength));
+                        ido.setParamSet(defaultParamSet);
+                        ido.init();
+                    }
                 } else if (pathLanguageModel.endsWith(".arpa")) {
                     ido = new DictOccurenceArpa(pathLanguageModel, Integer.parseInt(propMaxLength));
                     ido.setParamSet(ido.getDefaultParamSet(new ParamSet()));
