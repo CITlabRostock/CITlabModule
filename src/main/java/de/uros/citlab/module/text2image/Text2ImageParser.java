@@ -7,32 +7,29 @@ package de.uros.citlab.module.text2image;
 
 import com.achteck.misc.types.ConfMat;
 import de.planet.imaging.types.HybridImage;
-import de.planet.math.geom2d.types.Rectangle2DInt;
 import de.uros.citlab.confmat.CharMap;
 import de.uros.citlab.errorrate.util.ObjectCounter;
 import de.uros.citlab.module.htr.HTRParser;
-import de.uros.citlab.module.types.*;
+import de.uros.citlab.module.types.HTR;
+import de.uros.citlab.module.types.Key;
+import de.uros.citlab.module.types.LineImage;
+import de.uros.citlab.module.types.PageStruct;
 import de.uros.citlab.module.util.*;
-import de.uros.citlab.textalignment.BestPathPart;
-import de.uros.citlab.textalignment.DynProg;
 import de.uros.citlab.textalignment.HyphenationProperty;
 import de.uros.citlab.textalignment.TextAligner;
-import de.uros.citlab.textalignment.types.ConfMatCollection;
+import de.uros.citlab.textalignment.types.LineMatch;
 import eu.transkribus.core.model.beans.pagecontent.TextLineType;
 import eu.transkribus.core.model.beans.pagecontent.TextRegionType;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.interfaces.IText2Image;
 import eu.transkribus.interfaces.types.Image;
-import org.apache.commons.math3.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * @author gundram
@@ -94,16 +91,17 @@ public class Text2ImageParser extends HTRParser implements IText2Image {
         matchCollection(pathToOpticalModel, pathToLanguageModel, pathToCharacterMap, pathToText, images, xmlInOut, null, props);
     }
 
-    private static de.uros.citlab.confmat.ConfMat convert(ConfMat cm){
+    private static de.uros.citlab.confmat.ConfMat convert(ConfMat cm) {
         CharMap cmNew = new CharMap();
         com.achteck.misc.types.CharMap<Integer> charMap = cm.getCharMap();
         int size = charMap.keySet().size();
-        for (int i =1; i < size; i++) {
+        for (int i = 1; i < size; i++) {
             cmNew.add(charMap.get(i));
         }
-        return new de.uros.citlab.confmat.ConfMat(cmNew,cm.getDoubleMat());
+        return new de.uros.citlab.confmat.ConfMat(cmNew, cm.getDoubleMat());
     }
-    private static List<de.uros.citlab.confmat.ConfMat> convert(List<ConfMat> cms){
+
+    private static List<de.uros.citlab.confmat.ConfMat> convert(List<ConfMat> cms) {
         List<de.uros.citlab.confmat.ConfMat> res = new ArrayList<>(cms.size());
         for (int i = 0; i < cms.size(); i++) {
             res.add(convert(cms.get(i)));
@@ -155,182 +153,56 @@ public class Text2ImageParser extends HTRParser implements IText2Image {
         Double costJumpBaseline = PropertyUtil.hasProperty(props, Key.T2I_JUMP_BASELINE) ? Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_JUMP_BASELINE)) : null;
         int maxCount = PropertyUtil.hasProperty(props, Key.T2I_MAX_COUNT) ? Integer.parseInt(PropertyUtil.getProperty(props, Key.T2I_MAX_COUNT)) : -1;
         double threshold = Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_THRESH, "0.0"));
-        boolean appendFinalReturn = true;
         double nacOffset = -2.0;
         String lbChars = " ";
-//                new ConfMatCollection(1.0, confMats, appendFinalReturn, nacOffset);
-//        CharMap charMapCollection = cmc.getCharMap();
-//        StringBuilder sb = new StringBuilder();
-//        for (int i = 0; i < in.size(); i++) {
-//            sb.append(in.get(i).trim());
-//            if (i < in.size() - 1) {
-//                sb.append('\n');
-//            } else {
-////                sb.append('\n');
-//                sb.append(lbChars.charAt(0));
-//            }
-//        }
-        TextAligner dp = new TextAligner(lbChars, costSkipWords/*4.0*/, /*0.2*/ costSkipBaseline, costJumpBaseline, nacOffset, maxCount);
+        TextAligner textAligner = new TextAligner(
+                lbChars,
+                costSkipWords, //4.0
+                costSkipBaseline, //0.2
+                costJumpBaseline
+        );
+        textAligner.setNacOffset(-2.0);
+        if (maxCount > 0) {
+            textAligner.setMaxVertexCount(maxCount);
+        }
         if (PropertyUtil.hasProperty(props, Key.T2I_BEST_PATHES)) {
             throw new RuntimeException("path filter not implemented so far");
-//            try {
-//                Integer numPathes = Integer.parseInt(PropertyUtil.getProperty(props, Key.T2I_BEST_PATHES));
-//                dp.setMaxPathes(numPathes, Mode.VERTICAL);
-//            } catch (NumberFormatException ex) {
-//            try {
-//                Double offset = Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_BEST_PATHES));
-//                dp.setMaxPathes(offset, Mode.VERTICAL);
-//            } catch (NumberFormatException ex2) {
-//                throw new NumberFormatException("Input string \"" + PropertyUtil.getProperty(props, Key.T2I_BEST_PATHES) + "\" cannot be parsed to integer or double.");
-//            }
-//            }
         }
         String property = PropertyUtil.getProperty(props, Key.T2I_HYPHEN);
         String lang = PropertyUtil.getProperty(props, Key.T2I_HYPHEN_LANG);
-        dp.setHp(HyphenationProperty.newInstance(property, lang));
+        textAligner.setHp(HyphenationProperty.newInstance(property, lang));
 //        String ref = sb.toString();
 //        ref = ref.trim();
-        dp.setRecognition(confMats);
-        dp.setReference(in);
-        List<PathCalculatorGraph.IDistance<DynProg.ConfMatVector, DynProg.NormalizedCharacter>> bestPath = dp.getBestPath();
-        oc.add(Stat.REF, in.size());
-        oc.add(Stat.RECO, confMats.size());
-        boolean partsArePossible = false;
-
-        if (bestPath != null) {
-            if (LOG.isDebugEnabled()) {
-                for (PathCalculatorGraph.IDistance<DynProg.ConfMatVector, DynProg.NormalizedCharacter> distance : bestPath) {
-                    LOG.debug(distance.toString());
-                }
+        List<de.uros.citlab.confmat.ConfMat> confMatsConverted = convert(confMats);
+        List<LineMatch> alignmentResult = textAligner.getAlignmentResult(in, confMatsConverted);
+        if (alignmentResult != null) {
+            for (LineMatch match : alignmentResult) {
+                LineImage lineImage = linesExecution.get(confMatsConverted.indexOf(match.getCm()));
+                PageXmlUtil.setTextEquiv(lineImage.getTextLine(), match.getReference(), match.getConfidence());
             }
-            List<BestPathPart> grouping = GroupUtil.getGrouping(bestPath, new GroupUtil.Joiner<PathCalculatorGraph.IDistance<DynProg.ConfMatVector, DynProg.NormalizedCharacter>>() {
-                @Override
-                public boolean isGroup(List<PathCalculatorGraph.IDistance<DynProg.ConfMatVector, DynProg.NormalizedCharacter>> group, PathCalculatorGraph.IDistance<DynProg.ConfMatVector, DynProg.NormalizedCharacter> element) {
-                    return keepElement(element);
-                }
-
-                @Override
-                public boolean keepElement(PathCalculatorGraph.IDistance<DynProg.ConfMatVector, DynProg.NormalizedCharacter> element) {
-                    if (element.getManipulation().startsWith("SKIP_")) {
-                        return false;
-                    }
-                    DynProg.ConfMatVector[] recos = element.getRecos();
-                    if (recos == null || recos.length == 0) {
-                        return false;
-                    }
-                    int returnIndex = cmc.getCharMap().get(CharMap.Return);
-                    for (DynProg.ConfMatVector cmVec : recos) {
-                        if (cmVec.maxIndex == returnIndex) {
-                            if (recos.length != 1) {
-                                throw new RuntimeException("unexpected length");
-                            }
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-            }, new GroupUtil.Mapper<PathCalculatorGraph.IDistance<DynProg.ConfMatVector, DynProg.NormalizedCharacter>, BestPathPart>() {
-                @Override
-                public BestPathPart map(List<PathCalculatorGraph.IDistance<DynProg.ConfMatVector, DynProg.NormalizedCharacter>> elements) {
-                    return BestPathPart.newInstance(elements);
-                }
-            });
-            List<Pair<BestPathPart, BestPathPart>> parts = new LinkedList<>();
-            BestPathPart start = null;
-            BestPathPart last = null;
-            PageStruct current = null;
-            for (BestPathPart cmp : grouping) {
-                int index = cmc.getOrigIdx(cmp.startReco).first;
-                ConfMat cmOld = confMats.get(index);
-                LineImage lineImage = linesExecution.get(index);
-                if (start == null) {
-                    start = cmp;
-                    current = pageExecution.get(index);
-                }
-                ConfMat cmNew = new ConfMat(charMapCollection);
-                cmNew.copyFrom(cmp.orig);
-                if (cmOld.getLength() != cmNew.getLength()) {
-                    throw new RuntimeException("confmats differ in length");
-                }
-                if (nacOffset == 0.0 && !cmOld.getBestPath().equals(cmNew.getBestPath())) {
-                    throw new RuntimeException("error in reconstructing confmat\n" + cmOld.getBestPath().replace(ConfMat.NaC, '*') + "\n" + cmNew.getBestPath().replace(ConfMat.NaC, '*'));
-                }
-                double conf = cmp.getConf();
-                if (conf > threshold) {
-                    oc.add(Stat.MATCH);
-                    PageXmlUtil.setTextEquiv(lineImage.getTextLine(), cmp.reference, conf);
-                }
-                if (current != pageExecution.get(index)) {
-                    parts.add(new Pair<>(start, last));
-                    start = cmp;
-                    current = pageExecution.get(index);
-                }
-                last = cmp;
-            }
-            if (start != null) {
-                parts.add(new Pair<>(start, last));
-            }
-            if (PropertyUtil.isPropertyTrue(props, Key.DEBUG)) {
-                for (Pair<BestPathPart, BestPathPart> pair : parts) {
-                    BestPathPart cmp1 = pair.getFirst();
-                    BestPathPart cmp2 = pair.getSecond();
-                    PageStruct page1 = pageExecution.get(cmc.getOrigIdx(cmp1.startReco).first);
-                    PageStruct page2 = pageExecution.get(cmc.getOrigIdx(cmp2.startReco).first);
-                    if (page1 != page2) {
-                        LOG.error("saving debug images produces an error - different pages.");
-                    }
-                    File folder = PropertyUtil.hasProperty(props, Key.DEBUG_DIR)
-                            ? new File(PropertyUtil.getProperty(props, Key.DEBUG_DIR))
-                            : page1.getPathXml().getParentFile();
-                    folder.mkdirs();
-                    partsArePossible = true;
-                    if (images.length == 1) {
-                        dp.getDistMatImage(true).save(new File(folder, page1.getXml().getPage().getImageFilename().replaceAll("\\.[a-zA-Z]{3}", "_dynProg.png")).getAbsolutePath());
-                    } else {
-                        dp.getDistMatImage(true, new Rectangle2DInt(cmp1.startRef, cmp1.startReco, cmp2.endRef - cmp1.startRef, cmp2.endReco - cmp1.startReco)).save(new File(folder, page1.getXml().getPage().getImageFilename().replaceAll("\\.[a-zA-Z]{3}", "_dynProg.png")).getAbsolutePath());
-                    }
-                }
-            }
-
-            for (PageStruct page : pages) {
-                PageXmlUtil.copyTextEquivLine2Region(page.getXml());
-            }
-        } else if (PropertyUtil.isPropertyTrue(props, Key.DEBUG)) {
-            File folder = PropertyUtil.hasProperty(props, Key.DEBUG_DIR)
-                    ? new File(PropertyUtil.getProperty(props, Key.DEBUG_DIR))
-                    : pageExecution.get(0).getPathXml().getParentFile();
-            folder.mkdirs();
-            dp.getDistMatImage(true).save(new File(folder, pageExecution.get(0).getXml().getPage().getImageFilename().replaceAll("\\.[a-zA-Z]{3}", "_dynProg.png")).getAbsolutePath());
         }
-        if (!partsArePossible) {
-            File folder = PropertyUtil.hasProperty(props, Key.DEBUG_DIR)
-                    ? new File(PropertyUtil.getProperty(props, Key.DEBUG_DIR))
-                    : pageExecution.get(0).getPathXml().getParentFile();
-            dp.getDistMatImage(false).save(new File(folder, "all_dynProg.jpg").getAbsolutePath());
-        }
-        LOG.info("Statistic: {}", oc);
         for (PageStruct page : pages) {
             MetadataUtil.addMetadata(page.getXml(), this);
             page.saveXml();
         }
         if (PropertyUtil.isPropertyTrue(props, Key.DEBUG)) {
-            double threshBaseline = Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_THRESH, "0.0"));
-            for (PageStruct page : pages) {
-                File folder = PropertyUtil.hasProperty(props, Key.DEBUG_DIR)
-                        ? new File(PropertyUtil.getProperty(props, Key.DEBUG_DIR))
-                        : page.getPathXml().getParentFile();
-                folder.mkdirs();
-                {
-                    BufferedImage debugImage = ImageUtil.getDebugImage(page.getImg().getImageBufferedImage(true), page.getXml(), 1.0, false, true, threshBaseline, true, false);
-                    debugImage = ImageUtil.resize(debugImage, 6000, debugImage.getHeight() * 6000 / debugImage.getWidth());
-                    try {
+            try {
+                double threshBaseline = Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_THRESH, "0.0"));
+                for (PageStruct page : pages) {
+                    File folder = PropertyUtil.hasProperty(props, Key.DEBUG_DIR)
+                            ? new File(PropertyUtil.getProperty(props, Key.DEBUG_DIR))
+                            : page.getPathXml().getParentFile();
+                    folder.mkdirs();
+                    {
+                        BufferedImage debugImage = ImageUtil.getDebugImage(page.getImg().getImageBufferedImage(true), page.getXml(), 1.0, false, true, threshBaseline, true, false);
+                        debugImage = ImageUtil.resize(debugImage, 6000, debugImage.getHeight() * 6000 / debugImage.getWidth());
                         String imageFilename = page.getXml().getPage().getImageFilename();
                         imageFilename += ".jpg";
                         ImageIO.write(debugImage, "jpg", new File(folder, imageFilename));
-                    } catch (IOException ex) {
-                        java.util.logging.Logger.getLogger(Text2ImageParser.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
+            } catch (Throwable ex) {
+                LOG.warn("writing debug images fails", ex);
             }
         }
     }

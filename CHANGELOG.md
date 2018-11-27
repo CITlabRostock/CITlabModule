@@ -1,5 +1,12 @@
 # Change Log
 
+# 2.1.0
+* faster TextAlignment and base technology moved to CITlabTextAlignment
+* HTR+ can be trained further - also with changed CharMap
+* bugfix load dictionary: now also possible for ";"-seperator with headlines
+* feature-request: logging in multi-process-use possible.
+* newest versions of all citlab and planet libs
+
 # 2.0.2
 * MOVE REPOSITORY WITHOUT HISTORY FROM Transkribs to CITlabRostock AND MAKE OPENSOURCE
 * bugfix: check System.getenv() instead of System.getProperty() for $PYTHONPATH

@@ -10,13 +10,13 @@ import com.achteck.misc.util.IO;
 import de.planet.citech.trainer.loader.IImageLoader;
 import de.planet.reco.types.SNetwork;
 import de.planet.util.LoaderIO;
-import de.uros.citlab.errorrate.costcalculator.CostCalculatorDft;
 import de.uros.citlab.errorrate.htr.ErrorModuleDynProg;
 import de.uros.citlab.errorrate.htr.ErrorRateCalcer;
 import de.uros.citlab.errorrate.interfaces.IErrorModule;
 import de.uros.citlab.errorrate.types.Count;
 import de.uros.citlab.errorrate.types.Method;
 import de.uros.citlab.errorrate.types.Metric;
+import de.uros.citlab.errorrate.types.Result;
 import de.uros.citlab.errorrate.util.ObjectCounter;
 import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
 import de.uros.citlab.module.la.B2PSimple;
@@ -106,7 +106,7 @@ public class TestB2P {
         ErrorRateCalcer erc = new ErrorRateCalcer();
         List<File> xmlListMO = FileUtil.listFiles(folderB2PSimple, "xml".split(" "), true);
         Collections.sort(xmlListMO);
-        ErrorRateCalcer.Result process = erc.process(xmlListMO.toArray(new File[0]), xmlList.toArray(new File[0]), Method.CER);
+        Result process = erc.process(xmlListMO.toArray(new File[0]), xmlList.toArray(new File[0]), Method.CER);
         System.out.println(process.getCounts());
         double metric = process.getMetric(Metric.ERR);
         System.out.println(metric);
@@ -134,7 +134,7 @@ public class TestB2P {
         ErrorRateCalcer erc = new ErrorRateCalcer();
         List<File> xmlListMO = FileUtil.listFiles(folderB2PSeamMultiOriented, "xml".split(" "), true);
         Collections.sort(xmlListMO);
-        ErrorRateCalcer.Result process = erc.process(xmlListMO.toArray(new File[0]), xmlList.toArray(new File[0]), Method.CER);
+        Result process = erc.process(xmlListMO.toArray(new File[0]), xmlList.toArray(new File[0]), Method.CER);
         System.out.println(process.getCounts());
         double metric = process.getMetric(Metric.ERR);
         System.out.println(metric);
@@ -162,7 +162,7 @@ public class TestB2P {
         ErrorRateCalcer erc = new ErrorRateCalcer();
         List<File> xmlListMO = FileUtil.listFiles(folderNoB2P, "xml".split(" "), true);
         Collections.sort(xmlListMO);
-        ErrorRateCalcer.Result process = erc.process(xmlListMO.toArray(new File[0]), xmlList.toArray(new File[0]), Method.CER);
+        Result process = erc.process(xmlListMO.toArray(new File[0]), xmlList.toArray(new File[0]), Method.CER);
         System.out.println(process.getCounts());
         double metric = process.getMetric(Metric.ERR);
         System.out.println(metric);
@@ -182,7 +182,7 @@ public class TestB2P {
         TrainHtr thtr = new TrainHtr();
         thtr.trainHtr(fileNet.getPath(), null, null, folderSnipets.getPath(), null);
         List<File> listFiles = FileUtil.listFiles(folderSnipets, "jpg".split(" "), true);
-        IErrorModule err = new ErrorModuleDynProg(new CostCalculatorDft(), new CategorizerCharacterDft(), null, false);
+        IErrorModule err = new ErrorModuleDynProg(new CategorizerCharacterDft(), null, false);
         for (File snipet : listFiles) {
             IImageLoader.IImageHolder loadImageHolder = LoaderIO.loadImageHolder(snipet.getPath(), false, true);
             net.setInput(loadImageHolder);

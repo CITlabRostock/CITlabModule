@@ -244,7 +244,7 @@ public class TrainDataUtil {
         for (int i = 0; i < pageXmls.length; i++) {
             String xmlFilePath = pageXmls[i];
             File fileXml = new File(xmlFilePath);
-            PageStruct page = new PageStruct(fileXml);
+            PageStruct page = saveTrainData ? new PageStruct(fileXml) : new PageStruct(fileXml, (File) null, false);
             try {
                 PcGtsType pageType = page.getXml();
                 if (statuses != null) {

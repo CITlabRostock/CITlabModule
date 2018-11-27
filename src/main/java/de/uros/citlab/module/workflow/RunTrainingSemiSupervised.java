@@ -6,26 +6,27 @@
 package de.uros.citlab.module.workflow;
 
 import com.achteck.misc.exception.InvalidParameterException;
-import com.achteck.misc.log.Logger;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.CharMap;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
-import com.achteck.misc.util.IO;
-import de.planet.reco.types.SNetwork;
+import de.uros.citlab.errorrate.util.ObjectCounter;
 import de.uros.citlab.module.text2image.Text2ImageParser;
 import de.uros.citlab.module.train.TrainHtr;
+import de.uros.citlab.module.train.TrainHtrPlus;
 import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.CharMapUtil;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.PropertyUtil;
 import de.uros.citlab.module.util.TrainDataUtil;
-import de.uros.citlab.errorrate.util.ObjectCounter;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,17 +34,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import org.apache.commons.io.FileUtils;
 
 /**
- *
  * @author gundram
  */
 public class RunTrainingSemiSupervised extends ParamTreeOrganizer {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger LOG = Logger.getLogger(RunTrainingSemiSupervised.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(RunTrainingSemiSupervised.class);
     @ParamAnnotation(name = "net_in", descr = "path to untrained/pretrained network (if not given charmap have to be set to create default network)")
     private String netIn = "";
 
@@ -212,7 +210,7 @@ public class RunTrainingSemiSupervised extends ParamTreeOrganizer {
 
         //create traindata of supervised images and validation images
         List<Future> futuresCreateTraindata = new LinkedList<>();
-        LOG.log(Logger.INFO, "Create Traindata Supervised...");
+        LOG.info("Create Traindata Supervised...");
         if (fXmlGT != null) {
             futuresCreateTraindata.add(threadPool.submit(getThreadCreateTraindata(fXmlGT, fSnGT, null, props)));
         }
@@ -224,7 +222,7 @@ public class RunTrainingSemiSupervised extends ParamTreeOrganizer {
         //2. Create Traindata for seimisupervised training
         //3. Train (and validate) Networks
         for (int i = 0; i < epochs; i++) {
-            LOG.log(Logger.INFO, "Text2Image...");
+            LOG.info("Text2Image...");
             {
                 //text to image of semi supervised pages
                 List<Future> futuresText2Image = new LinkedList<>();
@@ -250,14 +248,14 @@ public class RunTrainingSemiSupervised extends ParamTreeOrganizer {
                 futuresText2Image.clear();
                 ObjectCounter<Text2ImageParser.Stat> stat = new ObjectCounter<>();
                 for (Text2ImageNoLineBreak text2ImageCollection : worker) {
-                    LOG.log(Logger.DEBUG, "statistic of submodule: " + text2ImageCollection.getStat().toString());
+                    LOG.debug("statistic of submodule: " + text2ImageCollection.getStat().toString());
                     stat.addAll(text2ImageCollection.getStat());
                 }
-                LOG.log(Logger.INFO, "statistic of Text2Image: " + stat.toString());
+                LOG.info("statistic of Text2Image: " + stat.toString());
             }
-            LOG.log(Logger.INFO, "Text2Image... [DONE]");
+            LOG.info("Text2Image... [DONE]");
             //create traindata from semi-supervised xmls
-            LOG.log(Logger.INFO, "Create Traindata Semisupervised...");
+            LOG.info("Create Traindata Semisupervised...");
             for (int j = 0; j < foldersSemi.size(); j++) {
                 File folderXml = foldersSemi.get(j);
                 File folderSnippets = fSnSemis.get(j);
@@ -275,10 +273,10 @@ public class RunTrainingSemiSupervised extends ParamTreeOrganizer {
             }
             futuresCreateTraindata.clear();
             if (LOG.isInfoEnabled()) {
-                LOG.log(Logger.INFO, "(Create Traindata Supervised... [DONE])");
-                LOG.log(Logger.INFO, "Create Traindata Semisupervised... [DONE]");
-                LOG.log(Logger.INFO, "found " + FileUtil.getFilesListsOrFolders(getPathesExceptOne(null, fSnSemis, -1), FileUtil.IMAGE_SUFFIXES, true).size() + " automatical assigned training sampls");
-                LOG.log(Logger.INFO, "found " + FileUtil.getFilesListsOrFolders(getPathesExceptOne(fSnGT, fSnSemis, -1), FileUtil.IMAGE_SUFFIXES, true).size() + " training sampls in total ");
+                LOG.info("(Create Traindata Supervised... [DONE])");
+                LOG.info("Create Traindata Semisupervised... [DONE]");
+                LOG.info("found " + FileUtil.getFilesListsOrFolders(getPathesExceptOne(null, fSnSemis, -1), FileUtil.IMAGE_SUFFIXES, true).size() + " automatical assigned training sampls");
+                LOG.info("found " + FileUtil.getFilesListsOrFolders(getPathesExceptOne(fSnGT, fSnSemis, -1), FileUtil.IMAGE_SUFFIXES, true).size() + " training sampls in total ");
             }
 
             //train networks
@@ -289,7 +287,7 @@ public class RunTrainingSemiSupervised extends ParamTreeOrganizer {
                         CharMapUtil.setCharMap(net.getPath(), net.getPath(), charMap, -5.0);
                     }
                 }
-                LOG.log(Logger.INFO, "Train Nets...");
+                LOG.info("Train Nets...");
                 List<Future> fu_train = new LinkedList<>();
                 String[] propsTrain = PropertyUtil.setProperty(null, Key.NOISE, "both");
                 propsTrain = PropertyUtil.setProperty(propsTrain, Key.EPOCHS, String.valueOf(epochs_inner[i]));
@@ -320,9 +318,9 @@ public class RunTrainingSemiSupervised extends ParamTreeOrganizer {
                         throw new RuntimeException(ex);
                     }
                 }
-                LOG.log(Logger.INFO, "Train Nets... [DONE]");
+                LOG.info("Train Nets... [DONE]");
             } else {
-                LOG.log(Logger.WARN, "no training done for semi-supervised learning");
+                LOG.warn("no training done for semi-supervised learning");
             }
         }
         threadPool.shutdown();
@@ -337,7 +335,7 @@ public class RunTrainingSemiSupervised extends ParamTreeOrganizer {
             if (i != idxExcept) {
                 sb.append(pathes.get(i).getAbsolutePath()).append(File.pathSeparator);
             } else if (pathes.size() == 1) {
-                LOG.log(Logger.WARN, "only one subpath given - take this anyway (expect #subsets = 1)");
+                LOG.warn("only one subpath given - take this anyway (expect #subsets = 1)");
                 sb.append(pathes.get(i).getAbsolutePath()).append(File.pathSeparator);
             }
         }
@@ -357,8 +355,16 @@ public class RunTrainingSemiSupervised extends ParamTreeOrganizer {
 //                    String[] props1 = PropertyUtil.setProperty(props, "viewer", "true");
                     htr.trainHtr(pathToModelsIn, pathToModelsOut, inputTrainDir, inputValDir, props);
                 } catch (Throwable ex) {
-                    ex.printStackTrace();
-                    System.exit(-1);
+                    LOG.debug("TrainHTR with old htr fails - try to use HTR+", ex);
+                    try {
+                        TrainHtrPlus htr = new TrainHtrPlus();
+//                    String[] props1 = PropertyUtil.setProperty(props, "viewer", "true");
+                        htr.trainHtr(pathToModelsIn, pathToModelsOut, inputTrainDir, inputValDir, props);
+                    } catch (Throwable ex2) {
+                        LOG.error("TrainHTR fails", ex);
+                        LOG.error("TrainHtr and TrainHtrPlus fails", ex2);
+                        System.exit(-1);
+                    }
                 }
             }
         });
@@ -373,11 +379,11 @@ public class RunTrainingSemiSupervised extends ParamTreeOrganizer {
                     folderSnipets.mkdirs();
                     int res = TrainDataUtil.runCreateTraindata(folderPageXml, folderSnipets, charMap, props);
                     if (res == 0) {
-                        LOG.log(Logger.WARN, "copy folder - assume that folder " + folderPageXml.getAbsolutePath() + " contains snipets.");
+                        LOG.warn("copy folder - assume that folder " + folderPageXml.getAbsolutePath() + " contains snipets.");
                         FileUtils.copyDirectory(folderPageXml, folderSnipets);
                     }
                 } catch (Throwable ex) {
-                    ex.printStackTrace();
+                    LOG.error("create trainingdata fails", ex);
                     System.exit(-1);
                 }
             }

@@ -12,36 +12,30 @@ import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamSetOrganizer;
 import com.achteck.misc.util.IO;
 import com.achteck.misc.util.StopWatch;
+import de.planet.citech.trainer.IListener;
 import de.planet.itrtech.reco.ISNetwork;
 import de.planet.itrtech.reco.ISNetworkBase;
-import de.planet.citech.trainer.IListener;
 import de.planet.trainer.Trainer;
 import de.planet.trainer.TrainerThread;
 import de.planet.trainer.util.ErrorCTC;
 import de.planet.trainer.util.TrainerException;
 import de.planet.util.ObjectCounter;
 import de.planet.util.PathCalculatorDft;
-import de.uros.citlab.module.util.FileUtil;
-import de.uros.citlab.errorrate.costcalculator.CostCalculatorDft;
 import de.uros.citlab.errorrate.htr.ErrorModuleDynProg;
 import de.uros.citlab.errorrate.interfaces.IErrorModule;
 import de.uros.citlab.errorrate.types.Count;
+import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.tokenizer.categorizer.CategorizerWordMergeGroups;
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Observable;
-import org.apache.commons.io.FileUtils;
+import java.util.*;
 
 /**
- *
  * Calculates the CTC error and logs it.
- *
+ * <p>
  * 2014.05.26 implements the external SubstitutionCounter and ErrorCTC instead
  * of internal classes. (Tobias)
  *
@@ -86,7 +80,7 @@ public class TrainingListener extends ParamSetOrganizer implements Comparable<Tr
         time = 0;
         stopWatches.clear();
         normed = false;
-        errModule = new ErrorModuleDynProg(new CostCalculatorDft(), new CategorizerWordMergeGroups(), null, false);
+        errModule = new ErrorModuleDynProg(new CategorizerWordMergeGroups(), null, false);
     }
 
     protected synchronized void addPoint(TrainerThread trainerThread) {
@@ -178,7 +172,7 @@ public class TrainingListener extends ParamSetOrganizer implements Comparable<Tr
         try {
             if (message.equals(TrainHtr.EVENT_PRESENT_OBSERVABLE)) {
                 observable = (Observable) reason;
-                observable.notifyObservers(new TrainHtr.Status(0, 1.0, 1.0, method, false));
+                observable.notifyObservers(new TrainHtr.Status(0, 1.0, 1.0, method, false,null));
             }
             if (message.equals(Trainer.EVENT_NET_LOAD)) {
                 ISNetwork network = (ISNetwork) ((Trainer) source).getNet();
@@ -340,7 +334,7 @@ public class TrainingListener extends ParamSetOrganizer implements Comparable<Tr
                     }
                     train = null;
                     val = null;
-                    observable.notifyObservers(new TrainHtr.Status(cntEpochs, errTrain, errTest, method, bestMatch));
+                    observable.notifyObservers(new TrainHtr.Status(cntEpochs, errTrain, errTest, method, bestMatch,null));
                 }
             }
         } catch (Throwable t) {

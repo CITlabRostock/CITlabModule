@@ -5,20 +5,14 @@
  */
 package de.uros.citlab.module.htr;
 
-import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.CharMap;
 import com.achteck.misc.util.ArrayUtil;
-import de.planet.citech.types.ISortingFunction;
 import de.planet.imaging.types.HybridImage;
 import de.planet.itrtech.reco.IImagePreProcess;
 import de.planet.itrtech.reco.ISNetwork;
-import de.planet.itrtech.types.IDictOccurrence;
-import de.planet.langmod.LangMod;
-import de.planet.langmod.LangModFullText;
 import de.planet.langmod.types.ILangMod;
 import de.planet.math.geom2d.types.Polygon2DInt;
 import de.planet.tensorflow.types.SNetworkTF;
-import de.planet.util.types.DictOccurrence;
 import de.uros.citlab.module.interfaces.IHtrCITlab;
 import de.uros.citlab.module.kws.ConfMatContainer;
 import de.uros.citlab.module.la.BaselineGenerationHist;
@@ -54,52 +48,6 @@ public class HTRParserPlus implements IHtrCITlab {
     private final String version = "1.0.2";
     String nameCurrent = "?";
     private BaselineGenerationHist baselineGeneration = new BaselineGenerationHist();
-
-    private static ILangMod getLangMod(String pathLanguageModel, CharMap<Integer> cm, String[] props) {
-//so far a dictionary is a langmod - this changes later
-        if (useDict(pathLanguageModel)) {
-            String[] subTreeProperty = PropertyUtil.getSubTreeProperty(props, "sf");
-            ISortingFunction sf = new SortingFunctionDA();
-            ParamSet psSF = sf.getDefaultParamSet(new ParamSet());
-            for (int i = 0; subTreeProperty != null && i < subTreeProperty.length; i += 2) {
-                String key = subTreeProperty[i];
-                String value = subTreeProperty[i + 1];
-                psSF.setParamFromString(key, value);
-            }
-            sf.setParamSet(psSF);
-            sf.init();
-            LangMod lm = new LangModFullText();
-            lm.setParamSet(lm.getDefaultParamSet(new ParamSet()));
-            lm.init();
-            IDictOccurrence ido;
-            {
-                String propMaxLength = PropertyUtil.getProperty(props, Key.MAX_ANZ, "-1");
-                if (pathLanguageModel.endsWith(".csv") || pathLanguageModel.endsWith(".txt") || pathLanguageModel.endsWith(".dict")) {
-                    ido = new DictOccurrence(pathLanguageModel, ",", 1, 0, false);
-                    ParamSet defaultParamSet = ido.getDefaultParamSet(new ParamSet());
-                    defaultParamSet.getParam(DictOccurrence.P_MAXANZ).set(Integer.parseInt(propMaxLength));
-                    ido.setParamSet(defaultParamSet);
-                    ido.init();
-                } else if (pathLanguageModel.endsWith(".arpa")) {
-                    ido = new DictOccurenceArpa(pathLanguageModel, Integer.parseInt(propMaxLength));
-                    ido.setParamSet(ido.getDefaultParamSet(new ParamSet()));
-                    ido.init();
-                } else {
-                    throw new RuntimeException("cannot load " + pathLanguageModel + ": unknown suffix (.csv, .txt, .dict and .arpa allowed).");
-                }
-            }
-            lm.setSortingFunction(sf);
-            LangModConfigurator lmConfig = new LangModConfigurator(ido, cm, "dict");
-            try {
-                lmConfig.initLangMod(lm);
-            } catch (LangModConfigurator.EmptyDictException ex) {
-                LOG.warn("Error in initializing dictionary " + pathLanguageModel + ", use bestpath instead.", ex);
-                return null;
-            }
-            return lm;
-        }
-        return null;
-    }
 
     private ISNetwork getNetwork(String htrIn, String pathCharMap) {
         String key = htrIn + (pathCharMap == null || pathCharMap.isEmpty() ? "" : File.pathSeparator + pathCharMap);
@@ -175,7 +123,7 @@ public class HTRParserPlus implements IHtrCITlab {
         int hash = htrDummy.hashCode();
         if (!htrs.containsKey(hash)) {
             ISNetwork network = getNetwork(om, cm);
-            ILangMod langMod = getLangMod(lm, network.getCharMap(), props);
+            ILangMod langMod = HTRParser.getLangMod(lm, network.getCharMap(), props);
             htrs.put(hash, new HTR(network, langMod, om, lm, cm, props));
         }
         HTR res = htrs.get(hash);

@@ -16,7 +16,6 @@ import de.planet.itrtech.reco.ISNetwork;
 import de.planet.itrtech.types.ImagePropertyIDs;
 import de.planet.math.geom2d.types.Polygon2DInt;
 import de.planet.math.util.PolygonHelper;
-import de.uros.citlab.errorrate.costcalculator.CostCalculatorDft;
 import de.uros.citlab.errorrate.htr.ErrorModuleDynProg;
 import de.uros.citlab.errorrate.normalizer.StringNormalizerDft;
 import de.uros.citlab.errorrate.types.Count;
@@ -71,7 +70,7 @@ public class BestPathTest {
                 continue;
             }
             tr = tr.replace("\n", "");
-            instance = new ErrorModuleDynProg(new CostCalculatorDft(), new CategorizerCharacterDft(), new StringNormalizerDft(), Boolean.FALSE);
+            instance = new ErrorModuleDynProg(new CategorizerCharacterDft(), new StringNormalizerDft(), Boolean.FALSE);
             net.setInput(inImg);
             net.update();
             ConfMat cm = new ConfMat(net.getConfMat());
