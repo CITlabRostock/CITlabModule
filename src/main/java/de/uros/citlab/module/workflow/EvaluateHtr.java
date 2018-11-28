@@ -7,12 +7,13 @@ package de.uros.citlab.module.workflow;
 
 import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.param.ParamSet;
+import com.achteck.misc.types.ConfMat;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
+import de.planet.languagemodel.train.TrainLM;
 import de.uros.citlab.errorrate.HtrError;
 import de.uros.citlab.errorrate.types.Metric;
 import de.uros.citlab.errorrate.types.Result;
-import de.uros.citlab.languagemodel.TrainLM;
 import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
 import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
 import de.uros.citlab.module.htr.HTRParser;
@@ -163,7 +164,8 @@ public class EvaluateHtr extends ParamTreeOrganizer {
         for (File file : filesXML) {
             text.addAll(PageXmlUtil.getText(PageXmlUtil.unmarshal(file)));
         }
-        TrainLM.train(text, 6, out);
+//        TrainLM.train(text, 6, out, String.valueOf(ConfMat.NaC));
+        TrainLM.train(text, 6, out, String.valueOf('@'));
     }
 
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException, InterruptedException {
@@ -184,11 +186,11 @@ public class EvaluateHtr extends ParamTreeOrganizer {
                             Key.CREATETRAINDATA,
                             false)
             );
-            createLM_NGram(xml, new File(HomeDir.getFile("data/LM_Konzilsprotokolle/"), "dict.arp"));
+            createLM_NGram(xml, new File(HomeDir.getFile("data/LM_Konzilsprotokolle/"), "lm.bin"));
             List<File> xml2 = FileUtil.listFiles(HomeDir.getFile("data/TRAIN_CITlab_Bentham_himself_M4/"), "xml", true);
             FileUtil.deleteMetadataAndMetsFiles(xml2);
             TrainDataUtil.createTrainData(FileUtil.asStringList(xml2), HomeDir.getFile("data/LM_Bentham/").getAbsolutePath(), null, PropertyUtil.setProperty(PropertyUtil.setProperty(null, Key.CREATEDICT, true), Key.CREATETRAINDATA, false));
-            createLM_NGram(xml2, new File(HomeDir.getFile("data/LM_Bentham/"), "dict.arp"));
+            createLM_NGram(xml2, new File(HomeDir.getFile("data/LM_Bentham/"), "lm.bin"));
             return;
 
         }
@@ -197,7 +199,6 @@ public class EvaluateHtr extends ParamTreeOrganizer {
                 "Konzilsprotokolle_ARPA"/*,
                 "Bentham_CSV",
                 "Bentham_RAW",
-                "Konzilsprotokolle_CSV",
                 "Konzilsprotokolle_RAW"*/}) {
             File folderGT = null, folderOut = null, fileLR = null, fileHtr = null;
             switch (szenario) {
@@ -211,7 +212,7 @@ public class EvaluateHtr extends ParamTreeOrganizer {
                     folderGT = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4/");
                     folderOut = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4_ARPA/");
                     fileHtr = new File("src/test/resources/test_htr/Bentham");
-                    fileLR = HomeDir.getFile("data/LM_Bentham/dict.arp");
+                    fileLR = HomeDir.getFile("data/LM_Bentham/lm.bin");
                     break;
                 case "Bentham_RAW":
                     folderGT = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4/");
@@ -230,7 +231,7 @@ public class EvaluateHtr extends ParamTreeOrganizer {
                     folderGT = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3/");
                     folderOut = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3_ARPA/");
                     fileHtr = new File("src/test/resources/test_htr/Konzilsprotokolle_M4");
-                    fileLR = HomeDir.getFile("data/LM_Konzilsprotokolle/dict.arp");
+                    fileLR = HomeDir.getFile("data/LM_Konzilsprotokolle/lm.bin");
                     break;
                 case "Konzilsprotokolle_RAW":
                     folderGT = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3/");

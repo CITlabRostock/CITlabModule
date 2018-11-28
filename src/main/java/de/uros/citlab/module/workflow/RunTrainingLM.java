@@ -1,7 +1,7 @@
 package de.uros.citlab.module.workflow;
 
 import com.achteck.misc.exception.InvalidParameterException;
-import de.uros.citlab.languagemodel.TrainLM;
+import de.planet.languagemodel.train.TrainLM;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 

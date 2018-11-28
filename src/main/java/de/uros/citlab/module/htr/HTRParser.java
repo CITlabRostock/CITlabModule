@@ -15,12 +15,10 @@ import de.planet.itrtech.types.IDictOccurrence;
 import de.planet.langmod.LangMod;
 import de.planet.langmod.LangModFullText;
 import de.planet.langmod.types.ILangMod;
+import de.planet.languagemodel.langmod.LanguageDecoderLangModAdapter;
 import de.planet.math.geom2d.types.Polygon2DInt;
 import de.planet.reco.types.SNetwork;
 import de.planet.util.types.DictOccurrence;
-import de.uros.citlab.languagemodel.decoder.LanguageDecoderLM;
-import de.uros.citlab.languagemodel.lmtypes.ILM;
-import de.uros.citlab.languagemodel.lmtypes.LMBerkleyChar;
 import de.uros.citlab.module.interfaces.IHtrCITlab;
 import de.uros.citlab.module.kws.ConfMatContainer;
 import de.uros.citlab.module.la.BaselineGenerationHist;
@@ -89,12 +87,16 @@ public class HTRParser implements IHtrCITlab {
     public static ILangMod getLangMod(String pathLanguageModel, CharMap<Integer> cm, String[] props) {
 //so far a dictionary is a langmod - this changes later
         if (useDict(pathLanguageModel)) {
-            if (pathLanguageModel.endsWith(".arp")) {
+            if (pathLanguageModel.endsWith(".bin")) {
                 //use better version of LM
-                ILM langModImpl = new LMBerkleyChar(pathLanguageModel);
-                langModImpl.setParamSet(langModImpl.getDefaultParamSet(null));
-                langModImpl.init();
-                LanguageDecoderLM res = new LanguageDecoderLM(langModImpl);
+//                ILM langModImpl = new LMBerkleyChar(pathLanguageModel);
+//                langModImpl.setParamSet(langModImpl.getDefaultParamSet(null));
+//                langModImpl.init();
+                ILangMod res = new LanguageDecoderLangModAdapter(pathLanguageModel,
+                        "@",
+                        1,
+                        -1.5,
+                        0.0);
                 return res;
             }
             String[] subTreeProperty = PropertyUtil.getSubTreeProperty(props, "sf");
