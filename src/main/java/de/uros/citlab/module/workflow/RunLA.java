@@ -21,6 +21,10 @@ import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.interfaces.IBaseline2Polygon;
 import eu.transkribus.interfaces.ILayoutAnalysis;
 import eu.transkribus.interfaces.types.Image;
+import org.apache.commons.io.FileUtils;
+
+import javax.imageio.ImageIO;
+import javax.xml.bind.JAXBException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -28,9 +32,6 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import javax.imageio.ImageIO;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -108,12 +109,12 @@ public class RunLA extends ParamTreeOrganizer {
         File folder = null, folderOut = null, la = null;
 //        folder = new File("/home/gundram/devel/projects/barlach/T2I_la/");//folder containing images and PAGE-XML with baselines
 //        folder = new File("/home/gundram/devel/src/git/CITlabModule/src/test/resources/");//folder containing images and PAGE-XML with baselines
-        folder = new File(HomeDir.PATH_FILE, "data/StaZh_FirstTestCollection/Testdaten_TKR/T2I/");
-        folderOut = new File(HomeDir.PATH_FILE, "data/StaZh_FirstTestCollection/Testdaten_TKR/T2I_la/");
+        folder = HomeDir.getFile("data/T2I");
+        folderOut = new File(HomeDir.PATH_FILE, "data/T2I");
 //        htr = new File("/home/gundram/devel/projects/barlach/nets/barlach_v3_unsorted.sprnn");//path to htr model
 //        lr = new File("/home/gundram/devel/projects/barlach/dicts/dict_v1.csv");//path to htr model
 //        la = new File("/home/gundram/devel/projects/barlach/configs/historical_90_dft_20161011.bin"); //path to la - if no la is given, the PAGE-XML should have baselines.
-        la = new File("src/main/resources/planet/la/historical_90_dft_20161011.bin"); //path to la - if no la is given, the PAGE-XML should have baselines.
+//        la = new File("src/main/resources/planet/la/historical_90_dft_20161011.bin"); //path to la - if no la is given, the PAGE-XML should have baselines.
         RunLA instance = new RunLA(la, folder, folderOut, true, true);
         ParamSet ps = new ParamSet();
         ps.setCommandLineArgs(args);    // allow early parsing

@@ -198,7 +198,7 @@ public class SetupHattem {
                 {
                     SetupHattem instance = new SetupHattem(
                             HomeDir.getFile("data/Hattem/AdditionalMaterial"),
-                            HomeDir.getFile("data/T2I_" + (abbr ? "Abbr" : "Expand") + (form == null ? "" : "_" + form)),
+                            HomeDir.getFile("data/T2I/T2I_" + (abbr ? "Abbr" : "Expand") + (form == null ? "" : "_" + form)),
                             abbr);
                     instance.setXml(false);
                     if (form != null) {

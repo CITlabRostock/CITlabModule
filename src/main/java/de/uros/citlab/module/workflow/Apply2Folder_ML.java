@@ -9,21 +9,26 @@ import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
+import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
 import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
 import de.uros.citlab.module.htr.HTRParser;
 import de.uros.citlab.module.la.LayoutAnalysisURO_ML;
 import de.uros.citlab.module.types.ArgumentLine;
-import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
-import de.uros.citlab.module.util.PropertyUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.interfaces.IBaseline2Polygon;
 import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.ILayoutAnalysis;
 import eu.transkribus.interfaces.types.Image;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import javax.xml.bind.JAXBException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -34,14 +39,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
-import javax.imageio.ImageIO;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author gundram
  */
 public class Apply2Folder_ML extends ParamTreeOrganizer {
@@ -78,7 +77,7 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
 
     @ParamAnnotation(descr = "link image file instead of copy")
     private boolean link = true;
-//    private int threads = 1;
+    //    private int threads = 1;
     private String[] props;
 
     public Apply2Folder_ML(String htr, String lr, String la, String folderIn, String folderOut, boolean createDebugImg, boolean saveCM, String[] props) {
@@ -120,7 +119,8 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
 
     public void run() throws MalformedURLException, IOException, JAXBException {
         File lrName = lr_path.isEmpty() ? null : new File(lr_path);
-        File folderOut = xml_out.isEmpty() ? null : new File(xml_out);;
+        File folderOut = xml_out.isEmpty() ? null : new File(xml_out);
+        ;
         File htrName = htr_path.isEmpty() ? null : new File(htr_path);
         Collection<File> listFiles = FileUtil.getFilesListsOrFolders(xml_in, FileUtil.IMAGE_SUFFIXES, true);
         File folderIn = FileUtil.getSourceFolderListsOrFolders(xml_in, FileUtil.IMAGE_SUFFIXES, true);
@@ -194,16 +194,19 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
                     ImageIO.write(debugImage, "jpg", new File(tgtXml.getAbsoluteFile() + "_txt.jpg"));
                 }
             }
-            if(img.hasType(Image.Type.OPEN_CV)){
+            if (img.hasType(Image.Type.OPEN_CV)) {
                 img.getImageOpenCVImage().release();
             }
         }
     }
-    
+
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException {
-//        ArgumentLine al = new ArgumentLine();
+        ArgumentLine al = new ArgumentLine();
+        al.addArgument("xml_in", HomeDir.getFile("data/T2I"));
+        al.addArgument("xml_out", HomeDir.getFile("data/T2I"));
+        al.addArgument("b2p", B2PSeamMultiOriented.class.getName());
 //        al.setHelp();
-//        args=al.getArgs();
+        args = al.getArgs();
 
 //        String folder = "/home/tobias/devel/projects/CitlabModule/raw4/", folderOut = "/home/tobias/devel/projects/CitlabModule/out/", htr = "", lr = "", la = "", b2p = "";
         String folder = "", folderOut = "", htr = "", lr = "", la = "", b2p = "";
