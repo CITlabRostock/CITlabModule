@@ -41,7 +41,7 @@ public class ShowKwsResult extends ParamTreeOrganizer {
 
     @ParamAnnotation(descr = "path to result file")
     private String i = "";
-    @ParamAnnotation(descr = "group by keyword-page (k), page-keyword (p) or no grouping (n) ")
+    @ParamAnnotation(descr = "group by keyword-page (k), page-keyword (patternChoose) or no grouping (n) ")
     private String group = "n";
 
     public ShowKwsResult() {
@@ -129,7 +129,7 @@ public class ShowKwsResult extends ParamTreeOrganizer {
                     fr.next();
                 }
                 break;
-            case "p":
+            case "patternChoose":
                 List<Entry2> kws = new LinkedList<>();
                 for (KWS.Word keyWord : fromJson.getKeywords()) {
                     for (KWS.Entry po : keyWord.getPos()) {

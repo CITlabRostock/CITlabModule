@@ -13,6 +13,7 @@ import com.achteck.misc.types.ParamTreeOrganizer;
 import de.planet.imaging.types.HybridImage;
 import de.planet.imaging.util.GraphicalMonPanelFrame;
 import de.planet.imaging.util.StdGraphicalMonPanelFrame;
+import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
@@ -69,7 +70,9 @@ public class PageViewer extends ParamTreeOrganizer {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException {
-        args = ("-i " + "/home/gundram/devel/projects/tf_htr/data/TEST_CITlab_NAF_Poll_Tax_M5_duplicated/TEST_CITlab_NAF_Poll_Tax_M5_duplicated/Henkikir_16.jpg").split(" ");
+        ArgumentLine al = new ArgumentLine();
+        al.addArgument("i", HomeDir.getFile("data/GTwithAbbreviations"));
+        args=al.getArgs();
 //        args=("-i "+HomeDir.getFile("tmp_20170308/xml_semi_0/")).split(" ");
         PageViewer instance = new PageViewer();
         ParamSet ps = new ParamSet();

@@ -13,7 +13,7 @@ import java.io.File;
  */
 public class HomeDir {
 
-    public static String PATH = "/home/gundram/devel/projects/read/";
+    public static String PATH = "/home/gundram/devel/projects/hattem/";
     public static File PATH_FILE = new File(PATH);
 
     public static File getFile(String file) {
