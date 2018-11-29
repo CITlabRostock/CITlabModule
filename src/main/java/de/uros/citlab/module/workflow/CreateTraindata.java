@@ -14,10 +14,10 @@ import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.PropertyUtil;
 import de.uros.citlab.module.util.TrainDataUtil;
+
 import java.io.File;
 
 /**
- *
  * @author gundram
  */
 public class CreateTraindata extends ParamTreeOrganizer {
@@ -86,11 +86,12 @@ public class CreateTraindata extends ParamTreeOrganizer {
     public static void main(String[] args) throws InvalidParameterException, ClassNotFoundException, Exception {
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("xml", HomeDir.getFile("data/linefeed_in_gt"));
+            al.addArgument("xml", HomeDir.getFile("data/002/t2i"));
             al.addArgument("cm", HomeDir.getFile("data/linefeed_in_gt/cm.txt"));
-            al.addArgument("out", HomeDir.getFile("traindata/linefeed_in_gt"));
-            al.addArgument("create", false);
+            al.addArgument("out", HomeDir.getFile("traindata/002/2018-11-29"));
+            al.addArgument("create", true);
             al.addArgument("stat", true);
+            al.addArgument("minconf", 0.05);
             args = al.getArgs();
         }
         CreateTraindata instance = new CreateTraindata();

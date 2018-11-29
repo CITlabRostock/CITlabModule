@@ -118,7 +118,7 @@ public class HTRParserPlus implements IHtrCITlab {
         PageXmlUtil.marshal(loadXml, new File(xmlInOut));
     }
 
-    protected HTR getHTR(String om, String lm, String cm, String storageDir, String[] props) {
+    public HTR getHTR(String om, String lm, String cm, String storageDir, String[] props) {
         HTR htrDummy = new HTR(om, lm, cm);
         int hash = htrDummy.hashCode();
         if (!htrs.containsKey(hash)) {

@@ -9,14 +9,18 @@ import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
+import de.uros.citlab.errorrate.util.ObjectCounter;
 import de.uros.citlab.module.text2image.Text2ImageParser;
 import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import de.uros.citlab.module.util.PropertyUtil;
-import de.uros.citlab.errorrate.util.ObjectCounter;
 import eu.transkribus.interfaces.types.Image;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,12 +28,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import javax.xml.bind.JAXBException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author gundram
  */
 public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnable {
@@ -42,14 +42,14 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
     @ParamAnnotation(name = "lr", descr = "language resource (dict...)")
     private String lrName = "";
     private Text2ImageParser text2image;
-//    private ILayoutAnalysis la;
+    //    private ILayoutAnalysis la;
     @ParamAnnotation(name = "cm", descr = "character map (if empty, character map of net is taken")
     private String charMapName = "";
     @ParamAnnotation(name = "in", descr = "folder which contains the images and pageXMLs")
     private String folderIn = "";
     @ParamAnnotation(name = "storage", descr = "folder which can be used for confmat storage")
     private String folderStorage = "";
-//    @ParamAnnotation(name = "ref", descr = "folder which contains the text files")
+    //    @ParamAnnotation(name = "ref", descr = "folder which contains the text files")
 //    private String folderRef = "";
     @ParamAnnotation(name = "out", descr = "folder where the results should be saved")
     private String folderOut = "";
@@ -192,23 +192,27 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
         File folder = HomeDir.getFile("t2i");//folder containing images and PAGE-XML with baselines
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("in", HomeDir.getFile("data/t2i_bar/raw/100"));
-            al.addArgument("out", HomeDir.getFile("/data/t2i_bar/t2i/100"));
-            al.addArgument("storage", HomeDir.getFile("/data/t2i_bar/storage/100"));
-            al.addArgument("htr", HomeDir.getFile("nets/tf_320/net.sprnn"));
+            al.addArgument("in", HomeDir.getFile("data/002/la"));
+            al.addArgument("out", HomeDir.getFile("/data/002/t2i"));
+            al.addArgument("storage", HomeDir.getFile("/data/002/storage"));
+            al.addArgument("htr", HomeDir.getFile("nets/8023"));
             args = al.getArgs();
         }
         String[] props = null;
-        props = PropertyUtil.setProperty(props, Key.T2I_HYPHEN, "6.0");
-//        props = PropertyUtil.setProperty(props, Key.T2I_HYPHEN_LANG, "DE");
-        props = PropertyUtil.setProperty(props, Key.T2I_JUMP_BASELINE, "10.0");
-        props = PropertyUtil.setProperty(props, Key.T2I_SKIP_WORD, "3.5");
-        props = PropertyUtil.setProperty(props, Key.T2I_SKIP_BASELINE, "0.4");
-        props = PropertyUtil.setProperty(props, Key.T2I_MAX_COUNT, "10000000");
-        props = PropertyUtil.setProperty(props, Key.T2I_BEST_PATHES, "200.0");
-        props = PropertyUtil.setProperty(props, Key.T2I_THRESH, "0.0");
+        props = PropertyUtil.setProperty(props, Key.T2I_HYPHEN,
+                "{\"skipSuffix\":true," +
+                        "\"suffixes\":[\"-\",\"¬\",\"–\",\"—\"]," +
+                        "\"hypCosts\":10.0," +
+                        "\"pattern\":\"EN_GB\"}");
+//        props = PropertyUtil.setProperty(props, Key.T2I_HYPHEN_LANG, "EN_UK");
+//        props = PropertyUtil.setProperty(props, Key.T2I_JUMP_BASELINE, "10.0");
+        props = PropertyUtil.setProperty(props, Key.T2I_SKIP_WORD, "4.0");
+        props = PropertyUtil.setProperty(props, Key.T2I_SKIP_BASELINE, "0.2");
+//        props = PropertyUtil.setProperty(props, Key.T2I_MAX_COUNT, "10000000");
+        props = PropertyUtil.setProperty(props, Key.T2I_BEST_PATHES, "150.0");
+        props = PropertyUtil.setProperty(props, Key.T2I_THRESH, "-0.05");
 //        props = PropertyUtil.setProperty(props, Key.DEBUG, "true");
-//        props = PropertyUtil.setProperty(props, Key.DEBUG_DIR, HomeDir.getFile("data/t2i_bar/debug").getPath());
+//        props = PropertyUtil.setProperty(props, Key.DEBUG_DIR, HomeDir.getFile("data/002/debug").getPath());
 //        props = PropertyUtil.setProperty(props, "b2p", "true");
         props = PropertyUtil.setProperty(props, Key.STATISTIC, "true");
         Text2ImageNoLineBreak instance = new Text2ImageNoLineBreak(props);

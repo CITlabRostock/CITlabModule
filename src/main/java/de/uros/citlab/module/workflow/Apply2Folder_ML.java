@@ -9,21 +9,26 @@ import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
+import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
 import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
 import de.uros.citlab.module.htr.HTRParser;
 import de.uros.citlab.module.la.LayoutAnalysisURO_ML;
 import de.uros.citlab.module.types.ArgumentLine;
-import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
-import de.uros.citlab.module.util.PropertyUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.interfaces.IBaseline2Polygon;
 import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.ILayoutAnalysis;
 import eu.transkribus.interfaces.types.Image;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import javax.xml.bind.JAXBException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -34,11 +39,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
-import javax.imageio.ImageIO;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -201,9 +201,12 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
     }
     
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException {
-//        ArgumentLine al = new ArgumentLine();
+        ArgumentLine al = new ArgumentLine();
+        al.addArgument("xml_in", HomeDir.getFile("data/002/la"));
+        al.addArgument("xml_out", HomeDir.getFile("data/002/la"));
+        al.addArgument("b2p", B2PSeamMultiOriented.class.getName());
 //        al.setHelp();
-//        args=al.getArgs();
+        args=al.getArgs();
 
 //        String folder = "/home/tobias/devel/projects/CitlabModule/raw4/", folderOut = "/home/tobias/devel/projects/CitlabModule/out/", htr = "", lr = "", la = "", b2p = "";
         String folder = "", folderOut = "", htr = "", lr = "", la = "", b2p = "";
@@ -211,7 +214,7 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
 //        props = PropertyUtil.setProperty(props, Key.LA_DELETESCHEME, LayoutAnalysisURO_ML.DEL_REGIONS);
 //        props = PropertyUtil.setProperty(props, Key.LA_ROTSCHEME, LayoutAnalysisURO_ML.ROT_HOM);
 //        props = PropertyUtil.setProperty(props, Key.LA_SEPSCHEME, LayoutAnalysisURO_ML.SEP_NEVER);
-        Apply2Folder_ML instance = new Apply2Folder_ML(htr, lr, la, folder, folderOut, b2p, false, true, props);
+        Apply2Folder_ML instance = new Apply2Folder_ML(htr, lr, la, folder, folderOut, b2p, false, false, props);
         ParamSet ps = new ParamSet();
         ps.setCommandLineArgs(args);    // allow early parsing
         ps = instance.getDefaultParamSet(ps);
@@ -224,7 +227,7 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
 //        System.out.println(Arrays.toString(remainingArgumentList));
         props = ArgumentLine.getPropertiesFromArgs(remainingArgumentList, props);
         LOG.info("set properties {}", Arrays.toString(props)); //        System.out.println("==>" + Arrays.toString(props));
-        instance = new Apply2Folder_ML(htr, lr, la, folder, folderOut, b2p, true, true, props);
+        instance = new Apply2Folder_ML(htr, lr, la, folder, folderOut, b2p, false, false, props);
         ps = new ParamSet();
         ps.setCommandLineArgs(args);    // allow early parsing
         ps = instance.getDefaultParamSet(ps);
