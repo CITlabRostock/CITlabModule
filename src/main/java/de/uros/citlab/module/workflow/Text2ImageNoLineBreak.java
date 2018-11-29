@@ -209,7 +209,7 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
         props = PropertyUtil.setProperty(props, Key.T2I_SKIP_WORD, "4.0");
         props = PropertyUtil.setProperty(props, Key.T2I_SKIP_BASELINE, "0.2");
 //        props = PropertyUtil.setProperty(props, Key.T2I_MAX_COUNT, "10000000");
-        props = PropertyUtil.setProperty(props, Key.T2I_BEST_PATHES, "150.0");
+        props = PropertyUtil.setProperty(props, Key.T2I_BEST_PATHES, "250.0");
         props = PropertyUtil.setProperty(props, Key.T2I_THRESH, "-0.05");
 //        props = PropertyUtil.setProperty(props, Key.DEBUG, "true");
 //        props = PropertyUtil.setProperty(props, Key.DEBUG_DIR, HomeDir.getFile("data/002/debug").getPath());
