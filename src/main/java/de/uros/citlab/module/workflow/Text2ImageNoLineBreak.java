@@ -16,7 +16,6 @@ import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import de.uros.citlab.module.util.PropertyUtil;
-import de.uros.citlab.textalignment.Hyphenator;
 import eu.transkribus.interfaces.types.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,8 +192,8 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
         File folder = HomeDir.getFile("t2i");//folder containing images and PAGE-XML with baselines
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("in", HomeDir.getFile("data/009/la/009_005_001"));
-            al.addArgument("out", HomeDir.getFile("/data/009/t2i/009_005_001"));
+            al.addArgument("in", HomeDir.getFile("data/009/la"));
+            al.addArgument("out", HomeDir.getFile("/data/009/t2i"));
             al.addArgument("htr", HomeDir.getFile("nets/8023"));
             args = al.getArgs();
         }
