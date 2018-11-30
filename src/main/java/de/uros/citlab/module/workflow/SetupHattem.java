@@ -17,9 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.text.Normalizer;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -168,6 +166,27 @@ public class SetupHattem {
         }
     }
 
+    public void toSubsets() {
+        List<File> files = FileUtil.listFiles(o, FileUtil.IMAGE_SUFFIXES, true);
+        Collections.sort(files, Comparator.comparing(File::getName));
+        for (int s = 0; s < 8; s++) {
+            File valFolder = new File(o, "val_" + s);
+            File trainFolder = new File(o, "train_" + s);
+            for (int i = 0; i < files.size(); i++) {
+                File file = files.get(i);
+                File toFolder = s == i / 5 ? valFolder : trainFolder;
+                FileUtil.copyFile(file, new File(toFolder, file.getName()));
+                File xml = PageXmlUtil.getXmlPath(file);
+                FileUtil.copyFile(xml, new File(new File(toFolder, "page"), xml.getName()));
+            }
+        }
+        for (int i = 0; i < files.size(); i++) {
+            File img = files.get(i);
+            img.delete();
+        }
+        FileUtils.deleteQuietly(new File(o,"page"));
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -189,6 +208,7 @@ public class SetupHattem {
                         instance.setNormalform(form);
                     }
                     instance.run();
+                    instance.toSubsets();
                 }
 
                 al.addArgument("f", HomeDir.getFile("data/Hattem/AdditionalMaterial"));

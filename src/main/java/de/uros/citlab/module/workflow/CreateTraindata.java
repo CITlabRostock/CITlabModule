@@ -86,7 +86,7 @@ public class CreateTraindata extends ParamTreeOrganizer {
     public static void main(String[] args) throws InvalidParameterException, ClassNotFoundException, Exception {
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("xml", HomeDir.getFile("data/linefeed_in_gt"));
+            al.addArgument("xml", HomeDir.getFile("data/GT_Abbr"));
             al.addArgument("cm", HomeDir.getFile("data/linefeed_in_gt/cm.txt"));
             al.addArgument("out", HomeDir.getFile("traindata/linefeed_in_gt"));
             al.addArgument("create", false);
