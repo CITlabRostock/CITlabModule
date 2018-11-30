@@ -188,7 +188,6 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
         if (threshold < 0) {
             threshold = 0.0;
         }
-        double nacOffset = -2.0;
         String lbChars = " ";
         TextAligner textAligner = new TextAligner(
                 lbChars,
@@ -196,7 +195,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
                 costSkipBaseline, //0.2
                 costJumpBaseline
         );
-        textAligner.setNacOffset(-2.0);
+        textAligner.setNacOffset(0.0);
         textAligner.setThreshold(threshold);
         if (PropertyUtil.isPropertyTrue(props, Key.DEBUG)) {
             File folder = PropertyUtil.hasProperty(props, Key.DEBUG_DIR)

@@ -16,6 +16,7 @@ import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import de.uros.citlab.module.util.PropertyUtil;
+import de.uros.citlab.textalignment.Hyphenator;
 import eu.transkribus.interfaces.types.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,8 +193,8 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
         File folder = HomeDir.getFile("t2i");//folder containing images and PAGE-XML with baselines
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("in", HomeDir.getFile("data/002/la"));
-            al.addArgument("out", HomeDir.getFile("/data/002/t2i"));
+            al.addArgument("in", HomeDir.getFile("data/009/la/009_005_001"));
+            al.addArgument("out", HomeDir.getFile("/data/009/t2i/009_005_001"));
             al.addArgument("htr", HomeDir.getFile("nets/8023"));
             args = al.getArgs();
         }
@@ -201,17 +202,17 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
         props = PropertyUtil.setProperty(props, Key.T2I_HYPHEN,
                 "{\"skipSuffix\":true," +
                         "\"suffixes\":[\"-\",\"¬\",\"–\",\"—\"]," +
-                        "\"hypCosts\":10.0," +
+                        "\"hypCosts\":6.0, " +
                         "\"pattern\":\"EN_GB\"}");
 //        props = PropertyUtil.setProperty(props, Key.T2I_HYPHEN_LANG, "EN_UK");
-//        props = PropertyUtil.setProperty(props, Key.T2I_JUMP_BASELINE, "10.0");
-        props = PropertyUtil.setProperty(props, Key.T2I_SKIP_WORD, "4.0");
+//        props = PropertyUtil.setProperty(props, Key.T2I_JUMP_BASELINE, "20.0");
+        props = PropertyUtil.setProperty(props, Key.T2I_SKIP_WORD, "6.0");
         props = PropertyUtil.setProperty(props, Key.T2I_SKIP_BASELINE, "0.2");
 //        props = PropertyUtil.setProperty(props, Key.T2I_MAX_COUNT, "10000000");
         props = PropertyUtil.setProperty(props, Key.T2I_BEST_PATHES, "250.0");
         props = PropertyUtil.setProperty(props, Key.T2I_THRESH, "-0.05");
 //        props = PropertyUtil.setProperty(props, Key.DEBUG, "true");
-//        props = PropertyUtil.setProperty(props, Key.DEBUG_DIR, HomeDir.getFile("data/002/debug").getPath());
+//        props = PropertyUtil.setProperty(props, Key.DEBUG_DIR, HomeDir.getFile("data/009/debug").getPath());
 //        props = PropertyUtil.setProperty(props, "b2p", "true");
         props = PropertyUtil.setProperty(props, Key.STATISTIC, "true");
         Text2ImageNoLineBreak instance = new Text2ImageNoLineBreak(props);
