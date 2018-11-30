@@ -41,7 +41,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- *
  * @author gundram
  */
 public class Apply2Folder_ML extends ParamTreeOrganizer {
@@ -78,7 +77,7 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
 
     @ParamAnnotation(descr = "link image file instead of copy")
     private boolean link = true;
-//    private int threads = 1;
+    //    private int threads = 1;
     private String[] props;
 
     public Apply2Folder_ML(String htr, String lr, String la, String folderIn, String folderOut, boolean createDebugImg, boolean saveCM, String[] props) {
@@ -120,7 +119,8 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
 
     public void run() throws MalformedURLException, IOException, JAXBException {
         File lrName = lr_path.isEmpty() ? null : new File(lr_path);
-        File folderOut = xml_out.isEmpty() ? null : new File(xml_out);;
+        File folderOut = xml_out.isEmpty() ? null : new File(xml_out);
+        ;
         File htrName = htr_path.isEmpty() ? null : new File(htr_path);
         Collection<File> listFiles = FileUtil.getFilesListsOrFolders(xml_in, FileUtil.IMAGE_SUFFIXES, true);
         File folderIn = FileUtil.getSourceFolderListsOrFolders(xml_in, FileUtil.IMAGE_SUFFIXES, true);
@@ -194,19 +194,21 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
                     ImageIO.write(debugImage, "jpg", new File(tgtXml.getAbsoluteFile() + "_txt.jpg"));
                 }
             }
-            if(img.hasType(Image.Type.OPEN_CV)){
+            if (img.hasType(Image.Type.OPEN_CV)) {
                 img.getImageOpenCVImage().release();
             }
         }
     }
-    
+
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException {
-        ArgumentLine al = new ArgumentLine();
-        al.addArgument("xml_in", HomeDir.getFile("data/002/la"));
-        al.addArgument("xml_out", HomeDir.getFile("data/002/la"));
-        al.addArgument("b2p", B2PSeamMultiOriented.class.getName());
+        if (args.length == 0) {
+            ArgumentLine al = new ArgumentLine();
+            al.addArgument("xml_in", HomeDir.getFile("data/002/la"));
+            al.addArgument("xml_out", HomeDir.getFile("data/002/la"));
+            al.addArgument("b2p", B2PSeamMultiOriented.class.getName());
+            args = al.getArgs();
+        }
 //        al.setHelp();
-        args=al.getArgs();
 
 //        String folder = "/home/tobias/devel/projects/CitlabModule/raw4/", folderOut = "/home/tobias/devel/projects/CitlabModule/out/", htr = "", lr = "", la = "", b2p = "";
         String folder = "", folderOut = "", htr = "", lr = "", la = "", b2p = "";

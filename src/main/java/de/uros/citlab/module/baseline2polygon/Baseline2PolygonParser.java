@@ -12,6 +12,13 @@ import de.planet.imaging.types.HybridImage;
 import de.planet.math.geom2d.types.Point2DInt;
 import de.planet.math.geom2d.types.Polygon2DInt;
 import de.planet.math.geom2d.types.Rectangle2DInt;
+import de.uros.citlab.module.interfaces.IB2P;
+import de.uros.citlab.module.interfaces.IP2B;
+import de.uros.citlab.module.la.B2PSimple;
+import de.uros.citlab.module.la.BaselineGenerationHist;
+import de.uros.citlab.module.util.ImageUtil;
+import de.uros.citlab.module.util.MetadataUtil;
+import de.uros.citlab.module.util.PageXmlUtil;
 import de.uros.citlab.module.util.PolygonUtil;
 import eu.transkribus.core.model.beans.pagecontent.BaselineType;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
@@ -20,20 +27,15 @@ import eu.transkribus.core.model.beans.pagecontent.TextRegionType;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.interfaces.IBaseline2Polygon;
 import eu.transkribus.interfaces.types.Image;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import de.uros.citlab.module.interfaces.IB2P;
-import de.uros.citlab.module.la.B2PSimple;
-import de.uros.citlab.module.util.ImageUtil;
-import de.uros.citlab.module.util.MetadataUtil;
-import de.uros.citlab.module.util.PageXmlUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author gundram
  */
 public class Baseline2PolygonParser implements IBaseline2Polygon {
@@ -44,6 +46,12 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
     private String impl = "";
     private IB2P implModule;
     private IB2P implModuleFallback;
+    private IP2B inverseModule = new BaselineGenerationHist();
+    private boolean useInverseModule = true;
+
+    public void useInverseModule(boolean useInverseModule) {
+        this.useInverseModule = useInverseModule;
+    }
 
     public Baseline2PolygonParser(String classname) {
         impl = classname;
@@ -74,9 +82,22 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
                 if (ids == null || ArrayUtil.linearSearch(ids, textLineType.getId()) >= 0) {
                     BaselineType bl = textLineType.getBaseline();
                     if (bl == null) {
-                        LOG.warn("for textline '{}' no baseline polygon given", textLineType.getId());
-                        continue;
+                        if (useInverseModule) {
+                            if (textLineType.getCoords() != null) {
+                                inverseModule.processLine(hi, textLineType, textRegion);
+                            }
+                            if (textLineType.getBaseline() == null) {
+                                LOG.warn("for textline '{}' no baseline polygon given and Polygon2Baseline does not work.", textLineType.getId());
+                                continue;
+                            } else {
+                                LOG.warn("for textline '{}' baseline polygon calculated from polygon", textLineType.getId());
+                            }
+                        } else {
+                            LOG.warn("for textline '{}' no baseline polygon given", textLineType.getId());
+                            continue;
+                        }
                     }
+
                     linesExecution.add(textLineType);
                     linesPolygon.add(PolygonUtil.convert(PolygonUtil.getBaseline(textLineType)));
                 }
@@ -122,7 +143,7 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
         }
 
         MetadataUtil.addMetadata(loadXml, this);
-        if(!image.hasType(Image.Type.OPEN_CV) && hi.getOpenCVMatImage()!=null){
+        if (!image.hasType(Image.Type.OPEN_CV) && hi.getOpenCVMatImage() != null) {
             hi.getOpenCVMatImage().release();
         }
     }

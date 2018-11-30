@@ -194,7 +194,6 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
             ArgumentLine al = new ArgumentLine();
             al.addArgument("in", HomeDir.getFile("data/002/la"));
             al.addArgument("out", HomeDir.getFile("/data/002/t2i"));
-            al.addArgument("storage", HomeDir.getFile("/data/002/storage"));
             al.addArgument("htr", HomeDir.getFile("nets/8023"));
             args = al.getArgs();
         }

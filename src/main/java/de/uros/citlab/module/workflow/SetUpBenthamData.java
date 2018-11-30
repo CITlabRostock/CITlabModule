@@ -20,10 +20,7 @@ public class SetUpBenthamData {
         return sb.toString().trim();
     }
 
-    public void run() {
-        File folderImg = HomeDir.getFile("data/002/images");
-        File folderXml = HomeDir.getFile("data/002/xmls");
-        File out = HomeDir.getFile("data/002/la");
+    public void run(File folderImg, File folderXml, File out) {
         out.mkdirs();
         List<File> xmls = FileUtil.listFiles(folderXml, "xml", true);
         for (File xml : xmls) {
@@ -78,7 +75,13 @@ public class SetUpBenthamData {
     }
 
     public static void main(String[] args) {
+        if (args.length == 0) {
+            args = new String[]{"data/002/images", "data/002/xmls", "data/002/la"};
+        }
         SetUpBenthamData instance = new SetUpBenthamData();
-        instance.run();
+        File folderImg = HomeDir.getFile(args[0]);
+        File folderXml = HomeDir.getFile(args[1]);
+        File out = HomeDir.getFile(args[2]);
+        instance.run(folderImg, folderXml, out);
     }
 }

@@ -55,6 +55,8 @@ public class TrainDataUtil {
         final private ICategorizer categorizer;
         final private boolean onlyLetter;
         final private LinkedList<String> languageResource;
+        final private int[] cntTraindata;
+
 
         public Statistic(IStringNormalizer normalizer, ICategorizer categorizer, boolean onlyLetter, boolean languageResource) {
             this.onlyLetter = onlyLetter;
@@ -63,6 +65,28 @@ public class TrainDataUtil {
             this.statWord = categorizer != null ? new ObjectCounter<String>() : null;
             this.tokenizer = categorizer != null ? new TokenizerCategorizer(categorizer) : null;
             this.languageResource = languageResource ? new LinkedList<>() : null;
+            cntTraindata = new int[30];
+
+        }
+
+        private double[][] getConfIntervalls() {
+            double[] vals = new double[30];
+            double[] vals2 = new double[30];
+            long sum = 0;
+            for (int i = 0; i < vals.length; i++) {
+                vals[i] = Math.pow(0.5, ((double) i + 1.0) / 3);
+                sum += cntTraindata[i];
+                vals2[i] = sum;
+            }
+            return new double[][]{vals, vals2};
+        }
+
+        public void countLine() {
+            cntTraindata[29]++;
+        }
+
+        public void countLine(double confidence) {
+            cntTraindata[Math.min(29, (int) (3 * Math.log(1 / Math.max(confidence, Double.MIN_VALUE)) / Math.log(2.0)))]++;
         }
 
         public ObjectCounter<String> getStatWord() {
@@ -132,6 +156,11 @@ public class TrainDataUtil {
             }
             if (saveCharMap) {
                 CharMapUtil.saveCharMap(statistic.getStatChar(), new File(pathToCharMap));
+            }
+            if (outputDir != null) {
+                double[][] confIntervalls = statistic.getConfIntervalls();
+                String s = Arrays.deepToString(confIntervalls);
+                FileUtil.writeLine(new File(outputDir,"statConf.txt"), s);
             }
         }
     }
@@ -267,7 +296,13 @@ public class TrainDataUtil {
                     for (TextLineType l : lines) {
                         String unicode = PageXmlUtil.getTextEquiv(l);
                         if (unicode == null || unicode.isEmpty()) {
+                            if (stat != null) {
+                                stat.countLine();
+                            }
                             continue;
+                        }
+                        if (stat != null) {
+                            stat.countLine();
                         }
                         if (saveTrainData) {
                             if (l.getTextEquiv().getConf() == null || l.getTextEquiv().getConf() >= minConf) {
@@ -276,6 +311,7 @@ public class TrainDataUtil {
                             }
                         }
                         if (stat != null) {
+                            stat.countLine(l.getTextEquiv().getConf() == null ? 1.0 : l.getTextEquiv().getConf().doubleValue());
                             stat.addLine(unicode);
                         }
                     }
