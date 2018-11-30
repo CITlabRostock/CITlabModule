@@ -14,7 +14,7 @@ import de.uros.citlab.errorrate.types.Metric;
 import de.uros.citlab.errorrate.types.Result;
 import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
 import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
-import de.uros.citlab.module.htr.HTRParser;
+import de.uros.citlab.module.htr.HTRParserPlus;
 import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.ImageUtil;
@@ -69,7 +69,7 @@ public class EvaluateHtr extends ParamTreeOrganizer {
     }
 
     public EvaluateHtr(String htr, String lr, String gt, String out, boolean createDebugImg) {
-        this.htrInstance = new HTRParser();
+        this.htrInstance = new HTRParserPlus();
         b2p = new Baseline2PolygonParser(B2PSeamMultiOriented.class.getName());
         this.gt = gt;
         this.out = out;
@@ -143,9 +143,9 @@ public class EvaluateHtr extends ParamTreeOrganizer {
 
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException, InterruptedException {
         ArgumentLine al = new ArgumentLine();
-        al.addArgument("gt", HomeDir.getFile("data/val_b2p/val_a/"));
-        al.addArgument("out", HomeDir.getFile("tmp/val_b2p/val_a/"));
-        al.addArgument("htr", HomeDir.getFile("nets/ABP_KWS_Test/net.sprnn"));
+        al.addArgument("gt", HomeDir.getFile("data/sets_b2p/test_hard/"));
+        al.addArgument("out", HomeDir.getFile("tmp/sets_b2p/test_hard/"));
+        al.addArgument("htr", HomeDir.getFile("nets/bentham_train-b2p"));
         args = al.getArgs();
         EvaluateHtr instance = new EvaluateHtr();
         ParamSet ps = new ParamSet();
