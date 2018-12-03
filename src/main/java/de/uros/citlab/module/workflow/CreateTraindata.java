@@ -14,10 +14,10 @@ import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.PropertyUtil;
 import de.uros.citlab.module.util.TrainDataUtil;
+
 import java.io.File;
 
 /**
- *
  * @author gundram
  */
 public class CreateTraindata extends ParamTreeOrganizer {
@@ -84,23 +84,38 @@ public class CreateTraindata extends ParamTreeOrganizer {
      * @throws java.lang.ClassNotFoundException
      */
     public static void main(String[] args) throws InvalidParameterException, ClassNotFoundException, Exception {
-        if (args.length == 0) {
-            ArgumentLine al = new ArgumentLine();
-            al.addArgument("xml", HomeDir.getFile("data/GT_Abbr"));
-            al.addArgument("cm", HomeDir.getFile("data/linefeed_in_gt/cm.txt"));
-            al.addArgument("out", HomeDir.getFile("traindata/linefeed_in_gt"));
-            al.addArgument("create", false);
-            al.addArgument("stat", true);
-            args = al.getArgs();
+        for (int i = 0; i < 8; i++) {
+            ArgumentLine alTrain = new ArgumentLine();
+            alTrain.addArgument("xml", HomeDir.getFile("data/GT_Expand/train_" + i));
+            alTrain.addArgument("cm", HomeDir.getFile("charmaps/cm_hattem-expand-" + i + ".txt"));
+            alTrain.addArgument("out", HomeDir.getFile("traindata/GT_Expand/train_" + i));
+            alTrain.addArgument("create", true);
+            alTrain.addArgument("stat", true);
+            args = alTrain.getArgs();
+            CreateTraindata instanceTrain = new CreateTraindata();
+            ParamSet psTrain = new ParamSet();
+            psTrain.setCommandLineArgs(args);    // allow early parsing
+            psTrain = instanceTrain.getDefaultParamSet(psTrain);
+            psTrain = ParamSet.parse(psTrain, args, ParamSet.ParseMode.FORCE); // be strict, don't accept generic parameter
+            instanceTrain.setParamSet(psTrain);
+            instanceTrain.init();
+            instanceTrain.run();
+            ArgumentLine alVal = new ArgumentLine();
+            alVal.addArgument("xml", HomeDir.getFile("data/GT_Expand/val_" + i));
+//                alVal.addArgument("cm", HomeDir.getFile("data/GT_Abbr/cm_" + i + ".txt"));
+            alVal.addArgument("out", HomeDir.getFile("traindata/GT_Expand/val_" + i));
+            alVal.addArgument("create", true);
+            alVal.addArgument("stat", true);
+            args = alVal.getArgs();
+            CreateTraindata instanceVal = new CreateTraindata();
+            ParamSet psVal = new ParamSet();
+            psVal.setCommandLineArgs(args);    // allow early parsing
+            psVal = instanceVal.getDefaultParamSet(psVal);
+            psVal = ParamSet.parse(psVal, args, ParamSet.ParseMode.FORCE); // be strict, don't accept generic parameter
+            instanceVal.setParamSet(psVal);
+            instanceVal.init();
+            instanceVal.run();
         }
-        CreateTraindata instance = new CreateTraindata();
-        ParamSet ps = new ParamSet();
-        ps.setCommandLineArgs(args);    // allow early parsing
-        ps = instance.getDefaultParamSet(ps);
-        ps = ParamSet.parse(ps, args, ParamSet.ParseMode.FORCE); // be strict, don't accept generic parameter
-        instance.setParamSet(ps);
-        instance.init();
-        instance.run();
     }
 
 }

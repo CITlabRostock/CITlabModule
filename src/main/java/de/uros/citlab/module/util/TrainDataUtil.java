@@ -88,28 +88,32 @@ public class TrainDataUtil {
         }
 
         private void addLine(String line) {
-            if (languageResource != null) {
-                languageResource.add(line == null ? "" : line);
-            }
-            if (line == null || line.isEmpty()) {
-                return;
-            }
-            if (normalizer != null) {
-                line = normalizer.normalize(line);
-            }
-            for (char c : line.toCharArray()) {
-                statChar.add(c);
-            }
-            if (tokenizer != null) {
-                for (String string : tokenizer.tokenize(line)) {
-                    if (onlyLetter) {
-                        if (categorizer.getCategory(string.charAt(0)).equals("L")) {
+            try {
+                if (languageResource != null) {
+                    languageResource.add(line == null ? "" : line);
+                }
+                if (line == null || line.isEmpty()) {
+                    return;
+                }
+                if (normalizer != null) {
+                    line = normalizer.normalize(line);
+                }
+                for (char c : line.toCharArray()) {
+                    statChar.add(c);
+                }
+                if (tokenizer != null) {
+                    for (String string : tokenizer.tokenize(line)) {
+                        if (onlyLetter) {
+                            if (categorizer.getCategory(string.charAt(0)).equals("L")) {
+                                statWord.add(string);
+                            }
+                        } else {
                             statWord.add(string);
                         }
-                    } else {
-                        statWord.add(string);
                     }
                 }
+            } catch (RuntimeException ex) {
+                LOG.warn("caught exception, proceed anyway.", ex);
             }
         }
 

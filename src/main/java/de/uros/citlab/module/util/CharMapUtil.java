@@ -206,6 +206,7 @@ public class CharMapUtil {
                 return Long.compare(o1.getFirst(), o2.getFirst());
             }
         });
+        outChar.getParentFile().mkdirs();
         try (FileWriter fw = new FileWriter(outChar)) {
             for (int i = 0; i < resultOccurrence.size(); i++) {
                 Pair<Character, Long> get = resultOccurrence.get(i);
