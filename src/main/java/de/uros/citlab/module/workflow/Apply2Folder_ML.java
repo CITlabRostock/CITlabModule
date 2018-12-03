@@ -128,74 +128,78 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
         folderOut.mkdirs();
         int i = 1;
         for (File srcImg : listFiles) {
-            LOG.info("process image {} / {} [{}]", i++, listFiles.size(), srcImg);
-            Path pathFull = Paths.get(srcImg.getAbsolutePath());
-            Path pathPart = Paths.get(folderIn.getAbsolutePath());
-            Path p = pathPart.relativize(pathFull);
-            File tgtImg = new File(folderOut, p.toString());
-            tgtImg.getParentFile().mkdirs();
-            if (!srcImg.equals(tgtImg)) {
-                if (link) {
-                    FileUtils.deleteQuietly(tgtImg);
-                    Path toPath = srcImg.getAbsoluteFile().toPath();
-                    try {
-                        while (true) {
-                            toPath = Files.readSymbolicLink(toPath);
+            try {
+                LOG.info("process image {} / {} [{}]", i++, listFiles.size(), srcImg);
+                Path pathFull = Paths.get(srcImg.getAbsolutePath());
+                Path pathPart = Paths.get(folderIn.getAbsolutePath());
+                Path p = pathPart.relativize(pathFull);
+                File tgtImg = new File(folderOut, p.toString());
+                tgtImg.getParentFile().mkdirs();
+                if (!srcImg.equals(tgtImg)) {
+                    if (link) {
+                        FileUtils.deleteQuietly(tgtImg);
+                        Path toPath = srcImg.getAbsoluteFile().toPath();
+                        try {
+                            while (true) {
+                                toPath = Files.readSymbolicLink(toPath);
+                            }
+                        } catch (NotLinkException ex) {
                         }
-                    } catch (NotLinkException ex) {
+                        Files.createSymbolicLink(tgtImg.toPath(), srcImg.getAbsoluteFile().toPath());
+                    } else {
+                        FileUtils.copyFile(srcImg, tgtImg);
                     }
-                    Files.createSymbolicLink(tgtImg.toPath(), srcImg.getAbsoluteFile().toPath());
-                } else {
-                    FileUtils.copyFile(srcImg, tgtImg);
                 }
-            }
-            Image img = new Image(tgtImg.toURI().toURL());
+                Image img = new Image(tgtImg.toURI().toURL());
 
 //            File parent = outImg.getParentFile();
-            File srcXml = PageXmlUtil.getXmlPath(srcImg, false);
-            File tgtXml = PageXmlUtil.getXmlPath(tgtImg, false);
+                File srcXml = PageXmlUtil.getXmlPath(srcImg, false);
+                File tgtXml = PageXmlUtil.getXmlPath(tgtImg, false);
 //            srcXml.getParentFile().mkdirs();
-            if (srcXml.exists()) {
-                if (!tgtXml.equals(srcXml)) {
-                    FileUtils.copyFile(srcXml, tgtXml);
+                if (srcXml.exists()) {
+                    if (!tgtXml.equals(srcXml)) {
+                        FileUtils.copyFile(srcXml, tgtXml);
+                    }
+                } else {
+                    PcGtsType createEmptyPcGtsType = PageXmlUtils.createEmptyPcGtsType(tgtImg.getName(), img.getImageBufferedImage(true).getWidth(), img.getImageBufferedImage(true).getHeight());
+                    tgtXml.getParentFile().mkdirs();
+                    PageXmlUtils.marshalToFile(createEmptyPcGtsType, tgtXml);
                 }
-            } else {
-                PcGtsType createEmptyPcGtsType = PageXmlUtils.createEmptyPcGtsType(tgtImg.getName(), img.getImageBufferedImage(true).getWidth(), img.getImageBufferedImage(true).getHeight());
-                tgtXml.getParentFile().mkdirs();
-                PageXmlUtils.marshalToFile(createEmptyPcGtsType, tgtXml);
-            }
-            if (la != null) {
+                if (la != null) {
 //                String[] props = PropertyUtil.setProperty(null, Key.LA_DELETESCHEME, "default");
 //                props = PropertyUtil.setProperty(props, Key.LA_SEPSCHEME, "default");
-                la.process(img, tgtXml.getAbsolutePath(), null, props);
+                    la.process(img, tgtXml.getAbsolutePath(), null, props);
 //                la.process(img, tgtXml.getAbsolutePath(), null, null);
-            }
-            if (b2pInstance != null) {
-                b2pInstance.process(img, tgtXml.getAbsolutePath(), null, null);
-            }
-            if (htrName != null) {
-                String storageDir = null;
-                if (saveCM) {
-                    File parent = tgtXml.getParentFile().getParentFile();
-                    File storage = new File(parent, "storage" + File.separator + tgtImg.getName());
-                    storage.mkdirs();
-                    storageDir = storage.getPath();
                 }
-                htr.process(htrName.getAbsolutePath(), lrName == null ? null : lrName.getAbsolutePath(), null, img, tgtXml.getAbsolutePath(), storageDir, null, null);
-            }
-            if (debug) {
-                BufferedImage imageBufferedImage = img.getImageBufferedImage(true);
-//                ImageUtil.printPolygons(imageBufferedImage, PageXmlUtils.unmarshal(tgtXml), false, true, true);
-                BufferedImage debugImage1 = ImageUtil.getDebugImage(imageBufferedImage, PageXmlUtils.unmarshal(tgtXml), 0, false, true, true, true, true);
-                LOG.debug("create debug images in folder {}", tgtXml.getParent());
-                ImageIO.write(debugImage1, "jpg", new File(tgtXml.getAbsoluteFile() + ".jpg"));
+                if (b2pInstance != null) {
+                    b2pInstance.process(img, tgtXml.getAbsolutePath(), null, null);
+                }
                 if (htrName != null) {
-                    BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, PageXmlUtils.unmarshal(tgtXml), 1.0, false, false, true, true, true);
-                    ImageIO.write(debugImage, "jpg", new File(tgtXml.getAbsoluteFile() + "_txt.jpg"));
+                    String storageDir = null;
+                    if (saveCM) {
+                        File parent = tgtXml.getParentFile().getParentFile();
+                        File storage = new File(parent, "storage" + File.separator + tgtImg.getName());
+                        storage.mkdirs();
+                        storageDir = storage.getPath();
+                    }
+                    htr.process(htrName.getAbsolutePath(), lrName == null ? null : lrName.getAbsolutePath(), null, img, tgtXml.getAbsolutePath(), storageDir, null, null);
                 }
-            }
-            if (img.hasType(Image.Type.OPEN_CV)) {
-                img.getImageOpenCVImage().release();
+                if (debug) {
+                    BufferedImage imageBufferedImage = img.getImageBufferedImage(true);
+//                ImageUtil.printPolygons(imageBufferedImage, PageXmlUtils.unmarshal(tgtXml), false, true, true);
+                    BufferedImage debugImage1 = ImageUtil.getDebugImage(imageBufferedImage, PageXmlUtils.unmarshal(tgtXml), 0, false, true, true, true, true);
+                    LOG.debug("create debug images in folder {}", tgtXml.getParent());
+                    ImageIO.write(debugImage1, "jpg", new File(tgtXml.getAbsoluteFile() + ".jpg"));
+                    if (htrName != null) {
+                        BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, PageXmlUtils.unmarshal(tgtXml), 1.0, false, false, true, true, true);
+                        ImageIO.write(debugImage, "jpg", new File(tgtXml.getAbsoluteFile() + "_txt.jpg"));
+                    }
+                }
+                if (img.hasType(Image.Type.OPEN_CV)) {
+                    img.getImageOpenCVImage().release();
+                }
+            } catch (RuntimeException ex) {
+                LOG.error("error in Apply folder for image {}, proceed with next image", srcImg, ex);
             }
         }
     }
@@ -203,8 +207,8 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException {
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("xml_in", HomeDir.getFile("data/009/la"));
-            al.addArgument("xml_out", HomeDir.getFile("data/009/la"));
+            al.addArgument("xml_in", HomeDir.getFile("data/la/"));
+            al.addArgument("xml_out", HomeDir.getFile("data/la/"));
             al.addArgument("b2p", B2PSeamMultiOriented.class.getName());
             args = al.getArgs();
         }

@@ -259,7 +259,7 @@ public class XmlParserTei implements Serializable {
                     throw new RuntimeException("cannot interprete decision " + taghi + " for taghi.");
                 }
                 String rend = rendNode.getTextContent();
-                if (rend.equals("superscript")) {
+                if (rend.startsWith("superscr")) {
                     if (taghi_superscript == Decision.CONTINUE) {
                         parseNodeTagContiue(node, pages, lines, line, page);
                         break;
@@ -272,7 +272,7 @@ public class XmlParserTei implements Serializable {
                     }
                     throw new RuntimeException("cannot interprete decision " + taghi_superscript + " for taghi_superscript.");
                 }
-                if (rend.equals("underline")) {
+                if (rend.startsWith("underlin")) {
                     if (taghi_underline == Decision.CONTINUE) {
                         parseNodeTagContiue(node, pages, lines, line, page);
                         break;
@@ -286,6 +286,10 @@ public class XmlParserTei implements Serializable {
                     throw new RuntimeException("cannot interprete decision " + taghi_underline + " for taghi_underline.");
                 }
                 throw new RuntimeException("cannot interprete attribute '" + rend + "' in tag <hi>.");
+            case "gap":
+                line.setValid(false);
+                parseNodeTagContiue(node, pages, lines, line, page);
+                break;
             case "front":
             case "body":
             case "back":
@@ -293,7 +297,6 @@ public class XmlParserTei implements Serializable {
             case "milestone":
             case "lg":
             case "l":
-            case "gap":
             case "quote":
             case "cit":
             case "argument":
