@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 public class TestB2P {
 
     private static File folder = new File(TestFiles.getPrefix(), "test_b2p");
-    private static File folderGT = new File(TestFiles.getPrefix(), "test_workflow");
+    private static File folderGT = new File(TestFiles.getPrefix(), "test_b2p_raw");
     private static File folderSnipets = new File(folder, "Snipets");
     private static File folderB2PSeamMultiOriented = new File(folder, "B2PSeamMultiOriented");
     private static File folderB2PSimple = new File(folder, "B2PSimple");
@@ -68,7 +68,7 @@ public class TestB2P {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(TestB2P.class.getName()).log(Level.SEVERE, null, ex);
         }
-        xmlList = FileUtil.listFiles(folderGT, "xml".split(" "), true);
+        xmlList = FileUtil.listFiles(folderGT, "xml", true);
         FileUtil.deleteMetadataAndMetsFiles(xmlList);
         Collections.sort(xmlList);
         folderSnipets.mkdirs();
@@ -82,10 +82,11 @@ public class TestB2P {
         if (TestFiles.skipLargeTests()) {
             return;
         }
-        FileUtils.deleteQuietly(folderSnipets);
-        FileUtils.deleteQuietly(folderB2PSeamMultiOriented);
-        FileUtils.deleteQuietly(folderB2PSimple);
-        FileUtils.deleteQuietly(folderNoB2P);
+        FileUtils.deleteQuietly(folder);
+//        FileUtils.deleteQuietly(folderSnipets);
+//        FileUtils.deleteQuietly(folderB2PSeamMultiOriented);
+//        FileUtils.deleteQuietly(folderB2PSimple);
+//        FileUtils.deleteQuietly(folderNoB2P);
     }
 
     @Test
@@ -104,7 +105,7 @@ public class TestB2P {
 
         }
         ErrorRateCalcer erc = new ErrorRateCalcer();
-        List<File> xmlListMO = FileUtil.listFiles(folderB2PSimple, "xml".split(" "), true);
+        List<File> xmlListMO = FileUtil.listFiles(folderB2PSimple, "xml", true);
         Collections.sort(xmlListMO);
         Result process = erc.process(xmlListMO.toArray(new File[0]), xmlList.toArray(new File[0]), Method.CER);
         System.out.println(process.getCounts());
@@ -132,7 +133,7 @@ public class TestB2P {
             throw new RuntimeException(ex);
         }
         ErrorRateCalcer erc = new ErrorRateCalcer();
-        List<File> xmlListMO = FileUtil.listFiles(folderB2PSeamMultiOriented, "xml".split(" "), true);
+        List<File> xmlListMO = FileUtil.listFiles(folderB2PSeamMultiOriented, "xml", true);
         Collections.sort(xmlListMO);
         Result process = erc.process(xmlListMO.toArray(new File[0]), xmlList.toArray(new File[0]), Method.CER);
         System.out.println(process.getCounts());
@@ -160,7 +161,7 @@ public class TestB2P {
             throw new RuntimeException(ex);
         }
         ErrorRateCalcer erc = new ErrorRateCalcer();
-        List<File> xmlListMO = FileUtil.listFiles(folderNoB2P, "xml".split(" "), true);
+        List<File> xmlListMO = FileUtil.listFiles(folderNoB2P, "xml", true);
         Collections.sort(xmlListMO);
         Result process = erc.process(xmlListMO.toArray(new File[0]), xmlList.toArray(new File[0]), Method.CER);
         System.out.println(process.getCounts());

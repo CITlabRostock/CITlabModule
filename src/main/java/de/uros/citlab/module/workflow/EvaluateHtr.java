@@ -9,6 +9,9 @@ import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
+import de.uros.citlab.errorrate.HtrError;
+import de.uros.citlab.errorrate.types.Metric;
+import de.uros.citlab.errorrate.types.Result;
 import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
 import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
 import de.uros.citlab.module.htr.HTRParser;
@@ -16,12 +19,15 @@ import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
-import de.uros.citlab.errorrate.HtrError;
-import de.uros.citlab.errorrate.htr.ErrorRateCalcer;
-import de.uros.citlab.errorrate.types.Metric;
 import eu.transkribus.interfaces.IBaseline2Polygon;
 import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.types.Image;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import javax.xml.bind.JAXBException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -29,11 +35,6 @@ import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import javax.imageio.ImageIO;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -135,7 +136,7 @@ public class EvaluateHtr extends ParamTreeOrganizer {
         FileUtil.writeLines(fileRef, refs);
         FileUtil.writeLines(fileReco, recos);
         HtrError erp = new HtrError();
-        ErrorRateCalcer.Result err = erp.run(("ref.lst reco.lst" + (wer ? " -w" : "")).split(" "));
+        Result err = erp.run(("ref.lst reco.lst" + (wer ? " -w" : "")).split(" "));
         FileUtils.deleteQuietly(fileRef);
         FileUtils.deleteQuietly(fileReco);
         return err.getMetric(Metric.ERR) * 100;
