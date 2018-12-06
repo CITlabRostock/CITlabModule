@@ -190,9 +190,10 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
         File folder = HomeDir.getFile("t2i");//folder containing images and PAGE-XML with baselines
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("in", HomeDir.getFile("data/la"));//004/004_070_015
+            al.addArgument("in", HomeDir.getFile("data/la/t4"));//004/004_070_015
             al.addArgument("out", HomeDir.getFile("/data/t2i"));
             al.addArgument("htr", HomeDir.getFile("nets/8023"));
+//            al.addArgument("storage", HomeDir.getFile("data/storage"));
             args = al.getArgs();
         }
         String[] props = null;

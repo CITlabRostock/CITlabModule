@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -144,8 +145,8 @@ public class EvaluateHtr extends ParamTreeOrganizer {
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException, InterruptedException {
         ArgumentLine al = new ArgumentLine();
         al.addArgument("gt", HomeDir.getFile("data/sets_b2p/test/"));
-        al.addArgument("out", HomeDir.getFile("tmp/sets_b2p/test/"));
-        al.addArgument("htr", HomeDir.getFile("nets/8023"));
+        al.addArgument("out", HomeDir.getFile("tmp/sets_b2p/queen_test/"));
+        al.addArgument("htr", HomeDir.getFile("nets/8366"));
         args = al.getArgs();
         EvaluateHtr instance = new EvaluateHtr();
         ParamSet ps = new ParamSet();
@@ -156,6 +157,7 @@ public class EvaluateHtr extends ParamTreeOrganizer {
         instance.init();
         double run = instance.run(null);
         System.out.println(run + " %");
+        System.out.println(Arrays.toString(al.getArgs()));
     }
 
 }

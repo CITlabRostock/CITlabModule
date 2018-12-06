@@ -123,14 +123,14 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
         }
         return res;
     }
+    private HTRParserPlus parserPlus = new HTRParserPlus();
+    private HTRParser parser = new HTRParser();
 
     public HTR getHTR(String folderHTR, String charMap, String storageDir) {
         try {
-            HTRParser parser = new HTRParser();
             return parser.getHTR(folderHTR, null, charMap, storageDir, null);
         } catch (RuntimeException ex) {
             try {
-                HTRParserPlus parserPlus = new HTRParserPlus();
                 return parserPlus.getHTR(folderHTR, null, charMap, storageDir, null);
             } catch (RuntimeException ex2) {
                 LOG.error("cannot load HTR and HTR+. Error HTR: ", ex);
@@ -240,7 +240,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
                             : page.getPathXml().getParentFile();
                     folder.mkdirs();
                     {
-                        BufferedImage debugImage = ImageUtil.getDebugImage(page.getImg().getImageBufferedImage(true), page.getXml(), 1.0, false, true, threshBaseline, true, false);
+                        BufferedImage debugImage = ImageUtil.getDebugImage(page.getImg().getImageBufferedImage(true), page.getXml(), 1.0, false, false, threshBaseline, false, false);
                         debugImage = ImageUtil.resize(debugImage, 6000, debugImage.getHeight() * 6000 / debugImage.getWidth());
                         String imageFilename = page.getXml().getPage().getImageFilename();
                         imageFilename += ".jpg";

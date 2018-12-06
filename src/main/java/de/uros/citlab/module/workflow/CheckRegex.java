@@ -11,6 +11,9 @@ import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ConfMat;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
+import de.uros.citlab.errorrate.HtrError;
+import de.uros.citlab.errorrate.types.Count;
+import de.uros.citlab.errorrate.util.ObjectCounter;
 import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
 import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
 import de.uros.citlab.module.htr.HTRParser;
@@ -21,12 +24,13 @@ import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.pagecontent.TextLineType;
-import de.uros.citlab.errorrate.HtrError;
-import de.uros.citlab.errorrate.types.Count;
-import de.uros.citlab.errorrate.util.ObjectCounter;
 import eu.transkribus.interfaces.IBaseline2Polygon;
 import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.types.Image;
+import org.apache.commons.io.FileUtils;
+
+import javax.imageio.ImageIO;
+import javax.xml.bind.JAXBException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -36,13 +40,8 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import javax.imageio.ImageIO;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.io.FileUtils;
 
 /**
- *
  * @author gundram and max
  */
 public class CheckRegex extends ParamTreeOrganizer {
@@ -139,7 +138,7 @@ public class CheckRegex extends ParamTreeOrganizer {
                 }
             }
 
-            PageXmlUtil.marshal(page, out);;
+            PageXmlUtil.marshal(page, out);
             htrInstance.process(null, lr, null, img, out.getAbsolutePath(), null, null, null);
             if (debug) {
                 BufferedImage imageBufferedImage = img.getImageBufferedImage(true);
