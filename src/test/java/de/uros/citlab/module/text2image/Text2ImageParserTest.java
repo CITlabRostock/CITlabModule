@@ -21,6 +21,7 @@ public class Text2ImageParserTest {
 
     static File imgFile = TestFiles.getTestFiles().get(0);
     static File xmlFile = null;
+    static File xmlFile2 = null;
     static File outFolder = null;
     static File txtFile = null;
 
@@ -33,6 +34,8 @@ public class Text2ImageParserTest {
         PcGtsType unmarshal = PageXmlUtil.unmarshal(xmlFile);
         List<String> textLines = getText(unmarshal);
         txtFile = new File(outFolder, imgFile.getName().replace(".xml", ".txt"));
+        xmlFile2 = new File(outFolder, xmlFile.getName());
+        FileUtil.copyFile(xmlFile, xmlFile2);
         if (txtFile.exists()) {
             throw new RuntimeException("file " + txtFile.getAbsolutePath() + " is written two times.");
         }
@@ -71,7 +74,7 @@ public class Text2ImageParserTest {
                 null,
                 txtFile.getAbsolutePath(),
                 new String[]{imgFile.getAbsolutePath()},
-                new String[]{xmlFile.getAbsolutePath()},
+                new String[]{xmlFile2.getAbsolutePath()},
                 props);
 
     }

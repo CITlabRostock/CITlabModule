@@ -6,6 +6,7 @@
 * bugfix load dictionary: now also possible for ";"-seperator with headlines
 * feature-request: logging in multi-process-use possible.
 * newest versions of all citlab and planet libs
+* bugfix fail-save Baseline2Polygon - 2 fallbacks for fails
 
 # 2.0.2
 * MOVE REPOSITORY WITHOUT HISTORY FROM Transkribs to CITlabRostock AND MAKE OPENSOURCE
