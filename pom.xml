@@ -59,14 +59,6 @@
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
-            <artifactId>misc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.planet</groupId>
-            <artifactId>misc_pc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.planet</groupId>
             <artifactId>nnwrapper</artifactId>
         </dependency>
         <dependency>
@@ -87,6 +79,10 @@
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
+            <artifactId>misc_pc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.planet</groupId>
             <artifactId>imaging</artifactId>
         </dependency>
         <dependency>
@@ -104,10 +100,6 @@
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>roi_historical</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.planet</groupId>
-            <artifactId>misc_pc</artifactId>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>

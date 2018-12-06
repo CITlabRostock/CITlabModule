@@ -161,7 +161,7 @@ public class TrainHtrTest {
             TrainHtr instance = new TrainHtr();
             instance.createTrainData(pageXmlsStr, dirTraindata.getAbsolutePath(), dirTraindata.getAbsolutePath() + File.separator + "chars.txt", props);
             List<String> readLinesAfter = FileUtil.readLines(new File(dirTraindata + File.separator + cmLong));
-            Assert.assertEquals("traindata should not be taken - resulting in emtpy statistic.", 40, readLinesAfter.size());
+            Assert.assertEquals("traindata should not be taken - resulting in emtpy statistic.", 49, readLinesAfter.size());
         }
         {
             props = PropertyUtil.setProperty(props, Key.TRAIN_STATUS, "DONE");
