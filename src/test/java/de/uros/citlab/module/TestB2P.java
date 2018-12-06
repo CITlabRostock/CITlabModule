@@ -193,15 +193,18 @@ public class TestB2P {
             err.calculate(reco, loadImageHolder.getTarget().toString());
         }
         ObjectCounter<Count> counter = err.getCounter();
+        Result res = new Result(Method.CER);
+        res.addCounts(counter);
         System.out.println(counter);
-        long gt = counter.getMap().getOrDefault(Count.GT, 0L);
-        long ins = counter.getMap().getOrDefault(Count.INS, 0L);
-        long del = counter.getMap().getOrDefault(Count.DEL, 0L);
-        long sub = counter.getMap().getOrDefault(Count.SUB, 0L);
-        System.out.println("CER = " + ((double) ins + del + sub) / ((double) gt));
+//        long gt = counter.getMap().getOrDefault(Count.GT, 0L);
+//        long ins = counter.getMap().getOrDefault(Count.INS, 0L);
+//        long del = counter.getMap().getOrDefault(Count.DEL, 0L);
+//        long sub = counter.getMap().getOrDefault(Count.SUB, 0L);
+        System.out.println("CER = " + res.getMetric(Metric.ERR));
+        res.getMetric(Metric.ERR);
         try {
             FileUtils.write(new File(folderSnipets, "count.txt"), counter.toString());
-            FileUtils.write(new File(folderSnipets, "cer.txt"), "" + ((double) ins + del + sub) / ((double) gt));
+            FileUtils.write(new File(folderSnipets, "cer.txt"), "" +res.getMetric(Metric.ERR));
         } catch (IOException ex) {
         }
     }

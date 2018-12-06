@@ -118,7 +118,9 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
             for (TextLineType textLine : textLines) {
                 baselines.add(PolygonUtil.convert(PolygonUtil.getBaseline(textLine)));
             }
-
+            if (Double.isNaN(angle)) {
+                angle = 0.0;
+            }
             if (textLines.isEmpty() && ids != null) {
                 continue;
             }
