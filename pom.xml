@@ -24,7 +24,7 @@
     <name>CITlabModule</name>
     <groupId>de.uros.citlab</groupId>
     <artifactId>module</artifactId>
-    <version>2.0.3-SNAPSHOT</version>
+    <version>2.1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <parent>
         <groupId>de.uros.citlab</groupId>
@@ -59,14 +59,6 @@
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
-            <artifactId>misc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.planet</groupId>
-            <artifactId>misc_pc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.planet</groupId>
             <artifactId>nnwrapper</artifactId>
         </dependency>
         <dependency>
@@ -87,6 +79,10 @@
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
+            <artifactId>misc_pc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.planet</groupId>
             <artifactId>imaging</artifactId>
         </dependency>
         <dependency>
@@ -104,10 +100,6 @@
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>roi_historical</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.planet</groupId>
-            <artifactId>misc_pc</artifactId>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
