@@ -188,19 +188,20 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
 
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException {
         File folder = HomeDir.getFile("t2i");//folder containing images and PAGE-XML with baselines
+        String out = "/home/gundram/Documents/citlab_git/PR/181219_T2I_Rostock2/tests/ro-small-costs";
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("in", HomeDir.getFile("data/la/t4"));//004/004_070_015
-            al.addArgument("out", HomeDir.getFile("/data/t2i"));
+            al.addArgument("in", "/home/gundram/Documents/citlab_git/PR/181219_T2I_Rostock2/tests/sub");//004/004_070_015
+            al.addArgument("out", out);
             al.addArgument("htr", HomeDir.getFile("nets/8023"));
 //            al.addArgument("storage", HomeDir.getFile("data/storage"));
             args = al.getArgs();
         }
         String[] props = null;
-        props = PropertyUtil.setProperty(props, Key.T2I_HYPHEN,
-                "{\"skipSuffix\":true," +
-                        "\"suffixes\":[\"¬\",\"-\",\"–\",\"—\"]," +
-                        "\"hypCosts\":6.0}");
+//        props = PropertyUtil.setProperty(props, Key.T2I_HYPHEN,
+//                "{\"skipSuffix\":true," +
+//                        "\"suffixes\":[\"¬\",\"-\",\"–\",\"—\"]," +
+//                        "\"hypCosts\":6.0}");
 //        props = PropertyUtil.setProperty(props, Key.T2I_HYPHEN_LANG, "EN_UK");
         props = PropertyUtil.setProperty(props, Key.T2I_JUMP_BASELINE, "50.0");
         props = PropertyUtil.setProperty(props, Key.T2I_SKIP_WORD, "6.0");
@@ -208,8 +209,8 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
 //        props = PropertyUtil.setProperty(props, Key.T2I_MAX_COUNT, "10000000");
 //        props = PropertyUtil.setProperty(props, Key.T2I_BEST_PATHES, "200.0");
         props = PropertyUtil.setProperty(props, Key.T2I_THRESH, "-0.02");
-//        props = PropertyUtil.setProperty(props, Key.DEBUG, "true");
-//        props = PropertyUtil.setProperty(props, Key.DEBUG_DIR, HomeDir.getFile("data/debug").getPath());
+        props = PropertyUtil.setProperty(props, Key.DEBUG, "true");
+        props = PropertyUtil.setProperty(props, Key.DEBUG_DIR, out);
 //        props = PropertyUtil.setProperty(props, "b2p", "true");
         props = PropertyUtil.setProperty(props, Key.STATISTIC, "true");
         Text2ImageNoLineBreak instance = new Text2ImageNoLineBreak(props);

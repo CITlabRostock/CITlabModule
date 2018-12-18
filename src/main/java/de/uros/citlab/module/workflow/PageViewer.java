@@ -69,7 +69,7 @@ public class PageViewer extends ParamTreeOrganizer {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException {
-        args = ("-i " + "/home/gundram/Documents/citlab_git/PR/181231_D7.21/res/sub").split(" ");
+        args = ("-i " + "/home/gundram/devel/projects/bentham_t2i/tmp").split(" ");
 //        args=("-i "+HomeDir.getFile("tmp_20170308/xml_semi_0/")).split(" ");
         PageViewer instance = new PageViewer();
         ParamSet ps = new ParamSet();

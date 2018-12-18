@@ -145,8 +145,8 @@ public class EvaluateHtr extends ParamTreeOrganizer {
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException, InterruptedException {
         ArgumentLine al = new ArgumentLine();
         al.addArgument("gt", HomeDir.getFile("data/sets_b2p/test/"));
-        al.addArgument("out", HomeDir.getFile("tmp/sets_b2p/queen_test/"));
-        al.addArgument("htr", HomeDir.getFile("nets/8366"));
+        al.addArgument("out", HomeDir.getFile("tmp/sets_b2p/queen_i4_10_test/"));
+        al.addArgument("htr", HomeDir.getFile("nets/queen_i4_10"));
         args = al.getArgs();
         EvaluateHtr instance = new EvaluateHtr();
         ParamSet ps = new ParamSet();

@@ -123,6 +123,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
         }
         return res;
     }
+
     private HTRParserPlus parserPlus = new HTRParserPlus();
     private HTRParser parser = new HTRParser();
 
@@ -195,6 +196,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
                 costSkipBaseline, //0.2
                 costJumpBaseline
         );
+//        textAligner.setUpdateScheme(PathCalculatorGraph.UpdateScheme.ALL);
         textAligner.setNacOffset(0.0);
         textAligner.setThreshold(threshold);
         if (PropertyUtil.isPropertyTrue(props, Key.DEBUG)) {
