@@ -205,11 +205,11 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
 //        al.setHelp();
 //        args=al.getArgs();
 
-//        String folder = "/home/tobias/devel/projects/CitlabModule/raw4/", folderOut = "/home/tobias/devel/projects/CitlabModule/out/", htr = "", lr = "", la = "", b2p = "";
-        String folder = "", folderOut = "", htr = "", lr = "", la = "", b2p = "";
+        String folder = "/home/tobi/devel/projects/CitlabModule/raw90/", folderOut = "/home/tobi/devel/projects/CitlabModule/outTube/", htr = "", lr = "", la = "", b2p = "de.uros.citlab.module.baseline2polygon.B2PTube";
+//        String folder = "", folderOut = "", htr = "", lr = "", la = "", b2p = "";
         String[] props = null;
 //        props = PropertyUtil.setProperty(props, Key.LA_DELETESCHEME, LayoutAnalysisURO_ML.DEL_REGIONS);
-//        props = PropertyUtil.setProperty(props, Key.LA_ROTSCHEME, LayoutAnalysisURO_ML.ROT_HOM);
+        props = PropertyUtil.setProperty(props, Key.LA_ROTSCHEME, LayoutAnalysisURO_ML.ROT_HOM);
 //        props = PropertyUtil.setProperty(props, Key.LA_SEPSCHEME, LayoutAnalysisURO_ML.SEP_NEVER);
         Apply2Folder_ML instance = new Apply2Folder_ML(htr, lr, la, folder, folderOut, b2p, false, true, props);
         ParamSet ps = new ParamSet();
