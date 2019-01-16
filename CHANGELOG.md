@@ -1,5 +1,8 @@
 # Change Log
 
+# 2.1.1
+* bugfix training of HTR+ with base model
+
 # 2.1.0
 * faster TextAlignment and base technology moved to CITlabTextAlignment
 * HTR+ can be trained further - also with changed CharMap
