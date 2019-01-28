@@ -207,8 +207,8 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException {
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("xml_in", HomeDir.getFile("data/la/"));
-            al.addArgument("xml_out", HomeDir.getFile("data/la/"));
+            al.addArgument("xml_in", HomeDir.getFile("data/LA/"));
+            al.addArgument("xml_out", HomeDir.getFile("data/LA/"));
             al.addArgument("b2p", B2PSeamMultiOriented.class.getName());
             args = al.getArgs();
         }

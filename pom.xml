@@ -24,7 +24,7 @@
     <name>CITlabModule</name>
     <groupId>de.uros.citlab</groupId>
     <artifactId>module</artifactId>
-    <version>2.0.3-SNAPSHOT</version>
+    <version>2.0.3-bentham_academical-SNAPSHOT</version>
     <packaging>jar</packaging>
     <parent>
         <groupId>de.uros.citlab</groupId>
@@ -162,6 +162,7 @@
         <dependency>
             <groupId>de.uros.citlab</groupId>
             <artifactId>errorrate</artifactId>
+            <version>3.4.1</version>
         </dependency>
         <dependency>
             <groupId>de.uros.citlab</groupId>
@@ -265,15 +266,15 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
-                <!--<executions>-->
-                <!--<execution>-->
-                <!--<id>make-assembly</id> &lt;!&ndash; this is used for inheritance merges &ndash;&gt;-->
-                <!--<phase>package</phase> &lt;!&ndash; bind to the packaging phase &ndash;&gt;-->
-                <!--<goals>-->
-                <!--<goal>single</goal>-->
-                <!--</goals>-->
-                <!--</execution>-->
-                <!--</executions>-->
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

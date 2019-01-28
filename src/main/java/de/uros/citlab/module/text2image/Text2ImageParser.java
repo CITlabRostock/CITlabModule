@@ -242,7 +242,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
                             : page.getPathXml().getParentFile();
                     folder.mkdirs();
                     {
-                        BufferedImage debugImage = ImageUtil.getDebugImage(page.getImg().getImageBufferedImage(true), page.getXml(), 1.0, false, false, threshBaseline, false, false);
+                        BufferedImage debugImage = ImageUtil.getDebugImage(page.getImg().getImageBufferedImage(true), page.getXml(), 1.0, false, true, threshBaseline, false, false);
                         debugImage = ImageUtil.resize(debugImage, 6000, debugImage.getHeight() * 6000 / debugImage.getWidth());
                         String imageFilename = page.getXml().getPage().getImageFilename();
                         imageFilename += ".jpg";

@@ -43,6 +43,7 @@ public class XmlParserTei implements Serializable {
     private Decision taghi = Decision.UNKNOWN; //any other special case (except underline and superscript)
     private Decision taghi_superscript = Decision.CONTINUE;//superscirpt words
     private Decision taghi_underline = Decision.CONTINUE;//underline words
+    private Decision taghi_italic = Decision.CONTINUE;//also underline or kursive words
 
     public enum Decision {
         /**
@@ -271,6 +272,19 @@ public class XmlParserTei implements Serializable {
                         break;
                     }
                     throw new RuntimeException("cannot interprete decision " + taghi_superscript + " for taghi_superscript.");
+                }
+                if (rend.startsWith("italic")) {
+                    if (taghi_italic == Decision.CONTINUE) {
+                        parseNodeTagContiue(node, pages, lines, line, page);
+                        break;
+                    } else if (taghi_italic == Decision.INVALID) {
+                        line.setValid(false);
+                        parseNodeTagContiue(node, pages, lines, line, page);
+                        break;
+                    } else if (taghi_italic == Decision.SKIP) {
+                        break;
+                    }
+                    throw new RuntimeException("cannot interprete decision " + taghi_italic + " for taghi_superscript.");
                 }
                 if (rend.startsWith("underlin")) {
                     if (taghi_underline == Decision.CONTINUE) {

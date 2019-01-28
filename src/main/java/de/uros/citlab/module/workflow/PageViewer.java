@@ -18,6 +18,7 @@ import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.interfaces.types.Image;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -58,7 +59,7 @@ public class PageViewer extends ParamTreeOrganizer {
             Image img = new Image(file.toURI().toURL());
             BufferedImage imageBufferedImage = img.getImageBufferedImage(true);
             PcGtsType unmarshal = PageXmlUtil.unmarshal(PageXmlUtil.getXmlPath(file, true));
-            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, 1.0, false, false, true, false, true);
+            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, 1.0, false, true, true, false, false);
             fr.addImage(HybridImage.newInstance(debugImage), file.getPath(), null, file.getPath());
             fr.next();
         }
@@ -69,7 +70,9 @@ public class PageViewer extends ParamTreeOrganizer {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException {
-        args = ("-i " + "/home/gundram/devel/projects/bentham_t2i/tmp").split(" ");
+//        args = ("-i " + HomeDir.getFile("data/T2I_LA_valid")).split(" ");
+        args = ("-i " + HomeDir.getFile("data/LA/005/005_033_001/005_033_001.jpg")).split(" ");
+//        args = ("-i " + "/home/gundram/old/data/la/001/001_050_002").split(" ");
 //        args=("-i "+HomeDir.getFile("tmp_20170308/xml_semi_0/")).split(" ");
         PageViewer instance = new PageViewer();
         ParamSet ps = new ParamSet();

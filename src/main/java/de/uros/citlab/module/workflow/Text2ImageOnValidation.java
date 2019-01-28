@@ -34,24 +34,17 @@ import java.util.concurrent.Future;
 /**
  * @author gundram
  */
-public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnable {
+public class Text2ImageOnValidation extends ParamTreeOrganizer implements Runnable {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger LOG = LoggerFactory.getLogger(Text2ImageNoLineBreak.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(Text2ImageOnValidation.class.getName());
 
     @ParamAnnotation(descr = "link image instead of copy")
     private boolean link = true;
     @ParamAnnotation(name = "htr", descr = "path to htr (network)")
     private String htrName = "";
-    @ParamAnnotation(name = "lr", descr = "language resource (dict...)")
-    private String lrName = "";
-    //    private ILayoutAnalysis la;
-    @ParamAnnotation(name = "cm", descr = "character map (if empty, character map of net is taken")
-    private String charMapName = "";
     @ParamAnnotation(name = "in", descr = "folder which contains the images and pageXMLs")
     private String folderIn = "";
-    @ParamAnnotation(name = "storage", descr = "folder which can be used for confmat storage")
-    private String folderStorage = "";
     @ParamAnnotation(descr = "number of threads")
     private int t = 3;
     //    @ParamAnnotation(name = "ref", descr = "folder which contains the text files")
@@ -63,22 +56,19 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
     private List<Runner> runners = new LinkedList<>();
     private File fIn;
     private File fOut;
-    private File fStorage;
 
-    public Text2ImageNoLineBreak() {
+    public Text2ImageOnValidation() {
         this(null);
     }
 
-    public Text2ImageNoLineBreak(String[] props) {
-        this("", "", "", "", "", props);
+    public Text2ImageOnValidation(String[] props) {
+        this("", "", "", props);
     }
 
-    public Text2ImageNoLineBreak(String htr, String lr, String charMap, String folderIn, String folderOut, String[] props) {
+    public Text2ImageOnValidation(String htr, String folderIn, String folderOut, String[] props) {
         setTask(folderIn, folderOut, props);
         htrName = htr;
-        lrName = lr;
-        charMapName = charMap;
-        addReflection(this, Text2ImageNoLineBreak.class);
+        addReflection(this, Text2ImageOnValidation.class);
     }
 
     @Override
@@ -119,7 +109,6 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
     public void run() {
         fIn = new File(this.folderIn);
         fOut = new File(this.folderOut);
-        fStorage = folderStorage != null && !folderStorage.isEmpty() ? new File(this.folderStorage) : null;
         //find folders to execute
         List<File> foldersExec = FileUtil.getFoldersLeave(fIn);
         List<Task> tasks = new LinkedList<>();
@@ -193,14 +182,9 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
                     }
                     //create tgt structure
                     File folderTgt = FileUtil.getTgtFile(fIn, fOut, task.folder);
-                    if(folderTgt.exists()){
-                        LOG.warn("Folder {} already exists, task already solved.", folderTgt);
-                        continue;
-                    }
                     folderTgt.mkdirs();
                     List<File> imagesTgt = new LinkedList<>();
                     List<File> xmlsTgt = new LinkedList<>();
-                    List<File> storages = fStorage != null ? new LinkedList<>() : null;
                     //copy images, create default xml and apply LA
                     for (File fileImgSrc : imagesSrc) {
                         File fileImgTgt = FileUtil.getTgtFile(fIn, fOut, fileImgSrc);
@@ -234,9 +218,6 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
                         }
                         xmlsTgt.add(fileXmlTgt);
                         imagesTgt.add(fileImgTgt);
-                        if (storages != null) {
-                            storages.add(FileUtil.getTgtFile(fIn, fStorage, fileImgSrc));
-                        }
 //                if (PropertyUtil.isPropertyTrue(props, Key.DEBUG)) {
 //                    BufferedImage imageBufferedImage = imgTgt.getImageBufferedImage(true);
 //                    ImageUtil.printPolygons(imageBufferedImage, PageXmlUtil.unmarshal(fileXmlTgt), false, true, true);
@@ -247,12 +228,12 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
                     if (htrName != null) {
                         text2ImageParser.matchCollection(
                                 htrName,
-                                lrName,
-                                charMapName,
+                                null,
+                                null,
                                 textFile.getAbsolutePath(),
                                 FileUtil.asStringList(imagesTgt),
                                 FileUtil.asStringList(xmlsTgt),
-                                folderStorage != null ? FileUtil.asStringList(storages) : null,
+                                null,
                                 props);
                     }
                 } catch (RuntimeException | IOException ex) {
@@ -271,19 +252,12 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
     }
 
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException {
-        File out = null;
+        String htr = "geo";
+        String setup = "NO_RO";
+        int threads = 6;
         String[] props = null;
         if (args.length == 0) {
-            out = HomeDir.getFile("debug/RO/geo");
-            ArgumentLine al = new ArgumentLine();
-            al.addArgument("in", HomeDir.getFile("data/LA"));//004/004_070_015
-            al.addArgument("out", HomeDir.getFile("data/T2I/RO/geo"));
-            al.addArgument("htr", HomeDir.getFile("models/geo"));
-//            al.addArgument("storage", HomeDir.getFile("data/storage"));
-            props = PropertyUtil.setProperty(props, Key.T2I_BEST_PATHES, "400.0");
-            args = al.getArgs();
-        } else if (args.length == 2 || args.length == 3) {
-            switch (args[0]) {
+            switch (setup) {
                 case "RO_HYP":
                     props = PropertyUtil.setProperty(props, Key.T2I_HYPHEN,
                             "{\"skipSuffix\":true," +
@@ -301,15 +275,13 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
                     props = PropertyUtil.setProperty(props, Key.T2I_JUMP_BASELINE, "50.0");
                     break;
                 default:
-                    throw new RuntimeException("cannot interprete " + args[0] + ".");
+                    throw new RuntimeException("cannot interprete " + setup + ".");
             }
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("in", HomeDir.getFile("data/LA"));//004/004_070_015
-            al.addArgument("out", HomeDir.getFile("data/T2I/" + args[0] + "/" + HomeDir.getFile(args[1]).getName()));
-            al.addArgument("htr", HomeDir.getFile(args[1]));
-            if (args.length == 3) {
-                al.addArgument("t", args[2]);
-            }
+            al.addArgument("in", HomeDir.getFile("data/T2I_LA_valid"));//004/004_070_015
+            al.addArgument("out", HomeDir.getFile("data/T2I_LA_valid_out/" + setup + "/" + htr));
+            al.addArgument("htr", HomeDir.getFile("models/" + htr));
+            al.addArgument("t", threads);
             args = al.getArgs();
         } else {
             throw new RuntimeException("needs 2 arguments for (branch of T2I was merged )");
@@ -324,13 +296,9 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
         props = PropertyUtil.setProperty(props, Key.T2I_SKIP_BASELINE, "0.2");
 //        props = PropertyUtil.setProperty(props, Key.T2I_MAX_COUNT, "10000000");
         props = PropertyUtil.setProperty(props, Key.T2I_THRESH, "-0.05");
-        if (out != null) {
-            props = PropertyUtil.setProperty(props, Key.DEBUG, "true");
-            props = PropertyUtil.setProperty(props, Key.DEBUG_DIR, out);
-        }
 //        props = PropertyUtil.setProperty(props, "b2p", "true");
         props = PropertyUtil.setProperty(props, Key.STATISTIC, "true");
-        Text2ImageNoLineBreak instance = new Text2ImageNoLineBreak(props);
+        Text2ImageOnValidation instance = new Text2ImageOnValidation(props);
         ParamSet ps = new ParamSet();
         ps.setCommandLineArgs(args);    // allow early parsing
         ps = instance.getDefaultParamSet(ps);

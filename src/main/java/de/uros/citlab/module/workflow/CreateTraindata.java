@@ -84,13 +84,14 @@ public class CreateTraindata extends ParamTreeOrganizer {
      * @throws java.lang.ClassNotFoundException
      */
     public static void main(String[] args) throws InvalidParameterException, ClassNotFoundException, Exception {
+//        HomeDir.setPath("/home/gundram/devel/projects/bentham_t2i");
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("xml", HomeDir.getFile("data/sets_b2p"));
+            al.addArgument("xml",HomeDir.getFile("data/sets_b2p/valid"));
 //            al.addArgument("cm", HomeDir.getFile("charmaps/cm_train.txt"));
-            al.addArgument("out", HomeDir.getFile("traindata/sets_b2p"));
+            al.addArgument("out", HomeDir.getFile("traindata/sets_b2p/valid"));
 //            al.addArgument("xml", HomeDir.getFile("data/002/t2i"));
-//            al.addArgument("cm", HomeDir.getFile("data/002/cm_01.txt"));
+//            al.addArgument("cm", HomeDir.getFile("traindata/geo/cm_val.txt"));
 //            al.addArgument("out", HomeDir.getFile("traindata/002/conf_01"));
 //            al.addArgument("minconf", 0.01);
             args = al.getArgs();
