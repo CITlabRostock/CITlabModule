@@ -7,7 +7,6 @@ package de.uros.citlab.module.workflow;
 
 import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.param.ParamSet;
-import com.achteck.misc.types.ConfMat;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
 import de.planet.languagemodel.train.TrainLM;
@@ -16,10 +15,11 @@ import de.uros.citlab.errorrate.types.Metric;
 import de.uros.citlab.errorrate.types.Result;
 import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
 import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
-import de.uros.citlab.module.htr.HTRParser;
+import de.uros.citlab.module.htr.HTRParserPlus;
 import de.uros.citlab.module.types.ArgumentLine;
-import de.uros.citlab.module.types.Key;
-import de.uros.citlab.module.util.*;
+import de.uros.citlab.module.util.FileUtil;
+import de.uros.citlab.module.util.ImageUtil;
+import de.uros.citlab.module.util.PageXmlUtil;
 import eu.transkribus.interfaces.IBaseline2Polygon;
 import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.types.Image;
@@ -71,7 +71,7 @@ public class EvaluateHtr extends ParamTreeOrganizer {
     }
 
     public EvaluateHtr(String htr, String lr, String gt, String out, boolean createDebugImg) {
-        this.htrInstance = new HTRParser();
+        this.htrInstance = new HTRParserPlus();
         b2p = new Baseline2PolygonParser(B2PSeamMultiOriented.class.getName());
         this.gt = gt;
         this.out = out;
@@ -169,101 +169,103 @@ public class EvaluateHtr extends ParamTreeOrganizer {
     }
 
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException, InterruptedException {
-        HomeDir.setPath("/home/gundram/devel/projects/read");
-        boolean createLangMods = false;
-        if (createLangMods) {
-            List<File> xml = FileUtil.listFiles(HomeDir.getFile("data/TRAIN_CITlab_Konzilsprotokolle_M3/"), "xml", true);
-            FileUtil.deleteMetadataAndMetsFiles(xml);
-            TrainDataUtil.createTrainData(
-                    FileUtil.asStringList(xml),
-                    HomeDir.getFile("data/LM_Konzilsprotokolle/").getAbsolutePath(),
-                    null,
-                    PropertyUtil.setProperty(
-                            PropertyUtil.setProperty(
-                                    null,
-                                    Key.CREATEDICT,
-                                    true),
-                            Key.CREATETRAINDATA,
-                            false)
-            );
-            createLM_NGram(xml, new File(HomeDir.getFile("data/LM_Konzilsprotokolle/"), "lm.bin"));
-            List<File> xml2 = FileUtil.listFiles(HomeDir.getFile("data/TRAIN_CITlab_Bentham_himself_M4/"), "xml", true);
-            FileUtil.deleteMetadataAndMetsFiles(xml2);
-            TrainDataUtil.createTrainData(FileUtil.asStringList(xml2), HomeDir.getFile("data/LM_Bentham/").getAbsolutePath(), null, PropertyUtil.setProperty(PropertyUtil.setProperty(null, Key.CREATEDICT, true), Key.CREATETRAINDATA, false));
-            createLM_NGram(xml2, new File(HomeDir.getFile("data/LM_Bentham/"), "lm.bin"));
-            return;
-
+        HomeDir.setPath("/home/gundram/devel/projects/bentham_academical");
+//        boolean createLangMods = false;
+//        if (createLangMods) {
+//            List<File> xml = FileUtil.listFiles(HomeDir.getFile("data/TRAIN_CITlab_Konzilsprotokolle_M3/"), "xml", true);
+//            FileUtil.deleteMetadataAndMetsFiles(xml);
+//            TrainDataUtil.createTrainData(
+//                    FileUtil.asStringList(xml),
+//                    HomeDir.getFile("data/LM_Konzilsprotokolle/").getAbsolutePath(),
+//                    null,
+//                    PropertyUtil.setProperty(
+//                            PropertyUtil.setProperty(
+//                                    null,
+//                                    Key.CREATEDICT,
+//                                    true),
+//                            Key.CREATETRAINDATA,
+//                            false)
+//            );
+//            createLM_NGram(xml, new File(HomeDir.getFile("data/LM_Konzilsprotokolle/"), "lm.bin"));
+//            List<File> xml2 = FileUtil.listFiles(HomeDir.getFile("data/TRAIN_CITlab_Bentham_himself_M4/"), "xml", true);
+//            FileUtil.deleteMetadataAndMetsFiles(xml2);
+//            TrainDataUtil.createTrainData(FileUtil.asStringList(xml2), HomeDir.getFile("data/LM_Bentham/").getAbsolutePath(), null, PropertyUtil.setProperty(PropertyUtil.setProperty(null, Key.CREATEDICT, true), Key.CREATETRAINDATA, false));
+//            createLM_NGram(xml2, new File(HomeDir.getFile("data/LM_Bentham/"), "lm.bin"));
+//            return;
+//
+//        }
+//        for (String szenario : new String[]{
+///*                "Bentham_ARPA",*/
+//                "Konzilsprotokolle_ARPA"/*,
+//                "Bentham_CSV",
+//                "Bentham_RAW",
+//                "Konzilsprotokolle_RAW"*/}) {
+//            File folderGT = null, folderOut = null, fileLR = null, fileHtr = null;
+//            switch (szenario) {
+//                case "Bentham_CSV":
+//                    folderGT = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4/");
+//                    folderOut = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4_CSV/");
+//                    fileHtr = new File("src/test/resources/test_htr/Bentham");
+//                    fileLR = HomeDir.getFile("data/LM_Bentham/dict.csv");
+//                    break;
+//                case "Bentham_ARPA":
+//                    folderGT = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4/");
+//                    folderOut = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4_ARPA/");
+//                    fileHtr = new File("src/test/resources/test_htr/Bentham");
+//                    fileLR = HomeDir.getFile("data/LM_Bentham/lm.bin");
+//                    break;
+//                case "Bentham_RAW":
+//                    folderGT = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4/");
+//                    folderOut = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4_RAW/");
+//                    fileHtr = new File("src/test/resources/test_htr/Bentham");
+//                    fileLR = null;
+//                    break;
+//                case "Konzilsprotokolle_CSV":
+//                    folderGT = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3/");
+//                    folderOut = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3_CSV/");
+//                    fileHtr = new File("src/test/resources/test_htr/Konzilsprotokolle_M4");
+//                    fileLR = HomeDir.getFile("data/LM_Konzilsprotokolle/dict.csv");
+//                    break;
+//
+//                case "Konzilsprotokolle_ARPA":
+//                    folderGT = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3/");
+//                    folderOut = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3_ARPA/");
+//                    fileHtr = new File("src/test/resources/test_htr/Konzilsprotokolle_M4");
+//                    fileLR = HomeDir.getFile("data/LM_Konzilsprotokolle/lm.bin");
+//                    break;
+//                case "Konzilsprotokolle_RAW":
+//                    folderGT = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3/");
+//                    folderOut = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3_RAW/");
+//                    fileHtr = new File("src/test/resources/test_htr/Konzilsprotokolle_M4");
+//                    fileLR = null;
+//                    break;
+//                default:
+//                    throw new RuntimeException("no szenario '" + szenario + "'");
+//
+//            }
+        File folderGT = HomeDir.getFile("data/sets_b2p/valid");
+        File folderOut = HomeDir.getFile("tmp/valid/RO_net1_7gram/");
+        File fileHtr = HomeDir.getFile("models/RO_net1/");
+        File fileLR = HomeDir.getFile("lm/lm_t2i_7gram.bin");
+        ArgumentLine al = new ArgumentLine();
+        al.addArgument("gt", folderGT);
+        al.addArgument("out", folderOut);
+        al.addArgument("htr", fileHtr);
+        if (fileLR != null) {
+            al.addArgument("lr", fileLR);
         }
-        for (String szenario : new String[]{
-/*                "Bentham_ARPA",*/
-                "Konzilsprotokolle_ARPA"/*,
-                "Bentham_CSV",
-                "Bentham_RAW",
-                "Konzilsprotokolle_RAW"*/}) {
-            File folderGT = null, folderOut = null, fileLR = null, fileHtr = null;
-            switch (szenario) {
-                case "Bentham_CSV":
-                    folderGT = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4/");
-                    folderOut = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4_CSV/");
-                    fileHtr = new File("src/test/resources/test_htr/Bentham");
-                    fileLR = HomeDir.getFile("data/LM_Bentham/dict.csv");
-                    break;
-                case "Bentham_ARPA":
-                    folderGT = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4/");
-                    folderOut = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4_ARPA/");
-                    fileHtr = new File("src/test/resources/test_htr/Bentham");
-                    fileLR = HomeDir.getFile("data/LM_Bentham/lm.bin");
-                    break;
-                case "Bentham_RAW":
-                    folderGT = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4/");
-                    folderOut = HomeDir.getFile("data/TEST_CITlab_Bentham_himself_M4_RAW/");
-                    fileHtr = new File("src/test/resources/test_htr/Bentham");
-                    fileLR = null;
-                    break;
-                case "Konzilsprotokolle_CSV":
-                    folderGT = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3/");
-                    folderOut = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3_CSV/");
-                    fileHtr = new File("src/test/resources/test_htr/Konzilsprotokolle_M4");
-                    fileLR = HomeDir.getFile("data/LM_Konzilsprotokolle/dict.csv");
-                    break;
-
-                case "Konzilsprotokolle_ARPA":
-                    folderGT = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3/");
-                    folderOut = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3_ARPA/");
-                    fileHtr = new File("src/test/resources/test_htr/Konzilsprotokolle_M4");
-                    fileLR = HomeDir.getFile("data/LM_Konzilsprotokolle/lm.bin");
-                    break;
-                case "Konzilsprotokolle_RAW":
-                    folderGT = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3/");
-                    folderOut = HomeDir.getFile("data/TEST_CITlab_Konzilsprotokolle_M3_RAW/");
-                    fileHtr = new File("src/test/resources/test_htr/Konzilsprotokolle_M4");
-                    fileLR = null;
-                    break;
-                default:
-                    throw new RuntimeException("no szenario '" + szenario + "'");
-
-            }
-
-            ArgumentLine al = new ArgumentLine();
-            al.addArgument("gt", folderGT);
-            al.addArgument("out", folderOut);
-            al.addArgument("htr", fileHtr);
-            if (fileLR != null) {
-                al.addArgument("lr", fileLR);
-            }
-            args = al.getArgs();
-            EvaluateHtr instance = new EvaluateHtr();
-            ParamSet ps = new ParamSet();
-            ps.setCommandLineArgs(args);    // allow early parsing
-            ps = instance.getDefaultParamSet(ps);
-            ps = ParamSet.parse(ps, args, ParamSet.ParseMode.FORCE); // be strict, don't accept generic parameter
-            instance.setParamSet(ps);
-            instance.init();
-            double run = instance.run(null);
-            String res = szenario + "," + run + "," + Arrays.toString(al.getArgs());
-            System.out.println(res);
-            FileUtil.writeLines(HomeDir.getFile("cmpLM.csv"), Arrays.asList(res), true);
-        }
+        args = al.getArgs();
+        EvaluateHtr instance = new EvaluateHtr();
+        ParamSet ps = new ParamSet();
+        ps.setCommandLineArgs(args);    // allow early parsing
+        ps = instance.getDefaultParamSet(ps);
+        ps = ParamSet.parse(ps, args, ParamSet.ParseMode.FORCE); // be strict, don't accept generic parameter
+        instance.setParamSet(ps);
+        instance.init();
+        double run = instance.run(null);
+        String res = run + "," + Arrays.toString(al.getArgs());
+        System.out.println(res);
+        FileUtil.writeLines(HomeDir.getFile("cmpLM.csv"), Arrays.asList(res), true);
     }
 
 }
