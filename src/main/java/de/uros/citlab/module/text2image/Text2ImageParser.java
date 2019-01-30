@@ -46,7 +46,7 @@ public class Text2ImageParser extends HTRParser implements IText2Image {
 
     @Override
     public String getVersion() {
-        return "1.0";
+        return MetadataUtil.getSoftwareVersion();
     }
 
     public enum Stat {

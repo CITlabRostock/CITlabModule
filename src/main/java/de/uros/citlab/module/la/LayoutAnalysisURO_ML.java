@@ -38,7 +38,6 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(LayoutAnalysisURO_ML.class.getName());
     private String name;
-    private final String version = "0.1";
 
     private final String netPath1 = "/net_tf/LA73_249_0mod360.pb";
     private final String netPath2 = "/net_tf/LA76_249_0mod90.pb";
@@ -249,7 +248,7 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     private PageType buildRegs(HybridImage hi, PageType page, List<TrpRegionType> globRegs, List<TextRegionType> reducedTextRegions, List<Polygon2DInt> bls, String thisRotateScheme) {

@@ -51,7 +51,6 @@ public class LayoutAnalysisParser /*extends ParamTreeOrganizer*/ implements ILay
     private transient IP2B p2b;
     private transient IB2P b2p = new B2PSimple();
     private final String name;
-    private final String version = "0.1";
     ParamSet ps;
     private String[] props;
 
@@ -370,6 +369,6 @@ public class LayoutAnalysisParser /*extends ParamTreeOrganizer*/ implements ILay
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 }
