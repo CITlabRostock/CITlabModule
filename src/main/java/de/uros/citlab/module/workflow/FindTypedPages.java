@@ -1,18 +1,20 @@
 package de.uros.citlab.module.workflow;
 
+import de.planet.imaging.types.HybridImage;
 import de.planet.util.Gnuplot;
+import de.planet.util.gui.Display;
 import de.uros.citlab.errorrate.util.ObjectCounter;
 import de.uros.citlab.module.util.FileUtil;
+import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import de.uros.citlab.module.util.PolygonUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.pagecontent.TextLineType;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
 
 public class FindTypedPages {
@@ -141,22 +143,24 @@ public class FindTypedPages {
         return res;
     }
 
-    public static double[] calcTols(Polygon[] polyTruthNorm, int tickDist, int maxD, double relTol) {
+    public static double[][] calcTolsUpperLower(Polygon[] polyTruthNorm, int tickDist, int maxD, double relTol) {
         double[] tols = new double[polyTruthNorm.length];
+        double[] tols2 = new double[polyTruthNorm.length];
 
         int lineCnt = 0;
         for (Polygon aPoly : polyTruthNorm) {
             double angle = 0.0;
             double orVecY = Math.sin(angle);
             double orVecX = Math.cos(angle);
-            double aDist = maxD;
+            double aDist1 = maxD;
+            double aDist2 = maxD;
             double[] ptA1 = new double[]{aPoly.xpoints[0], aPoly.ypoints[0]};
             double[] ptA2 = new double[]{aPoly.xpoints[aPoly.npoints - 1], aPoly.ypoints[aPoly.npoints - 1]};
             for (int i = 0; i < aPoly.npoints; i++) {
                 double[] pA = new double[]{aPoly.xpoints[i], aPoly.ypoints[i]};
                 for (Polygon cPoly : polyTruthNorm) {
                     if (cPoly != aPoly) {
-                        if (getDistFast(pA, cPoly.getBounds()) > aDist) {
+                        if (getDistFast(pA, cPoly.getBounds()) > Math.max(aDist1, aDist2)) {
                             continue;
                         }
                         double[] ptC1 = new double[]{cPoly.xpoints[0], cPoly.ypoints[0]};
@@ -172,7 +176,12 @@ public class FindTypedPages {
                         for (int j = 0; j < cPoly.npoints; j++) {
                             double[] pC = new double[]{cPoly.xpoints[j], cPoly.ypoints[j]};
                             if (Math.abs(getInDist(pA, pC, orVecX, orVecY)) <= 2 * tickDist) {
-                                aDist = Math.min(aDist, Math.abs(getOffDist(pA, pC, orVecX, orVecY)));
+                                double offDist = getOffDist(pA, pC, orVecX, orVecY);
+                                if (offDist > 0) {
+                                    aDist1 = Math.min(aDist1, Math.abs(offDist));
+                                } else {
+                                    aDist2 = Math.min(aDist2, Math.abs(offDist));
+                                }
                             }
                         }
                     }
@@ -180,102 +189,235 @@ public class FindTypedPages {
             }
 //            System.out.println("Line " + lineCnt + " has min dist of: " + aDist);
 //            System.out.println("Line " + lineCnt + " has startX: " + aPoly.xpoints[0] + " and startY: " + aPoly.ypoints[0]);
-            if (aDist < maxD) {
-                tols[lineCnt] = aDist;
+            if (aDist1 < maxD) {
+                tols[lineCnt] = aDist1;
+            }
+            if (aDist2 < maxD) {
+                tols2[lineCnt] = aDist2;
             }
             lineCnt++;
         }
-        double sumVal = 0.0;
-        int cnt = 0;
-        for (int i = 0; i < tols.length; i++) {
-            double aTol = tols[i];
-            if (aTol != 0) {
-                sumVal += aTol;
-                cnt++;
-            }
-        }
-        double meanVal = maxD;
-        if (cnt != 0) {
-            meanVal = sumVal / cnt;
-        }
+//        double sumVal = 0.0;
+//        int cnt = 0;
+//        for (int i = 0; i < tols.length; i++) {
+//            double aTol = tols[i];
+//            if (aTol != 0) {
+//                sumVal += aTol;
+//                cnt++;
+//            }
+//        }
+//        double meanVal = maxD;
+//        if (cnt != 0) {
+//            meanVal = sumVal / cnt;
+//        }
+//
+//        for (int i = 0; i < tols.length; i++) {
+//            if (tols[i] == 0) {
+//                tols[i] = meanVal;
+//            }
+//            tols[i] = Math.min(tols[i], meanVal);
+//            tols[i] *= relTol;
+//        }
 
-        for (int i = 0; i < tols.length; i++) {
-            if (tols[i] == 0) {
-                tols[i] = meanVal;
-            }
-            tols[i] = Math.min(tols[i], meanVal);
-            tols[i] *= relTol;
-        }
-
-        return tols;
+        return new double[][]{tols, tols2};
     }
 
 
     public static void main(String[] args) {
-        File folder = HomeDir.getFile("data/LA");
-        File[] files = folder.listFiles();
-        List<String> setName = new ArrayList<>();
-        List<double[]> stat = new ArrayList<>();
-        int br=0;
-        for (File set : files) {
-            if(!set.isDirectory()){
+//        File folder = HomeDir.getFile("data/LA/");
+        File folderPos = HomeDir.getFile("data/UCL_URO/000_typed/");
+        File folderAll = HomeDir.getFile("data/LA/");
+        List<File> xml1 = FileUtil.listFiles(folderAll, "xml", true);
+        List<String> out = new LinkedList<>();
+        List<String> out2 = new LinkedList<>();
+        List<String> blacklist = FileUtil.readLines(HomeDir.getFile("lists/blacklist.txt"));
+        for (File f : xml1) {
+            if (blacklist.contains(f.getName().substring(0, 3))) {
+                out2.add(f.getAbsolutePath());
                 continue;
             }
-            if(br++>20){
-                break;
+            int size = PageXmlUtil.getTextLines(PageXmlUtil.unmarshal(f)).size();
+            if (size > 5 && size < 200) {
+                out.add(f.getAbsolutePath());
+            }else{
+                out2.add(f.getAbsolutePath());
             }
-            List<File> xmls = FileUtil.listFiles(set, "xml", true);
-            FileUtil.deleteMetadataAndMetsFiles(xmls);
-            ObjectCounter<Integer> oc = new ObjectCounter<>();
-            LinkedList<String> list = new LinkedList<>();
-            int count = 0;
-            for (File xml : xmls) {
-                PcGtsType unmarshal = PageXmlUtil.unmarshal(xml);
-                List<TextLineType> textLines = PageXmlUtil.getTextLines(unmarshal);
-                Polygon[] polys = new Polygon[textLines.size()];
-                for (int i = 0; i < textLines.size(); i++) {
-                    polys[i] = PolygonUtil.getBaseline(textLines.get(i));
-                }
-                polys = normDesDist(polys, 5);
-                double[] doubles = FindTypedPages.calcTols(polys, 5, 250, 1.0);
-                Arrays.sort(doubles);
-                int size = doubles.length == 0 ? 0 : (int) doubles[(doubles.length) / 2];
-                size = Math.min(size, 250);
-//            int size = PageXmlUtil.getTextLines(unmarshal).size();
-                oc.add(size);
-                String str = String.format("%03d %s", size, xml.getPath());
-                list.add(str);
-                System.out.println(count++ + " of " + xmls.size() + " ( " + size + " )");
-                if (count == 3000) {
-                    break;
-                }
-            }
-            list.sort(String::compareTo);
-            System.out.println(oc);
-            List<Integer> result = oc.getResult();
-            result.sort(Integer::compareTo);
-            double[] y2 = new double[251];
-            long n = 0;
-            int idx = 0;
-            for (int i = 0; i < 251; i++) {
-                Long cnt = oc.get(i);
-                if (cnt == null) {
-                    cnt = 0L;
-                }
-                n += cnt;
-//                y[idx] = (cnt * 100.0D) / count;
-                y2[idx] = (n * 100.0D) / count;
-                System.out.println(String.format("%3d %.2f%% %.2f%%", i, cnt * 100.0 / count, n * 100.0 / count));
-                idx++;
-            }
-            setName.add(set.getName());
-            stat.add(y2);
         }
-        double[] x = new double[251];
+        FileUtil.writeLines(HomeDir.getFile("image_6-199-written.txt"), out);
+        FileUtil.writeLines(HomeDir.getFile("image_6-199-written-blacklist.txt"), out2);
+        System.exit(-1);
+        ObjectCounter<Integer> ocPos = new ObjectCounter<>();
+        ObjectCounter<Integer> ocAll = new ObjectCounter<>();
+        ObjectCounter<String> map = new ObjectCounter<>();
+        int cntPositive = 0;
+        int cntNegative = 0;
+        for (File folder : new File[]{folderAll}) {
+            map.reset();
+            ObjectCounter<Integer> oc = folder == folderPos ? ocPos : ocAll;
+//        File folder = HomeDir.getFile("data/UCL_URO/000_typed");
+//        File folder = HomeDir.getFile("data/UCL_URO/000_typed/004_028_002");
+            File[] files = folder.listFiles();
+//            Arrays.sort(files, new ReverseComparator(new DefaultFileComparator()));
+            Arrays.sort(files, File::compareTo);
+            List<String> setName = new ArrayList<>();
+            List<double[]> stat = new ArrayList<>();
+//            int br = 0;
+//            List<Pair<Integer, File>> examples = new LinkedList<>();
+            int count = 0;
+            for (File set : files) {
+                if (!set.isDirectory()) {
+                    continue;
+                }
+//                if (br >= 10) {
+//                    break;
+//                }
+                List<File> xmls = FileUtil.listFiles(set, "xml", true);
+                FileUtil.deleteMetadataAndMetsFiles(xmls);
+                if (blacklist.contains(set.getName())) {
+                    System.out.println("skip " + set);
+                    cntNegative += xmls.size();
+                    continue;
+                }
+                LinkedList<String> list = new LinkedList<>();
+                for (File xml : xmls) {
+                    int cnt = 0;
+//                    if (count > 1000) {
+//                        break;
+//                    }
+
+                    PcGtsType unmarshal = PageXmlUtil.unmarshal(xml);
+                    List<TextLineType> textLines = PageXmlUtil.getTextLines(unmarshal);
+                    boolean useBaseLines = false;
+                    if (useBaseLines) {
+                        Polygon[] polys = new Polygon[textLines.size()];
+                        for (int i = 0; i < textLines.size(); i++) {
+                            polys[i] = PolygonUtil.getBaseline(textLines.get(i));
+                        }
+                        polys = normDesDist(polys, 5);
+                        int maxd = 250;
+                        double[][] doubles = FindTypedPages.calcTolsUpperLower(polys, 5, maxd, 1.0);
+                        if (doubles[0].length < 20) {
+                            continue;
+                        }
+//                int cntFalse = 0;
+                        int cntCalcs = 0;
+                        for (int i = 0; i < doubles[0].length - 1; i++) {
+                            double up = doubles[0][i];
+                            double down = doubles[1][i];
+                            if (up == 0D || down == 0D || Double.isNaN(up) || Double.isNaN(down) || up >= maxd || down >= maxd) {
+                                continue;
+                            }
+                            cntCalcs++;
+                            if (up < 60 && down < 60 && up < down * 1.1 && down < up * 1.1) {
+                                cnt++;
+                            }
+//                    if (up < down * 1.5 && down < up * 1.5) {
+//                        cntFalse++;
+//                    }
+                        }
+//                cnt-=cntFalse;
+                        cnt *= 100;
+                        if (cntCalcs > 0) {
+                            cnt /= cntCalcs;
+                        }
+                        double[] ds = doubles[0];
+                        Arrays.sort(ds);
+                        int size2 = ds.length == 0 ? 0 : (int) ds[(ds.length) / 2];
+//                size2 = Math.min(size2, 250);
+//                    if (size2 > 80) {
+//                        cnt += 10;
+//                    }
+//            int size = PageXmlUtil.getTextLines(unmarshal).size();
+                    } else {
+                        if (textLines.size() > 200) {
+                            cnt = textLines.size();
+                            System.out.println(cntPositive + " vs. " + cntNegative);
+                        } else if (textLines.size() < 5) {
+                            cnt = 10 + textLines.size();
+                            System.out.println(cntPositive + " vs. " + cntNegative);
+                        }
+                    }
+                    oc.add(cnt);
+                    if (cnt > 10) {
+                        cntNegative++;
+                        long before = map.get(xml.getName().substring(0, 3));
+                        if (before == 0) {
+                            Display.show(false, true);
+                        }
+                        map.add(xml.getName().substring(0, 3));
+                        System.out.println(xml.getName());
+                        System.out.println(map);
+//                        if (examples.size() % 1000 == 999) {
+//                            examples.sort((o1, o2) -> Integer.compare(o2.getFirst(), o1.getFirst()));
+//                            for (int i = 0; i < Math.min(100, examples.size()); i++) {
+                        HybridImage img = HybridImage.newInstance(PageXmlUtil.getImagePath(xml, true));
+                        BufferedImage resize = ImageUtil.resize(img.getAsBufferedImage(), img.getWidth() / 4, img.getHeight() / 4);
+//                        Display.addPanel(new DisplayPlanet(HybridImage.newInstance(resize)), cnt + " " + xml.getName());
+
+//                            }
+//                    examples.clear();
+//                        }
+                    } else {
+                        cntPositive++;
+                    }
+                    count++;
+//                    examples.add(new Pair<>(cnt, PageXmlUtil.getImagePath(xml, true)));
+                    String str = String.format("%03d %s", cnt, xml.getPath());
+                    list.add(str);
+//                    System.out.println(count++ + " of " + xmls.size() + " ( " + cnt + " )");
+//                if (count == 3000) {
+//                    break;
+//                }
+                }
+//            list.sort(String::compareTo);
+//            System.out.println(oc);
+//            List<Integer> result = oc.getResult();
+//            result.sort(Integer::compareTo);
+            }
+        }
+        System.out.println("positiv: " + cntPositive);
+        System.out.println("negativ: " + cntNegative);
+        long n1 = 0;
+        long n2 = 0;
+        List<Integer> resultPos = ocPos.getResult();
+        List<Integer> resultAll = ocAll.getResult();
+        System.out.println("ocPos: " + ocPos);
+        System.out.println("ocAll: " + ocAll);
+        Integer max = Math.max(Collections.max(resultAll), Collections.max(resultPos));
+        double[] y1 = new double[max + 1];
+        double[] y2 = new double[max + 1];
+        for (int i = 0; i < y2.length; i++) {
+            Long cnt = ocAll.get(i);
+            if (cnt != null) {
+                n1 += cnt;
+            }
+            y1[i] = (n1 * 100.0D);
+            Long cnt2 = ocPos.get(i);
+            if (cnt2 != null) {
+                n2 += cnt2;
+            }
+            y2[i] = (n2 * 100.0D);
+//                System.out.println(String.format("%3d %.2f%% %.2f%%", i, cnt * 100.0 / count, n * 100.0 / count));
+        }
+        for (int i = 0; i < y1.length; i++) {
+            y1[i] /= n1;
+            y2[i] /= n2;
+        }
+        List<String> setName = new ArrayList<>();
+        setName.add("All");
+        setName.add("Positiv");
+        List<double[]> stat = new ArrayList<>();
+        stat.add(y1);
+        stat.add(y2);
+//            if (br % 8 == 0) {
+        double[] x = new double[y2.length];
         for (int i = 0; i < x.length; i++) {
-            x[i]=i;
+            x[i] = i;
         }
         Gnuplot.plot(x, stat, "inter line distances", setName.toArray(new String[0]), 0, 100);
+        setName.clear();
+        stat.clear();
+        System.out.println(map);
     }
 
 }

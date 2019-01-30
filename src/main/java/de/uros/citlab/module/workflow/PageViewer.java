@@ -59,7 +59,7 @@ public class PageViewer extends ParamTreeOrganizer {
             Image img = new Image(file.toURI().toURL());
             BufferedImage imageBufferedImage = img.getImageBufferedImage(true);
             PcGtsType unmarshal = PageXmlUtil.unmarshal(PageXmlUtil.getXmlPath(file, true));
-            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, 1.0, false, true, true, false, false);
+            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, 1.0, false, true, true, true, false);
             fr.addImage(HybridImage.newInstance(debugImage), file.getPath(), null, file.getPath());
             fr.next();
         }
@@ -71,7 +71,7 @@ public class PageViewer extends ParamTreeOrganizer {
      */
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException {
 //        args = ("-i " + HomeDir.getFile("data/T2I_LA_valid")).split(" ");
-        args = ("-i " + HomeDir.getFile("data/LA/005/005_033_001/005_033_001.jpg")).split(" ");
+        args = ("-i " + HomeDir.getFile("data/114201")).split(" ");
 //        args = ("-i " + "/home/gundram/old/data/la/001/001_050_002").split(" ");
 //        args=("-i "+HomeDir.getFile("tmp_20170308/xml_semi_0/")).split(" ");
         PageViewer instance = new PageViewer();
