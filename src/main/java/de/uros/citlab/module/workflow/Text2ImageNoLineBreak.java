@@ -193,7 +193,7 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
                     }
                     //create tgt structure
                     File folderTgt = FileUtil.getTgtFile(fIn, fOut, task.folder);
-                    if(folderTgt.exists()){
+                    if (folderTgt.exists()) {
                         LOG.warn("Folder {} already exists, task already solved.", folderTgt);
                         continue;
                     }
@@ -303,10 +303,11 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
                 default:
                     throw new RuntimeException("cannot interprete " + args[0] + ".");
             }
+            Integer idx = Integer.valueOf(args[1]);
             ArgumentLine al = new ArgumentLine();
             al.addArgument("in", HomeDir.getFile("data/LA"));//004/004_070_015
-            al.addArgument("out", HomeDir.getFile("data/T2I/" + args[0] + "/" + HomeDir.getFile(args[1]).getName()));
-            al.addArgument("htr", HomeDir.getFile(args[1]));
+            al.addArgument("out", HomeDir.getFile("data/T2I/" + args[0] + "_net" + idx));
+            al.addArgument("htr", HomeDir.getFile("models/" + args[0] + "_net" + idx));
             if (args.length == 3) {
                 al.addArgument("t", args[2]);
             }

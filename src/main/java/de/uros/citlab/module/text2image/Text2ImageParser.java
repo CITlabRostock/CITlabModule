@@ -153,7 +153,13 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
         for (int i = 0; i < pages.size(); i++) {
             PageStruct page = pages.get(i);
             String storage = storages != null ? storages[i] : null;
-            HybridImage hi = ImageUtil.getHybridImage(page.getImg(), true);
+            HybridImage hi = null;
+            try {
+                hi = ImageUtil.getHybridImage(page.getImg(), true);
+            } catch (RuntimeException ex) {
+                LOG.info("loading image over transkribus throws error - use own method (errror = " + ex.getMessage() + ")");
+                hi = ImageUtil.getHybridImage(page.getPathImg(), true);
+            }
             List<TextRegionType> textRegions = PageXmlUtils.getTextRegions(page.getXml());
             HTR htr = getHTR(pathToOpticalModel, pathToCharacterMap, storage);
             for (TextRegionType textRegion : textRegions) {
