@@ -35,7 +35,6 @@ public class TrainHtrPlus extends TrainHtr {
     //    public static final String NAME_FROZEN = "frozen_model.pb";
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(TrainHtrPlus.class.getName());
-    private static final String version = "0.0.1";
     private static final String provider = "University of Rostock\nInstitute of Mathematics\nCITlab\nGundram Leifert\ngundram.leifert@uni-rostock.de";
     private static final String name = TrainHtrPlus.class.getName();
 
@@ -135,7 +134,7 @@ public class TrainHtrPlus extends TrainHtr {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override

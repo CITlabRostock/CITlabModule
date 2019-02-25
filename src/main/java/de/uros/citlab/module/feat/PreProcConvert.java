@@ -14,6 +14,7 @@ import de.planet.itrtech.reco.IImagePreProcess;
 import de.planet.trainer.factory.ImagePreprocessDft;
 import de.uros.citlab.module.interfaces.IFeatureGeneratorStreamable;
 import de.uros.citlab.module.util.FeatureIO;
+import de.uros.citlab.module.util.MetadataUtil;
 import eu.transkribus.interfaces.types.Image;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,7 +27,6 @@ public class PreProcConvert extends ParamSetOrganizer implements IFeatureGenerat
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = Logger.getLogger(PreProcConvert.class.getName());
-    private final String version = "1.0.0";
     private final String name = "PreProcDft";
     private IImagePreProcess impl = null;
 
@@ -64,7 +64,7 @@ public class PreProcConvert extends ParamSetOrganizer implements IFeatureGenerat
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override

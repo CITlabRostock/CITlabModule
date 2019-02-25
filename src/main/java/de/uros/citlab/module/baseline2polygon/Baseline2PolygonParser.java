@@ -177,7 +177,7 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
 
     @Override
     public String getVersion() {
-        return "1.0.1";
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override

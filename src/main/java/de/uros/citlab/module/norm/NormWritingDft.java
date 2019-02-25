@@ -13,6 +13,7 @@ import de.planet.trainer.factory.ImagePreprocessDft;
 import de.planet.util.LoaderIO;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.ImageUtil;
+import de.uros.citlab.module.util.MetadataUtil;
 import de.uros.citlab.module.util.PropertyUtil;
 import eu.transkribus.interfaces.IFeatureGenerator;
 import eu.transkribus.interfaces.types.Image;
@@ -25,7 +26,6 @@ public class NormWritingDft implements IFeatureGenerator {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = Logger.getLogger(NormWritingDft.class.getName());
-    private final String version = "1.0.0";
     private final String name = NormWritingDft.class.getSimpleName();
 
     private final int h;
@@ -70,7 +70,7 @@ public class NormWritingDft implements IFeatureGenerator {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override

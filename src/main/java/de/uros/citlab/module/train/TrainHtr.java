@@ -12,10 +12,7 @@ import de.planet.trainer.Trainer;
 import de.planet.trainer.factory.SNetworkFactory;
 import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.types.Key;
-import de.uros.citlab.module.util.CharMapUtil;
-import de.uros.citlab.module.util.FileUtil;
-import de.uros.citlab.module.util.PropertyUtil;
-import de.uros.citlab.module.util.TrainDataUtil;
+import de.uros.citlab.module.util.*;
 import eu.transkribus.interfaces.ITrainHtr;
 
 import java.io.File;
@@ -32,7 +29,6 @@ public class TrainHtr extends Observable implements ITrainHtr {
     private static final String INTERN_SPRNN = "net.sprnn";
     private static final String INTERN_SPRNN_BEST = "best_net.sprnn";
     public static final String EVENT_PRESENT_OBSERVABLE = "present_observable";
-    private static final String version = "0.0.1";
     private static final String provider = "University of Rostock\nInstitute of Mathematics\nCITlab\nGundram Leifert\ngundram.leifert@uni-rostock.de";
     private static final String name = TrainHtr.class.getName();
 
@@ -202,7 +198,7 @@ public class TrainHtr extends Observable implements ITrainHtr {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override
