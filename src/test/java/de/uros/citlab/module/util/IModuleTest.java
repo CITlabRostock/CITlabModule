@@ -49,7 +49,7 @@ public class IModuleTest {
     public void testVersion() {
         String softwareVersion = MetadataUtil.getSoftwareVersion();
         File f = new File("pom.xml");
-        Pattern p = Pattern.compile(".*<version>([0-9.]+)</version>.*");
+        Pattern p = Pattern.compile(".*<version>([0-9.]+)(-SNAPSHOT)?</version>.*");
         List<String> strings = FileUtil.readLines(f);
         strings.sort((o1, o2) -> Integer.compare(o1.indexOf('<'), o2.indexOf('<')));
         for (String s : strings) {
