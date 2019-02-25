@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
  * @author gundram
  */
 public class PageViewer extends ParamTreeOrganizer {
@@ -37,6 +36,8 @@ public class PageViewer extends ParamTreeOrganizer {
 
     @ParamAnnotation(descr = "path or file of image(s)")
     private String i = "";
+    @ParamAnnotation(descr = "path to save output file or nothing, if it should only be displayed")
+    private String o = "";
 
     public PageViewer() {
         addReflection(this, PageViewer.class);
@@ -59,8 +60,12 @@ public class PageViewer extends ParamTreeOrganizer {
             Image img = new Image(file.toURI().toURL());
             BufferedImage imageBufferedImage = img.getImageBufferedImage(true);
             PcGtsType unmarshal = PageXmlUtil.unmarshal(PageXmlUtil.getXmlPath(file, true));
-            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, 1.0, false, true, true, true, false);
-            fr.addImage(HybridImage.newInstance(debugImage), file.getPath(), null, file.getPath());
+            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, 1.2, false, true, 0.1, false, true);
+            HybridImage hi = HybridImage.newInstance(debugImage);
+            if (!o.equals("")) {
+                hi.save(o);
+            }
+            fr.addImage(hi, file.getPath(), null, file.getPath());
             fr.next();
         }
 
@@ -71,7 +76,7 @@ public class PageViewer extends ParamTreeOrganizer {
      */
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException {
 //        args = ("-i " + HomeDir.getFile("data/T2I_LA_valid")).split(" ");
-        args = ("-i " + HomeDir.getFile("data/114201")).split(" ");
+        args = ("-i " + "/home/gundram/Documents/docs/paper/ICDAR2019_Text2Image/res/042_046_001.jpg"+ " -o /home/gundram/042_046_001_debug.jpg").split(" ");
 //        args = ("-i " + "/home/gundram/old/data/la/001/001_050_002").split(" ");
 //        args=("-i "+HomeDir.getFile("tmp_20170308/xml_semi_0/")).split(" ");
         PageViewer instance = new PageViewer();

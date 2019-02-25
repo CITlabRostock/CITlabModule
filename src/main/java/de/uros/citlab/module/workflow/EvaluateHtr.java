@@ -15,7 +15,6 @@ import de.uros.citlab.errorrate.types.Result;
 import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
 import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
 import de.uros.citlab.module.htr.HTRParserPlus;
-import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
@@ -32,7 +31,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -131,23 +129,23 @@ public class EvaluateHtr extends ParamTreeOrganizer {
                 throw new RuntimeException("gt folder (" + refs.size() + ") and hyp folder (" + recos.size() + ") do not have the same number of files");
             }
         }
-        File fileRef = new File("ref.lst");
-        File fileReco = new File("reco.lst");
+        File fileRef = new File(folderOut, "ref.lst");
+        File fileReco = new File(folderOut, "reco.lst");
         FileUtil.writeLines(fileRef, refs);
         FileUtil.writeLines(fileReco, recos);
         HtrError erp = new HtrError();
-        Result err = erp.run(("ref.lst reco.lst" + (wer ? " -w" : "")).split(" "));
+        Result err = erp.run((fileRef.getPath() + " " + fileReco.getPath() + (wer ? " -w" : "")).split(" "));
         FileUtils.deleteQuietly(fileRef);
         FileUtils.deleteQuietly(fileReco);
         return err.getMetric(Metric.ERR) * 100;
     }
 
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException, InterruptedException {
-        ArgumentLine al = new ArgumentLine();
-        al.addArgument("gt", HomeDir.getFile("data/sets_b2p/valid/"));
-        al.addArgument("out", HomeDir.getFile("tmp/sets_b2p/valid/geo/"));
-        al.addArgument("htr", HomeDir.getFile("models/geo"));
-        args = al.getArgs();
+//        ArgumentLine al = new ArgumentLine();
+//        al.addArgument("gt", HomeDir.getFile("data/sets_b2p/valid/"));
+//        al.addArgument("out", HomeDir.getFile("tmp/sets_b2p/valid/geo/"));
+//        al.addArgument("htr", HomeDir.getFile("models/geo"));
+//        args = al.getArgs();
         EvaluateHtr instance = new EvaluateHtr();
         ParamSet ps = new ParamSet();
         ps.setCommandLineArgs(args);    // allow early parsing
@@ -157,7 +155,7 @@ public class EvaluateHtr extends ParamTreeOrganizer {
         instance.init();
         double run = instance.run(null);
         System.out.println(run + " %");
-        System.out.println(Arrays.toString(al.getArgs()));
+//        System.out.println(Arrays.toString(al.getArgs()));
     }
 
 }

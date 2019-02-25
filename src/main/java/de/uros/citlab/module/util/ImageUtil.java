@@ -306,6 +306,11 @@ public class ImageUtil {
                 }
                 String unicode = result.getUnicode();
                 String confidence = result.getConf() == null ? "?" : String.format("%.3f", result.getConf());
+//                if(drawBaseline>0.0){
+//                    if(confidence.equals("?")||Double.valueOf(confidence)<drawBaseline){
+//                        continue;
+//                    }
+//                }
                 Rectangle2D rect = PolygonUtil.getPolygon(textLine).getBounds();
 //            result = result.replace("\u017f", "s");
                 graphics.drawString(unicode + (skipConfidences ? "" : "(" + confidence + ")"),
