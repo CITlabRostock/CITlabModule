@@ -19,6 +19,7 @@ import de.uros.citlab.module.interfaces.IFeatureGeneratorStreamable;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.FeatureIO;
 import de.uros.citlab.module.util.FeatureUtil;
+import de.uros.citlab.module.util.MetadataUtil;
 import de.uros.citlab.module.util.PropertyUtil;
 import eu.transkribus.interfaces.types.Image;
 import java.io.InputStream;
@@ -32,7 +33,6 @@ public class FeatHannFreq implements IFeatureGeneratorStreamable {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = Logger.getLogger(FeatHannFreq.class.getName());
-    private final String version = "1.0.0";
     private final String name = "FeatHannFreq";
     private final int ss_x;// = 2;
     private final int ss_y;//= 4;
@@ -87,7 +87,7 @@ public class FeatHannFreq implements IFeatureGeneratorStreamable {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override

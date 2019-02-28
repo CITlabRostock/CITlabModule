@@ -17,7 +17,6 @@ import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import de.uros.citlab.module.util.PolygonUtil;
-import de.uros.citlab.tokenizer.categorizer.CategorizerCharacterDft;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.pagecontent.TextEquivType;
 import eu.transkribus.core.model.beans.pagecontent.TextLineType;
@@ -73,20 +72,7 @@ public class EvaluateT2I extends ParamTreeOrganizer implements Runnable {
         File fGT = new File(this.gt);
         File fHyp = new File(this.hyp);
         //find folders to execute
-        ErrorModuleEnd2End.Mode mode =
-                no_ro ?
-                        seg ?
-                                ErrorModuleEnd2End.Mode.NO_RO_SEG :
-                                ErrorModuleEnd2End.Mode.NO_RO :
-                        seg ?
-                                ErrorModuleEnd2End.Mode.RO_SEG :
-                                ErrorModuleEnd2End.Mode.RO;
-        ErrorModuleEnd2End measure = new ErrorModuleEnd2End(
-                new CategorizerCharacterDft(),
-                null,
-                mode,
-                g,
-                null);
+        ErrorModuleEnd2End measure = new ErrorModuleEnd2End(!no_ro, false, seg, false);
         List<File> xmlsGT = FileUtil.listFiles(fGT, "xml", true);
         List<File> xmlsHyps = FileUtil.listFiles(fHyp, "xml", true);
         FileUtil.deleteMetadataAndMetsFiles(xmlsGT);
@@ -103,10 +89,6 @@ public class EvaluateT2I extends ParamTreeOrganizer implements Runnable {
         }
         for (int i = 0; i < xmlsGT.size(); i++) {
             File xmlGT = xmlsGT.get(i);
-            System.out.println(xmlGT);
-            if(!xmlGT.getName().contains("071_085_002")){
-                continue;
-            }
             File xmlHyp = xmlMap.get(xmlGT.getName());
             if (xmlHyp == null) {
                 throw new RuntimeException("cannot find hypothese for file " + xmlGT);

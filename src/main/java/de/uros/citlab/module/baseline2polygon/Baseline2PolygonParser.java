@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -70,15 +71,37 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
         PageXmlUtil.marshal(loadXml, new File(xmlInOut));
     }
 
+    private List<Polygon2DInt> tryApplyB2P(IB2P implModule, HybridImage hi, List<Polygon2DInt> linesPolygon, Double angle) {
+        try {
+            return implModule.process(hi, linesPolygon, angle);
+        } catch (RuntimeException ex) {
+            LOG.warn("Baseline2Polygon method {} throws exception - return null-result", implModule.getClass().getCanonicalName(), ex);
+            return null;
+        }
+    }
+
+    private Polygon2DInt tryGetPolygonWorstCase(Polygon2DInt baseline) {
+        LOG.error("baseline {} used directly to generate polygon (grow-x=5, grow-y=20)", baseline);
+        Rectangle2DInt bounds = baseline.getBounds();
+        bounds.grow(5, 20);
+        return bounds.getPolygon();
+    }
+
+    private boolean isValid(Polygon2DInt polygon) {
+        return polygon != null && polygon.npoints > 3;
+    }
+
+
     public void process(Image image, PcGtsType loadXml, String[] ids, String[] props) {
         HybridImage hi = ImageUtil.getHybridImage(image, true);
         List<TextRegionType> textRegions = PageXmlUtils.getTextRegions(loadXml);
         int cntlinesExecutions = 0;
+        HashMap<Double, List<TextLineType>> mapTextLines = new HashMap<>();
+        //collect baselines with same angle
         for (TextRegionType textRegion : textRegions) {
-            List<TextLineType> linesExecution = new LinkedList<>();
-            List<Polygon2DInt> linesPolygon = new LinkedList<>();
-            List<TextLineType> linesInRegion1 = textRegion.getTextLine();
-            for (TextLineType textLineType : linesInRegion1) {
+            List<TextLineType> textLines = new LinkedList<>();
+            List<TextLineType> textLinesOfRegion = textRegion.getTextLine();
+            for (TextLineType textLineType : textLinesOfRegion) {
                 if (ids == null || ArrayUtil.linearSearch(ids, textLineType.getId()) >= 0) {
                     BaselineType bl = textLineType.getBaseline();
                     if (bl == null) {
@@ -97,39 +120,49 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
                             continue;
                         }
                     }
-
-                    linesExecution.add(textLineType);
-                    linesPolygon.add(PolygonUtil.convert(PolygonUtil.getBaseline(textLineType)));
+                    textLines.add(textLineType);
                 }
             }
-            if (linesExecution.isEmpty() && ids != null) {
+            Double angle = textRegion.getOrientation() != null ? textRegion.getOrientation().doubleValue() : Double.NaN;
+            List<TextLineType> textLinesToFill = mapTextLines.get(angle);
+            if (textLinesToFill == null) {
+                textLinesToFill = new LinkedList<>();
+                mapTextLines.put(angle, textLinesToFill);
+            }
+            textLinesToFill.addAll(textLines);
+        }
+        //apply b2p on all baselines with same angle
+        for (Double angle : mapTextLines.keySet()) {
+            List<TextLineType> textLines = mapTextLines.get(angle);
+            List<Polygon2DInt> baselines = new LinkedList<>();
+            for (TextLineType textLine : textLines) {
+                baselines.add(PolygonUtil.convert(PolygonUtil.getBaseline(textLine)));
+            }
+            if (Double.isNaN(angle)) {
+                angle = 0.0;
+            }
+            if (textLines.isEmpty() && ids != null) {
                 continue;
             }
-            cntlinesExecutions += linesExecution.size();
-            Double angle = textRegion.getOrientation() != null ? textRegion.getOrientation().doubleValue() : null;
-            List<Polygon2DInt> process = implModule.process(hi, linesPolygon, angle);
+            cntlinesExecutions += textLines.size();
+            List<Polygon2DInt> process = tryApplyB2P(implModule, hi, baselines, angle);
             List<Polygon2DInt> processFallback = null;
-            for (int j = 0; j < linesExecution.size(); j++) {
-                TextLineType textLine = linesExecution.get(j);
-                Polygon2DInt p2d = PolygonUtil.reducePoints(process.get(j));
-                if (p2d != null) {
-                    if (p2d.npoints < 3) {
-                        LOG.warn("coord polygon has coords {} - use fallback polygon calculation");
-                        if (processFallback == null) {
-                            processFallback = implModuleFallback.process(hi, process, angle);
-                        }
-                        Polygon2DInt get = processFallback.get(j);
-                        Polygon2DInt p2dFallback = PolygonUtil.reducePoints(processFallback.get(j));
-                        if (p2dFallback.npoints < 3) {
-                            Rectangle2DInt bounds = linesPolygon.get(j).getBounds();
-                            bounds.grow(5, 20);
-                            p2d = bounds.getPolygon();
-                            LOG.error("coord of line {}: polygon has coords {} and fallback {} - both are incorrect.", linesExecution.get(j).getId(), p2d, p2dFallback);
-                            textLine.setCoords(PolygonUtil.polyon2Coords(p2d));
-                        }
-                        textLine.setCoords(PolygonUtil.polyon2Coords(p2dFallback));
+            boolean fallbackCalculated = false;
+            for (int j = 0; j < textLines.size(); j++) {
+                TextLineType textLine = textLines.get(j);
+                Polygon2DInt result = process != null ? PolygonUtil.reducePoints(process.get(j)) : null;
+                if (!isValid(result)) {
+                    if (!fallbackCalculated) {
+                        processFallback = tryApplyB2P(implModuleFallback, hi, baselines, angle);
+                        fallbackCalculated = true;
                     }
-                    textLine.setCoords(PolygonUtil.polyon2Coords(p2d));
+                    result = processFallback != null ? PolygonUtil.reducePoints(processFallback.get(j)) : null;
+                    if (!isValid(result)) {
+                        result = tryGetPolygonWorstCase(baselines.get(j));
+                    }
+                }
+                if (result != null) {
+                    textLine.setCoords(PolygonUtil.polyon2Coords(result));
                 } else {
                     LOG.error("cannot calculate Polygon for Line-ID {} - no polygon is set.", textLine.getId());
                 }
@@ -164,7 +197,7 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
 
     @Override
     public String getVersion() {
-        return "1.0.1";
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override

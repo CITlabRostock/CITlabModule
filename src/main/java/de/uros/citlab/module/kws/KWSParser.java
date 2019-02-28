@@ -45,7 +45,6 @@ public class KWSParser extends Observable implements IKeywordSpotter {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(KWSParser.class.getName());
-    private static final String version = "1.0";
 //    private transient final HashMap<Integer, HTR> htrs = new HashMap<>();
 //    private transient final HashMap<String, ISNetwork> networks = new HashMap<>();
     private String nameCurrent = "?";
@@ -90,7 +89,7 @@ public class KWSParser extends Observable implements IKeywordSpotter {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override

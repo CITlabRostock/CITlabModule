@@ -1,9 +1,9 @@
 package de.uros.citlab.module.workflow;
 
 import com.achteck.misc.exception.InvalidParameterException;
-import de.uros.citlab.languagemodel.TrainLM;
+import de.planet.languagemodel.train.TrainLM;
 import de.uros.citlab.module.util.FileUtil;
-import de.uros.citlab.module.util.PageXmlUtil;
+import edu.berkeley.nlp.lm.io.MakeLmBinaryFromArpa;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -14,20 +14,23 @@ public class RunTrainingLM {
     }
 
     public static void run(File folder, File out) {
-        List<File> xml = FileUtil.listFiles(folder, "xml", true);
+        List<File> xml = FileUtil.listFiles(folder, "txt", true);
         FileUtil.deleteMetadataAndMetsFiles(xml);
         List<String> text = new LinkedList<>();
         for (File file : xml) {
-            text.addAll(PageXmlUtil.getText(PageXmlUtil.unmarshal(file)));
+            text.addAll(FileUtil.readLines(file));
         }
-        TrainLM.train(text, 5, out);
+        File arpa=new File(out.getAbsolutePath().replace(".bin",".arpa"));
+        TrainLM.train(text, 7, arpa);
+        MakeLmBinaryFromArpa.main(new String[]{arpa.getAbsolutePath(),out.getAbsolutePath()});
+
     }
 
     public static void main(String[] args) throws InvalidParameterException {
 
         RunTrainingLM training = new RunTrainingLM();
         training.run(
-                new File("/home/gundram/devel/projects/read/data/TRAIN_CITlab_Bentham_himself_M4"),
-                new File("/home/gundram/devel/projects/read/langmods/M4.arpa"));
+                new File("/home/gundram/devel/projects/bentham_academical/data/LA"),
+                new File("/home/gundram/devel/projects/bentham_academical/lm/lm_t2i_7gram.bin"));
     }
 }

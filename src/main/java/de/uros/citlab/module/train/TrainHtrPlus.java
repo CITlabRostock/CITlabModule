@@ -35,7 +35,6 @@ public class TrainHtrPlus extends TrainHtr {
     //    public static final String NAME_FROZEN = "frozen_model.pb";
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(TrainHtrPlus.class.getName());
-    private static final String version = "0.0.1";
     private static final String provider = "University of Rostock\nInstitute of Mathematics\nCITlab\nGundram Leifert\ngundram.leifert@uni-rostock.de";
     private static final String name = TrainHtrPlus.class.getName();
 
@@ -98,6 +97,7 @@ public class TrainHtrPlus extends TrainHtr {
     public void createHtr(String htrOut, String pathToCharMapFile, String[] props) {
         File folderHtrOut = new File(htrOut);
         folderHtrOut.mkdirs();
+        File charMapHtr = new File(folderHtrOut, Key.GLOBAL_CHARMAP);
 //        double factor = Double.parseDouble(PropertyUtil.getProperty(props, "RelScaleHiddenUnits", "1.0"));
 //        int featMaps = Integer.parseInt(PropertyUtil.getProperty(props, "NumFeatMaps", "1"));
 //        if (featMaps != 1) {
@@ -109,19 +109,21 @@ public class TrainHtrPlus extends TrainHtr {
             LOG.info("use network '{}' instead of create new network", pathNet);
             // If we load a TensorFlow Network a CharMap is already linked
             if (pathToCharMapFile != null && !pathToCharMapFile.isEmpty()) {
-                throw new RuntimeException("cannot change charmap in trained model using HTR+");
+                if (charMapHtr.exists()) {
+                    LOG.info("overwrite charmap at path {} with charmap at path {}.", charMapHtr, pathToCharMapFile);
+                }
+                FileUtil.copyFile(new File(pathToCharMapFile), charMapHtr);
+//                throw new RuntimeException("cannot change charmap in trained model using HTR+");
             }
-            // Overwrite with new CharMap?! Or just ignore it?!
-//            CharMapUtil.setCharMap(pathNet, pathToModelsOut, pathToCharMapFile, -4.0);
-            return;
-        }
+        } else {
 //        File folderTmp = new File(PropertyUtil.getProperty(props, Key.TMP_FOLDER));
-        IImagePreProcess preProc = getPreProcDft(props);
-        savePreProc(folderHtrOut, preProc);
+            IImagePreProcess preProc = getPreProcDft(props);
+            savePreProc(folderHtrOut, preProc);
 //        saveDataTypeConfig(folderHtrOut, preProc);
 
-        File charMap = new File(pathToCharMapFile);
-        FileUtil.copyFile(charMap, new File(folderHtrOut, Key.GLOBAL_CHARMAP));
+            File charMap = new File(pathToCharMapFile);
+            FileUtil.copyFile(charMap, charMapHtr);
+        }
         // Execute python script to build the TensorFlow model and save it
     }
 
@@ -132,7 +134,7 @@ public class TrainHtrPlus extends TrainHtr {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override

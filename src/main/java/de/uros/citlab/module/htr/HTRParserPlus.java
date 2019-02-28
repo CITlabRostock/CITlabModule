@@ -45,7 +45,6 @@ public class HTRParserPlus implements IHtrCITlab {
     private static final Logger LOG = LoggerFactory.getLogger(HTRParserPlus.class.getName());
     private transient final HashMap<String, ISNetwork> networks = new HashMap<>();
     private transient final HashMap<Integer, HTR> htrs = new HashMap<>();
-    private final String version = "1.0.2";
     String nameCurrent = "?";
     private BaselineGenerationHist baselineGeneration = new BaselineGenerationHist();
 
@@ -127,10 +126,19 @@ public class HTRParserPlus implements IHtrCITlab {
             htrs.put(hash, new HTR(network, langMod, om, lm, cm, props));
         }
         HTR res = htrs.get(hash);
-        res.setStorageFile(storageDir == null || storageDir.isEmpty() ? null : new File(storageDir, ConfMatContainer.CONFMAT_CONTAINER_FILENAME));
+        if (storageDir == null || storageDir.isEmpty()) {
+            res.setStorageFile(null);
+        } else {
+            String containerFileName = PropertyUtil.getProperty(props, Key.HTR_CONFMAT_CONTAINER_FILENAME, "");
+            if (containerFileName == null || containerFileName.isEmpty()) {
+                containerFileName = ConfMatContainer.CONFMAT_CONTAINER_FILENAME;
+            }
+            res.setStorageFile(new File(storageDir, containerFileName));
+        }
         nameCurrent = res.getName();
         return res;
     }
+
 
     private static boolean useDict(String lm) {
         return lm != null && !lm.isEmpty();
@@ -208,7 +216,7 @@ public class HTRParserPlus implements IHtrCITlab {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     //    @Override

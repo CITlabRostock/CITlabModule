@@ -9,11 +9,11 @@ import com.achteck.misc.log.Logger;
 import eu.transkribus.core.model.beans.pagecontent.MetadataType;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.interfaces.IModule;
-import java.util.GregorianCalendar;
+
 import javax.xml.datatype.DatatypeFactory;
+import java.util.GregorianCalendar;
 
 /**
- *
  * @author gundram
  */
 public class MetadataUtil {
@@ -39,6 +39,10 @@ public class MetadataUtil {
         return "University of Rostock/Institute of Mathematics/CITlab"
                 + (nameOfPerson != null && !nameOfPerson.isEmpty() ? "/" + nameOfPerson : "")
                 + (email != null && !email.isEmpty() ? "/" + email : "");
+    }
+
+    public static String getSoftwareVersion() {
+        return "2.2.0";
     }
 
 }

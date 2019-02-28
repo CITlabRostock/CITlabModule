@@ -14,6 +14,7 @@ import de.planet.sprnn.util.SNetUtils;
 import de.uros.citlab.module.interfaces.IFeatureGeneratorStreamable;
 import de.uros.citlab.module.util.FeatureIO;
 import de.uros.citlab.module.util.FeatureUtil;
+import de.uros.citlab.module.util.MetadataUtil;
 import eu.transkribus.interfaces.types.Image;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,7 +30,6 @@ public class FeatNetwork implements IFeatureGeneratorStreamable {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = Logger.getLogger(FeatNetwork.class.getName());
-    private final String version = "1.0.0";
     private final String name = "FeatNetwork";
 
     private final SNet net;
@@ -104,7 +104,7 @@ public class FeatNetwork implements IFeatureGeneratorStreamable {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override

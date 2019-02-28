@@ -180,7 +180,7 @@ public class TestWorkflow {
             double corRate, corRateB2P;
             {
                 String recoLaHtr = PageXmlUtils.getFulltextFromLines(PageXmlUtil.unmarshal(testXmlFile_LA_HTR));
-                ErrorModuleDynProg errorModule = new ErrorModuleDynProg( new CategorizerCharacterDft(), null, Boolean.FALSE);
+                ErrorModuleDynProg errorModule = new ErrorModuleDynProg(new CategorizerCharacterDft(), null, Boolean.FALSE);
                 errorModule.calculate(recoLaHtr, recoRef);
                 Map<Count, Long> map = errorModule.getCounter().getMap();
                 long gt = map.get(Count.GT);
