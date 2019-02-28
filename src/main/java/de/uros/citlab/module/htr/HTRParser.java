@@ -51,7 +51,6 @@ public class HTRParser implements IHtrCITlab {
     private static final Logger LOG = LoggerFactory.getLogger(HTRParser.class.getName());
     private transient final HashMap<String, ISNetwork> networks = new HashMap<>();
     private transient final HashMap<Integer, HTR> htrs = new HashMap<>();
-    private final String version = "1.0.2";
     String nameCurrent = "?";
     private BaselineGenerationHist baselineGeneration = new BaselineGenerationHist();
 
@@ -281,7 +280,7 @@ public class HTRParser implements IHtrCITlab {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     //    @Override

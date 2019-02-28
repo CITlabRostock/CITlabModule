@@ -46,7 +46,7 @@ public class Text2ImageParser extends HTRParser implements IText2Image {
 
     @Override
     public String getVersion() {
-        return "1.0";
+        return MetadataUtil.getSoftwareVersion();
     }
 
     public enum Stat {
@@ -177,8 +177,10 @@ public class Text2ImageParser extends HTRParser implements IText2Image {
         List<LineMatch> alignmentResult = textAligner.getAlignmentResult(in, confMatsConverted);
         if (alignmentResult != null) {
             for (LineMatch match : alignmentResult) {
-                LineImage lineImage = linesExecution.get(confMatsConverted.indexOf(match.getCm()));
-                PageXmlUtil.setTextEquiv(lineImage.getTextLine(), match.getReference(), match.getConfidence());
+                if (match != null) {
+                    LineImage lineImage = linesExecution.get(confMatsConverted.indexOf(match.getCm()));
+                    PageXmlUtil.setTextEquiv(lineImage.getTextLine(), match.getReference(), match.getConfidence());
+                }
             }
         }
         for (PageStruct page : pages) {

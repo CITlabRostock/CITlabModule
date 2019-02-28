@@ -7,24 +7,18 @@ package de.uros.citlab.module.train;
 
 import de.uros.citlab.module.TestFiles;
 import de.uros.citlab.module.types.Key;
-import de.uros.citlab.module.util.DictionaryTest;
-import de.uros.citlab.module.util.FileUtil;
-import de.uros.citlab.module.util.LangModConfigurator;
-import de.uros.citlab.module.util.PageXmlUtil;
-import de.uros.citlab.module.util.PropertyUtil;
-import static de.uros.citlab.module.util.TrainDataUtil.cmLong;
+import de.uros.citlab.module.util.*;
+import org.apache.commons.io.FileUtils;
+import org.junit.*;
+import org.junit.runners.MethodSorters;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+
+import static de.uros.citlab.module.util.TrainDataUtil.cmLong;
 import static org.junit.Assert.fail;
 
 /**

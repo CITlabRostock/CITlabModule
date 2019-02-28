@@ -16,16 +16,17 @@ import de.planet.math.geom2d.types.Rectangle2DInt;
 import de.planet.math.util.PolygonHelper;
 import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PolygonUtil;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Desciption of BaseLineAugmented
- *
- *
+ * <p>
+ * <p>
  * Since 29.08.2016
  *
  * @author Tobi <tobias.gruening.hro@gmail.com>
@@ -52,7 +53,7 @@ public class BaseLine {
 
     private boolean topBounded = false;
 
-//    private double[] regLineStats;
+    //    private double[] regLineStats;
     public BaseLine(Polygon2DInt bL) {
         this.bL = bL;
     }
@@ -226,7 +227,7 @@ public class BaseLine {
             }
 
             for (int j = 0; j < lookAt; j++) {
-                if (yA - j >= 0) {
+                if (yA - j >= 0 && yA - j < sobelI.length) {
                     if (xA < sobelI[0].length) {
                         sobelSumA[j] += sobelI[yA - j][xA];
                     }
@@ -402,8 +403,8 @@ public class BaseLine {
     public boolean isTopBounded() {
         return topBounded;
     }
-    
-    public void release(){
+
+    public void release() {
         subImg.clear();
         subImgBin.clear();
     }

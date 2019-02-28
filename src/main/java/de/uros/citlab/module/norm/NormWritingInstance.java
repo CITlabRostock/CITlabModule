@@ -10,6 +10,7 @@ import com.achteck.misc.param.ParamSet;
 import de.planet.itrtech.reco.IImagePreProcess;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.ImageUtil;
+import de.uros.citlab.module.util.MetadataUtil;
 import de.uros.citlab.module.util.PropertyUtil;
 import eu.transkribus.interfaces.IImageManipulator;
 import eu.transkribus.interfaces.types.Image;
@@ -22,7 +23,6 @@ public class NormWritingInstance implements IImageManipulator {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = Logger.getLogger(NormWritingInstance.class.getName());
-    private final String version = "1.0.0";
     private final String name = NormWritingInstance.class.getSimpleName();
 
     private transient boolean isNoisy = false;
@@ -48,7 +48,7 @@ public class NormWritingInstance implements IImageManipulator {
 
     @Override
     public String getVersion() {
-        return version;
+        return MetadataUtil.getSoftwareVersion();
     }
 
     @Override
