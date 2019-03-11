@@ -276,9 +276,9 @@ public class Text2ImageNoLineBreak extends ParamTreeOrganizer implements Runnabl
         if (args.length == 0) {
             out = HomeDir.getFile("debug/RO/geo");
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("in", HomeDir.getFile("data/LA"));//004/004_070_015
-            al.addArgument("out", HomeDir.getFile("data/T2I/RO/geo"));
-            al.addArgument("htr", HomeDir.getFile("models/geo"));
+            al.addArgument("in", HomeDir.getFile("data/sets_b2p_plaintext/test_hard"));//004/004_070_015
+            al.addArgument("out", HomeDir.getFile("data/eval4joan"));
+            al.addArgument("htr", HomeDir.getFile("models/RO_HYP_net4"));
 //            al.addArgument("storage", HomeDir.getFile("data/storage"));
             props = PropertyUtil.setProperty(props, Key.T2I_BEST_PATHES, "400.0");
             args = al.getArgs();

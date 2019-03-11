@@ -12,16 +12,12 @@ import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
 import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.util.FileUtil;
-import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
-import eu.transkribus.core.model.beans.pagecontent.TextLineType;
-import eu.transkribus.core.util.PageXmlUtils;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.util.List;
 
 /**
  *
