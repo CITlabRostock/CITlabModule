@@ -5,24 +5,7 @@
  */
 package de.uros.citlab.module.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOCase;
-import org.apache.commons.io.filefilter.FalseFileFilter;
-import org.apache.commons.io.filefilter.SuffixFileFilter;
-import org.apache.commons.lang.ArrayUtils;
-
 import com.achteck.misc.log.Logger;
-
 import de.uros.citlab.module.types.PageStruct;
 import eu.transkribus.core.model.beans.customtags.CssSyntaxTag;
 import eu.transkribus.core.model.beans.customtags.ReadingOrderTag;
@@ -31,6 +14,22 @@ import eu.transkribus.core.model.beans.pagecontent.TextEquivType;
 import eu.transkribus.core.model.beans.pagecontent.TextLineType;
 import eu.transkribus.core.model.beans.pagecontent.TextRegionType;
 import eu.transkribus.core.util.PageXmlUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOCase;
+import org.apache.commons.io.filefilter.FalseFileFilter;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.lang.ArrayUtils;
+
+import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -116,6 +115,14 @@ public class PageXmlUtil {
     }
 
     public static PcGtsType unmarshal(File file) {
+        String content = null;
+        try {
+            content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+        content = content.replaceAll("http://schema.primaresearch.org/PAGE/gts/pagecontent/bar-07-15", "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15");
+        content = content.replaceAll("http://schema.primaresearch.org/PAGE/gts/pagecontent/2017-07-15", "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15");
+        Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+        }
         try {
             return PageXmlUtils.unmarshal(file);
         } catch (JAXBException ex) {

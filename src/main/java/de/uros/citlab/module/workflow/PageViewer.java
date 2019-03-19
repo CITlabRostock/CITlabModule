@@ -18,6 +18,7 @@ import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.interfaces.types.Image;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -54,13 +55,18 @@ public class PageViewer extends ParamTreeOrganizer {
             files = new LinkedList<>();
             files.add(f);
         }
+            System.out.println(files.size());
         for (File file : files) {
+            try{
+            System.out.println("page "+file);
             Image img = new Image(file.toURI().toURL());
             BufferedImage imageBufferedImage = img.getImageBufferedImage(true);
             PcGtsType unmarshal = PageXmlUtil.unmarshal(PageXmlUtil.getXmlPath(file, true));
-            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, 1.0, false, false, true, true, true);
+            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, 1.0, false, true, true, true, true);
             fr.addImage(HybridImage.newInstance(debugImage), file.getPath(), null, file.getPath());
-            fr.next();
+            fr.next();}catch(RuntimeException ex){
+                LOG.log(Logger.ERROR, ex);
+            }
         }
 
     }
@@ -69,7 +75,7 @@ public class PageViewer extends ParamTreeOrganizer {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException {
-        args = ("-i " + "/home/gundram/devel/projects/tf_htr/data/TEST_CITlab_NAF_Poll_Tax_M5_duplicated/TEST_CITlab_NAF_Poll_Tax_M5_duplicated/Henkikir_16.jpg").split(" ");
+        args = ("-i " + HomeDir.getFile("racetrack/export_job_504245/104580")).split(" ");
 //        args=("-i "+HomeDir.getFile("tmp_20170308/xml_semi_0/")).split(" ");
         PageViewer instance = new PageViewer();
         ParamSet ps = new ParamSet();

@@ -5,18 +5,6 @@
  */
 package de.uros.citlab.module.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.io.FileUtils;
@@ -26,8 +14,14 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.*;
+
 /**
- *
  * @author gundram
  */
 public class FileUtil {
@@ -35,13 +29,21 @@ public class FileUtil {
     public static final Charset CHARSET = StandardCharsets.UTF_8;
     public static final String CHARSET_NAME = CHARSET.name();
     public static final String[] IMAGE_SUFFIXES = new String[]{
-        "png", "jpg", "jpeg", "jpe", "tif", "tiff",
-        "PNG", "JPG", "JPEG", "JPE", "TIF", "TIFF"};
+            "png", "jpg", "jpeg", "jpe", "tif", "tiff",
+            "PNG", "JPG", "JPEG", "JPE", "TIF", "TIFF"};
     private static Logger LOG = LoggerFactory.getLogger(FileUtil.class);
 
     public static List<String> readLines(File file) {
         try {
             return FileUtils.readLines(file, CHARSET);
+        } catch (IOException ex) {
+            throw new RuntimeException("cannot read file '" + file == null ? null : file.getAbsolutePath() + "'", ex);
+        }
+    }
+
+    public static String readLine(File file) {
+        try {
+            return FileUtils.readLines(file, CHARSET).get(0);
         } catch (IOException ex) {
             throw new RuntimeException("cannot read file '" + file == null ? null : file.getAbsolutePath() + "'", ex);
         }

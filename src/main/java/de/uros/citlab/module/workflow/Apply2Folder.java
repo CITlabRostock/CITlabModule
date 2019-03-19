@@ -24,6 +24,10 @@ import eu.transkribus.interfaces.IBaseline2Polygon;
 import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.ILayoutAnalysis;
 import eu.transkribus.interfaces.types.Image;
+import org.apache.commons.io.FileUtils;
+
+import javax.imageio.ImageIO;
+import javax.xml.bind.JAXBException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +35,6 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import javax.imageio.ImageIO;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -138,12 +139,12 @@ public class Apply2Folder extends ParamTreeOrganizer {
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException {
         File folder = null, folderOut = null, htr = null, lr = null, la = null;
 //        String dir = /*"23737";//"25126"*/ "TEST_CITlab_Konzilsprotokolle_M4";
-        folder = HomeDir.getFile("data/train_b2p");//folder containing images and PAGE-XML with baselines
-        folderOut = HomeDir.getFile("data/train_b2p"); //folder where recognition should be saved
+        folder = HomeDir.getFile("racetrack");//folder containing images and PAGE-XML with baselines
+        folderOut = HomeDir.getFile("racetrack"); //folder where recognition should be saved
 //        htr = HomeDir.getFile("netsUIBK/Konzielsprotokolle_M4.sprnn");
 //        lr = HomeDir.getFile("dicts/transkribus/Konzilsprotokolle_v1.dict");//path to htr model
 //        la = HomeDir.getFile("configs/historical_90_dft_20161011.bin"); //path to la - if no la is given, the PAGE-XML should have baselines.
-        Apply2Folder instance = new Apply2Folder(htr, lr, la, folder, folderOut, true, true);
+        Apply2Folder instance = new Apply2Folder(htr, lr, la, folder, folderOut, false, false);
         ParamSet ps = new ParamSet();
         ps.setCommandLineArgs(args);    // allow early parsing
         ps = instance.getDefaultParamSet(ps);
