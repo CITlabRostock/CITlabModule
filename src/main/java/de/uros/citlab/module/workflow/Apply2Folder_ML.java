@@ -13,17 +13,21 @@ import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
 import de.uros.citlab.module.htr.HTRParser;
 import de.uros.citlab.module.la.LayoutAnalysisURO_ML;
 import de.uros.citlab.module.types.ArgumentLine;
-import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
-import de.uros.citlab.module.util.PropertyUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.interfaces.IBaseline2Polygon;
 import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.ILayoutAnalysis;
 import eu.transkribus.interfaces.types.Image;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import javax.xml.bind.JAXBException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -34,14 +38,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
-import javax.imageio.ImageIO;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author gundram
  */
 public class Apply2Folder_ML extends ParamTreeOrganizer {
@@ -71,14 +69,14 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
     private String xml_out = "";
 
     @ParamAnnotation(descr = "save debug images to output page folder")
-    private boolean debug;
+    private boolean debug = false;
 
     @ParamAnnotation(descr = "if htr is set, save cm-storage")
-    private boolean saveCM;
+    private boolean saveCM=false;
 
     @ParamAnnotation(descr = "link image file instead of copy")
     private boolean link = true;
-//    private int threads = 1;
+    //    private int threads = 1;
     private String[] props;
 
     public Apply2Folder_ML(String htr, String lr, String la, String folderIn, String folderOut, boolean createDebugImg, boolean saveCM, String[] props) {
@@ -92,17 +90,12 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
         b2p = b2pClassName;
 //            String[] props = PropertyUtil.setProperty(null, Key.LA_SINGLECORE, "false");
 //            props = PropertyUtil.setProperty(props, Key.LA_ROTSCHEME, "default");
-        if (la != null) {
-            if (la.isEmpty()) {
-                LOG.info("use default layout analysis");
-            }
-            this.la = new LayoutAnalysisURO_ML(la.isEmpty() ? null : la, props);
-        }
         xml_in = folderIn;
         xml_out = folderOut;
         this.debug = createDebugImg;
         this.saveCM = saveCM;
         this.props = props;
+        this.la_path = la;
         addReflection(this, Apply2Folder_ML.class);
     }
 
@@ -116,11 +109,18 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
         if (xml_out == null || xml_out.isEmpty()) {
             throw new RuntimeException("xml_out is null or empty.");
         }
+        if (la_path != null) {
+            if (la_path.isEmpty()) {
+                LOG.info("use default layout analysis");
+            }
+            this.la = new LayoutAnalysisURO_ML(la_path.isEmpty() ? null : la_path, props);
+        }
     }
 
     public void run() throws MalformedURLException, IOException, JAXBException {
         File lrName = lr_path.isEmpty() ? null : new File(lr_path);
-        File folderOut = xml_out.isEmpty() ? null : new File(xml_out);;
+        File folderOut = xml_out.isEmpty() ? null : new File(xml_out);
+        ;
         File htrName = htr_path.isEmpty() ? null : new File(htr_path);
         Collection<File> listFiles = FileUtil.getFilesListsOrFolders(xml_in, FileUtil.IMAGE_SUFFIXES, true);
         File folderIn = FileUtil.getSourceFolderListsOrFolders(xml_in, FileUtil.IMAGE_SUFFIXES, true);
@@ -194,12 +194,12 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
                     ImageIO.write(debugImage, "jpg", new File(tgtXml.getAbsoluteFile() + "_txt.jpg"));
                 }
             }
-            if(img.hasType(Image.Type.OPEN_CV)){
+            if (img.hasType(Image.Type.OPEN_CV)) {
                 img.getImageOpenCVImage().release();
             }
         }
     }
-    
+
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException {
 //        ArgumentLine al = new ArgumentLine();
 //        al.setHelp();

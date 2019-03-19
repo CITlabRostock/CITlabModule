@@ -18,6 +18,7 @@ import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.interfaces.types.Image;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -26,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
  * @author gundram
  */
 public class PageViewer extends ParamTreeOrganizer {
@@ -36,6 +36,16 @@ public class PageViewer extends ParamTreeOrganizer {
 
     @ParamAnnotation(descr = "path or file of image(s)")
     private String i = "";
+    @ParamAnnotation(descr = "show polygons")
+    private boolean p = false;
+    @ParamAnnotation(descr = "show baselines")
+    private boolean b = true;
+    @ParamAnnotation(descr = "show regions")
+    private boolean r = true;
+    @ParamAnnotation(descr = "show text")
+    private boolean t = true;
+    @ParamAnnotation(descr = "show confidence of text")
+    private boolean c = false;
 
     public PageViewer() {
         addReflection(this, PageViewer.class);
@@ -58,7 +68,7 @@ public class PageViewer extends ParamTreeOrganizer {
             Image img = new Image(file.toURI().toURL());
             BufferedImage imageBufferedImage = img.getImageBufferedImage(true);
             PcGtsType unmarshal = PageXmlUtil.unmarshal(PageXmlUtil.getXmlPath(file, true));
-            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, 1.0, false, false, true, true, true);
+            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, t ? 1.0 : -1.0, false, r, b, p, !c);
             fr.addImage(HybridImage.newInstance(debugImage), file.getPath(), null, file.getPath());
             fr.next();
         }
@@ -69,7 +79,7 @@ public class PageViewer extends ParamTreeOrganizer {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException {
-        args = ("-i " + "/home/gundram/devel/projects/tf_htr/data/TEST_CITlab_NAF_Poll_Tax_M5_duplicated/TEST_CITlab_NAF_Poll_Tax_M5_duplicated/Henkikir_16.jpg").split(" ");
+//        args = ("-i " + "/home/gundram/devel/projects/ICDAR_chinese/racetrack_ONB/data/val/104587_0019_3954047.tif -p true").split(" ");
 //        args=("-i "+HomeDir.getFile("tmp_20170308/xml_semi_0/")).split(" ");
         PageViewer instance = new PageViewer();
         ParamSet ps = new ParamSet();
