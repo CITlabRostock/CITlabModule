@@ -13,12 +13,10 @@ import com.achteck.misc.types.ParamTreeOrganizer;
 import de.planet.imaging.types.HybridImage;
 import de.planet.imaging.util.GraphicalMonPanelFrame;
 import de.planet.imaging.util.StdGraphicalMonPanelFrame;
-import de.planet.math.functor.DoubleFunctor;
 import de.uros.citlab.module.la.LayoutAnalysisURO_ML;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.segmentation.CITlab_LA_ML;
-import de.uros.citlab.segmentation.core.Bla;
 import de.uros.citlab.segmentation.core.SuperPixelCalcML_BL;
 import de.uros.citlab.segmentation.interfaces.ILineClusterer;
 import de.uros.citlab.segmentation.interfaces.ISuperPixel;
@@ -95,7 +93,7 @@ public class LAViewer extends ParamTreeOrganizer {
 //            BufferedImage debugImage = ImageUtil.getDebugImage(imageBufferedImage, unmarshal, t ? 1.0 : -1.0, false, r, b, p, !c);
             fr.addImage(hi, file.getPath(), null, file.getPath());
             fr.addImage(HybridImage.newInstance(b), process1.length + " pixels", null, process1.length + " pixels");
-            fr.addImage(Bla.debug, "skelet", null,"skelet" );
+//            fr.addImage(Bla.debug, "skelet", null,"skelet" );
             for (int jj = 0; jj < update.length; jj++) {
                 short[][] baseProb = update[jj];
                 byte[][] floatImg = new byte[baseProb.length][baseProb[0].length];
