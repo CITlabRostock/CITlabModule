@@ -123,7 +123,7 @@ public class LAViewer extends ParamTreeOrganizer {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException {
-        args = ("-i " + "/home/gundram/devel/projects/ICDAR_chinese/racetrack_ONB/data/val/104587_0018_3954045.tif -p LA_news_onb_190314_2019-03-15.pb").split(" ");
+//        args = ("-i " + "/home/gundram/devel/projects/ICDAR_chinese/racetrack_ONB/data/val/104587_0018_3954045.tif -p LA_news_onb_190314_2019-03-15.pb").split(" ");
 //        args=("-i "+HomeDir.getFile("tmp_20170308/xml_semi_0/")).split(" ");
         LAViewer instance = new LAViewer();
         ParamSet ps = new ParamSet();
