@@ -10,18 +10,13 @@ import com.achteck.misc.log.Logger;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
-import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.util.FileUtil;
-import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
-import eu.transkribus.core.model.beans.pagecontent.TextLineType;
-import eu.transkribus.core.util.PageXmlUtils;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.util.List;
 
 /**
  *
@@ -67,11 +62,11 @@ public class Page2PlainText extends ParamTreeOrganizer {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InvalidParameterException {
-        ArgumentLine al = new ArgumentLine();
-        al.addArgument("f", "/home/gundram/devel/projects/racetrack_stazh/data/train_b2p");
-        al.addArgument("o", "/home/gundram/devel/projects/racetrack_stazh/data/lr_stazh_320.txt");
-//        al.setHelp();
-        args = al.getArgs();
+//        ArgumentLine al = new ArgumentLine();
+//        al.addArgument("f", "/home/gundram/devel/projects/racetrack_stazh/data/train_b2p");
+//        al.addArgument("o", "/home/gundram/devel/projects/racetrack_stazh/data/lr_stazh_320.txt");
+////        al.setHelp();
+//        args = al.getArgs();
         Page2PlainText instance = new Page2PlainText();
         ParamSet ps = new ParamSet();
         ps.setCommandLineArgs(args);    // allow early parsing
