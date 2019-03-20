@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
  * @author gundram
  */
 public class ImageUtil {
@@ -67,6 +66,15 @@ public class ImageUtil {
     public static HybridImage getHybridImage(Image image, boolean toGrey) {
         return getHybridImage(image, toGrey, null);
     }
+
+    public static HybridImage getHybridImage(File file, boolean toGrey) {
+        HybridImage res = HybridImage.newInstance(file);
+        if (toGrey) {
+            res = ImageHelper.makeGrey(res);
+        }
+        return res;
+    }
+
     public static short[][] calcAbsSobelSum(Mat inp) {
         /// Generate grad_x and grad_y
         Mat sobel_x = new Mat(inp.rows(), inp.cols(), CvType.CV_16S);
@@ -98,8 +106,8 @@ public class ImageUtil {
     }
 
     public static boolean write(RenderedImage im,
-            String formatName,
-            File output) {
+                                String formatName,
+                                File output) {
         try {
             return ImageIO.write(im, formatName, output);
         } catch (IOException ex) {
@@ -298,6 +306,11 @@ public class ImageUtil {
                 }
                 String unicode = result.getUnicode();
                 String confidence = result.getConf() == null ? "?" : String.format("%.3f", result.getConf());
+//                if(drawBaseline>0.0){
+//                    if(confidence.equals("?")||Double.valueOf(confidence)<drawBaseline){
+//                        continue;
+//                    }
+//                }
                 Rectangle2D rect = PolygonUtil.getPolygon(textLine).getBounds();
 //            result = result.replace("\u017f", "s");
                 graphics.drawString(unicode + (skipConfidences ? "" : "(" + confidence + ")"),

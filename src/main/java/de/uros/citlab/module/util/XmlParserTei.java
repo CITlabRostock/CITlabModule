@@ -6,22 +6,6 @@
 package de.uros.citlab.module.util;
 
 import de.uros.citlab.module.workflow.HomeDir;
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.math3.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +15,58 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.*;
+
 /**
- *
  * @author gundram
  */
 public class XmlParserTei implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(XmlParserTei.class.getName());
+    private Decision tagDel = Decision.CONTINUE;
+    private Decision tagAdd = Decision.SEPARATE;
+    private Decision tagSic = Decision.CONTINUE;
+    private Decision tagUnclear = Decision.INVALID;
+    private Decision tagForeign = Decision.CONTINUE;
+    private Decision taghi = Decision.UNKNOWN; //any other special case (except underline and superscript)
+    private Decision taghi_superscript = Decision.CONTINUE;//superscirpt words
+    private Decision taghi_underline = Decision.CONTINUE;//underline words
+    private Decision taghi_italic = Decision.CONTINUE;//also underline or kursive words
+
+    public enum Decision {
+        /**
+         * If tag occures, the children will be used as transcription
+         */
+        CONTINUE,
+        /**
+         * if tag occures, the line, where this tag occures, will not be used
+         */
+        INVALID,
+        /**
+         * the text in this tag will be interpreted as seperate line
+         */
+        SEPARATE,
+        /**
+         * the text of this tag will not be used neither as seperate line or in the actual line
+         */
+        SKIP,
+        /**
+         * should be used for situations, which should not occure in your documents - throws an exception
+         */
+        UNKNOWN
+    }
 
     private static class LineParser {
 
@@ -89,7 +117,7 @@ public class XmlParserTei implements Serializable {
 
         private String getPageName() {
             if (page == null) {
-                return null;
+                return "???";
             }
             NamedNodeMap attributes = page.getAttributes();
             if (attributes.getNamedItem("facs") != null) {
@@ -116,16 +144,17 @@ public class XmlParserTei implements Serializable {
 
     }
 
-    private static void linebreak(ArrayList<String> lines, LineParser line) {
+    private void linebreak(ArrayList<String> lines, LineParser line) {
         String l = line.getLine();
         if (!l.isEmpty() && line.isValid) {
             l = l.replaceAll(" +", " ");
+            l = l.replaceAll("\t+", "\t");
             lines.add(l);
         }
         line.clear();
     }
 
-    private static void pagebreak(ArrayList<Page> pages, ArrayList<String> lines, LineParser line, PageNameHolder page, Node pageNode) {
+    private void pagebreak(ArrayList<Page> pages, ArrayList<String> lines, LineParser line, PageNameHolder page, Node pageNode) {
         linebreak(lines, line);
         if (page.getPageName() != null) {
             pages.add(new Page(page.getPageName(), new ArrayList<>(lines)));
@@ -134,7 +163,7 @@ public class XmlParserTei implements Serializable {
         page.init(pageNode);
     }
 
-    private static void parseNodeNote(Node node, ArrayList<Page> pages, ArrayList<String> lines, LineParser line, PageNameHolder page) {
+    private void parseNodeNote(Node node, ArrayList<Page> pages, ArrayList<String> lines, LineParser line, PageNameHolder page) {
         NodeList childNodes = node.getChildNodes();
         LineParser line_note = new LineParser();
         for (int j = 0; j < childNodes.getLength(); j++) {
@@ -143,7 +172,7 @@ public class XmlParserTei implements Serializable {
         linebreak(lines, line_note);
     }
 
-    private static void parseNodeChoice(Node node, ArrayList<Page> pages, ArrayList<String> lines, LineParser line, PageNameHolder page) {
+    private void parseNodeChoice(Node node, ArrayList<Page> pages, ArrayList<String> lines, LineParser line, PageNameHolder page) {
         Node child_important = null;
         NodeList childNodes = node.getChildNodes();
         for (int j = 0; j < childNodes.getLength(); j++) {
@@ -165,7 +194,7 @@ public class XmlParserTei implements Serializable {
         }
     }
 
-    private static void parseNodeTagContiue(Node node, ArrayList<Page> pages, ArrayList<String> lines, LineParser line, PageNameHolder page) {
+    private void parseNodeTagContiue(Node node, ArrayList<Page> pages, ArrayList<String> lines, LineParser line, PageNameHolder page) {
         if (node.hasChildNodes()) {
             NodeList children = node.getChildNodes();
             for (int i = 0; i < children.getLength(); i++) {
@@ -174,10 +203,20 @@ public class XmlParserTei implements Serializable {
         }
     }
 
-    private static void parseNode(Node node, ArrayList<Page> pages, ArrayList<String> lines, LineParser line, PageNameHolder page) {
+    private void parseNode(Node node, ArrayList<Page> pages, ArrayList<String> lines, LineParser line, PageNameHolder page) {
         switch (node.getNodeName()) {
 //zeile wird später ignoriert
             case "foreign":
+                if (tagForeign == Decision.CONTINUE) {
+                    parseNodeTagContiue(node, pages, lines, line, page);
+                    break;
+
+                } else if (tagForeign == Decision.INVALID) {
+                    line.setValid(false);
+                    parseNodeTagContiue(node, pages, lines, line, page);
+                    break;
+                }
+                throw new RuntimeException("cannot interprete decision " + tagDel + " for tagDel.");
             case "g":
             case "fw":
                 LOG.warn("tag " + node + " is not clear how to handle - ignore line.");
@@ -186,6 +225,19 @@ public class XmlParserTei implements Serializable {
                 break;
 
             case "sic":
+                if (tagSic == Decision.INVALID) {
+                    line.setValid(false);
+                    parseNodeTagContiue(node, pages, lines, line, page);
+                    break;
+                } else if (tagSic == Decision.SKIP) {
+                    break;
+                } else if (tagSic == Decision.CONTINUE) {
+                    parseNodeTagContiue(node, pages, lines, line, page);
+                    break;
+                } else {
+                    throw new RuntimeException("cannot interprete decision " + tagSic + " for tagSic.");
+                }
+                //els: handle like abbr and orig in choice
             case "abbr":
             case "orig":
                 if (node.getParentNode().getNodeName().equals("choice")) {
@@ -195,16 +247,70 @@ public class XmlParserTei implements Serializable {
                     line.setValid(false);
                 }
                 break;
+            case "hi":
+                Node rendNode = node.getAttributes().getNamedItem("rend");
+                if (rendNode == null) {
+                    if (taghi == Decision.CONTINUE) {
+                        parseNodeTagContiue(node, pages, lines, line, page);
+                        break;
+                    } else if (taghi == Decision.INVALID) {
+                        line.setValid(false);
+                        parseNodeTagContiue(node, pages, lines, line, page);
+                    }
+                    throw new RuntimeException("cannot interprete decision " + taghi + " for taghi.");
+                }
+                String rend = rendNode.getTextContent();
+                if (rend.startsWith("superscr")) {
+                    if (taghi_superscript == Decision.CONTINUE) {
+                        parseNodeTagContiue(node, pages, lines, line, page);
+                        break;
+                    } else if (taghi_superscript == Decision.INVALID) {
+                        line.setValid(false);
+                        parseNodeTagContiue(node, pages, lines, line, page);
+                        break;
+                    } else if (taghi_superscript == Decision.SKIP) {
+                        break;
+                    }
+                    throw new RuntimeException("cannot interprete decision " + taghi_superscript + " for taghi_superscript.");
+                }
+                if (rend.startsWith("italic")) {
+                    if (taghi_italic == Decision.CONTINUE) {
+                        parseNodeTagContiue(node, pages, lines, line, page);
+                        break;
+                    } else if (taghi_italic == Decision.INVALID) {
+                        line.setValid(false);
+                        parseNodeTagContiue(node, pages, lines, line, page);
+                        break;
+                    } else if (taghi_italic == Decision.SKIP) {
+                        break;
+                    }
+                    throw new RuntimeException("cannot interprete decision " + taghi_italic + " for taghi_superscript.");
+                }
+                if (rend.startsWith("underlin")) {
+                    if (taghi_underline == Decision.CONTINUE) {
+                        parseNodeTagContiue(node, pages, lines, line, page);
+                        break;
+                    } else if (taghi_underline == Decision.INVALID) {
+                        line.setValid(false);
+                        parseNodeTagContiue(node, pages, lines, line, page);
+                        break;
+                    } else if (taghi_underline == Decision.SKIP) {
+                        break;
+                    }
+                    throw new RuntimeException("cannot interprete decision " + taghi_underline + " for taghi_underline.");
+                }
+                throw new RuntimeException("cannot interprete attribute '" + rend + "' in tag <hi>.");
+            case "gap":
+                line.setValid(false);
+                parseNodeTagContiue(node, pages, lines, line, page);
+                break;
             case "front":
             case "body":
             case "back":
-            case "hi":
             case "div":
             case "milestone":
-            case "head":
             case "lg":
             case "l":
-            case "gap":
             case "quote":
             case "cit":
             case "argument":
@@ -277,6 +383,7 @@ public class XmlParserTei implements Serializable {
                 linebreak(lines, line);
                 break;
             }
+            case "head":
             case "p": {
                 linebreak(lines, line);
                 parseNodeTagContiue(node, pages, lines, line, page);
@@ -287,9 +394,50 @@ public class XmlParserTei implements Serializable {
                 line.appendPart(node);
                 break;
             }
+            case "del": {
+                if (tagDel == Decision.INVALID) {
+                    line.setValid(false);
+                    parseNodeTagContiue(node, pages, lines, line, page);
+                    break;
+                } else if (tagDel == Decision.CONTINUE) {
+                    parseNodeTagContiue(node, pages, lines, line, page);
+                    break;
+                } else if (tagDel == Decision.SKIP) {
+                    break;
+                }
+                throw new RuntimeException("cannot interprete decision " + tagDel + " for tagDel.");
+            }
+            case "add": {
+                if (tagAdd == Decision.SEPARATE) {
+                    parseNodeNote(node, pages, lines, line, page);
+                    break;
+                } else if (tagAdd == Decision.CONTINUE) {
+                    parseNodeTagContiue(node, pages, lines, line, page);
+                    break;
+                } else if (tagAdd == Decision.SKIP) {
+                    break;
+                } else if (tagAdd == Decision.INVALID) {
+                    line.setValid(false);
+                    parseNodeTagContiue(node, pages, lines, line, page);
+                    break;
+                }
+                throw new RuntimeException("cannot interprete decision " + tagAdd + " for tagAdd.");
+            }
+            case "unclear": {
+                if (tagUnclear == Decision.INVALID) {
+                    line.setValid(false);
+                    parseNodeTagContiue(node, pages, lines, line, page);
+                    break;
+                } else if (tagUnclear == Decision.CONTINUE) {
+                    parseNodeTagContiue(node, pages, lines, line, page);
+                    break;
+                }
+                throw new RuntimeException("cannot interprete decision " + tagUnclear + " for tagUnclear.");
+            }
             default: {
                 LOG.warn("ignore tag " + node + ", ignore line.");
                 line.setValid(false);
+                parseNodeTagContiue(node, pages, lines, line, page);
             }
 
         }
@@ -328,7 +476,7 @@ public class XmlParserTei implements Serializable {
         }
     }
 
-    public static ArrayList<Page> getPages(Doc document) {
+    public ArrayList<Page> getPages(Doc document) {
         NodeList elementsByTagName = document.getDocument().getElementsByTagName("text");
         if (elementsByTagName.getLength() != 1) {
             LOG.warn("expect only one tag with name 'body'.");
@@ -353,10 +501,11 @@ public class XmlParserTei implements Serializable {
             Doc document = new Doc(builder.parse(filename));
             return document;
         } catch (ParserConfigurationException | SAXException ex) {
-            throw new RuntimeException("unexpected syntax error.", ex);
+            LOG.error("unexpected syntax error.", ex);
         } catch (IOException ex) {
-            throw new RuntimeException("cannot find or open file", ex);
+            LOG.error("cannot find or open file", ex);
         }
+        return null;
     }
 
     public static void saveXML(Doc dokument, File filename) {
@@ -410,9 +559,13 @@ public class XmlParserTei implements Serializable {
             }
             System.out.println("File: " + file.getAbsolutePath());
             Doc loadXML = XmlParserTei.loadXML(file);
+            if (loadXML == null) {
+                continue;
+            }
             ArrayList<Page> pages = null;
             try {
-                pages = XmlParserTei.getPages(loadXML);
+                XmlParserTei parser = new XmlParserTei();
+                pages = parser.getPages(loadXML);
             } catch (Throwable ex) {
                 LOG.error("found error in xml " + file + " - skip xml.", ex);
                 continue;

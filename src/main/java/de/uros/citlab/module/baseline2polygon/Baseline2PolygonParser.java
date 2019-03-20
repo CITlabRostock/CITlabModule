@@ -13,7 +13,9 @@ import de.planet.math.geom2d.types.Point2DInt;
 import de.planet.math.geom2d.types.Polygon2DInt;
 import de.planet.math.geom2d.types.Rectangle2DInt;
 import de.uros.citlab.module.interfaces.IB2P;
+import de.uros.citlab.module.interfaces.IP2B;
 import de.uros.citlab.module.la.B2PSimple;
+import de.uros.citlab.module.la.BaselineGenerationHist;
 import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.MetadataUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
@@ -45,6 +47,12 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
     private String impl = "";
     private IB2P implModule;
     private IB2P implModuleFallback;
+    private IP2B inverseModule = new BaselineGenerationHist();
+    private boolean useInverseModule = true;
+
+    public void useInverseModule(boolean useInverseModule) {
+        this.useInverseModule = useInverseModule;
+    }
 
     public Baseline2PolygonParser(String classname) {
         impl = classname;
@@ -97,8 +105,20 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
                 if (ids == null || ArrayUtil.linearSearch(ids, textLineType.getId()) >= 0) {
                     BaselineType bl = textLineType.getBaseline();
                     if (bl == null) {
-                        LOG.warn("for textline '{}' no baseline polygon given", textLineType.getId());
-                        continue;
+                        if (useInverseModule) {
+                            if (textLineType.getCoords() != null) {
+                                inverseModule.processLine(hi, textLineType, textRegion);
+                            }
+                            if (textLineType.getBaseline() == null) {
+                                LOG.warn("for textline '{}' no baseline polygon given and Polygon2Baseline does not work.", textLineType.getId());
+                                continue;
+                            } else {
+                                LOG.warn("for textline '{}' baseline polygon calculated from polygon", textLineType.getId());
+                            }
+                        } else {
+                            LOG.warn("for textline '{}' no baseline polygon given", textLineType.getId());
+                            continue;
+                        }
                     }
                     textLines.add(textLineType);
                 }

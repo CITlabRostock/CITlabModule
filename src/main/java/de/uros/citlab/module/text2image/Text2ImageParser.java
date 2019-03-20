@@ -6,10 +6,12 @@
 package de.uros.citlab.module.text2image;
 
 import com.achteck.misc.types.ConfMat;
+import com.achteck.misc.types.ParamSetOrganizer;
 import de.planet.imaging.types.HybridImage;
 import de.uros.citlab.confmat.CharMap;
 import de.uros.citlab.errorrate.util.ObjectCounter;
 import de.uros.citlab.module.htr.HTRParser;
+import de.uros.citlab.module.htr.HTRParserPlus;
 import de.uros.citlab.module.types.HTR;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.types.LineImage;
@@ -21,6 +23,7 @@ import de.uros.citlab.textalignment.types.LineMatch;
 import eu.transkribus.core.model.beans.pagecontent.TextLineType;
 import eu.transkribus.core.model.beans.pagecontent.TextRegionType;
 import eu.transkribus.core.util.PageXmlUtils;
+import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.IText2Image;
 import eu.transkribus.interfaces.types.Image;
 import org.slf4j.Logger;
@@ -34,19 +37,31 @@ import java.util.*;
 /**
  * @author gundram
  */
-public class Text2ImageParser extends HTRParser implements IText2Image {
+public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
 
     public static Logger LOG = LoggerFactory.getLogger(Text2ImageParser.class.getName());
     private ObjectCounter<Stat> oc = new ObjectCounter<>();
+    IHtr htrImpl = null;
+
+    @Override
+    public String usage() {
+        return "tries to match given text to given baselines. " +
+                "See " + Key.class.getCanonicalName() + ".T2I_* for possible configurations";
+    }
 
     @Override
     public String getToolName() {
-        return "Matcher(" + super.getToolName() + ")";
+        return "Matcher(" + (htrImpl != null ? htrImpl.getToolName() : "?") + ")";
     }
 
     @Override
     public String getVersion() {
         return MetadataUtil.getSoftwareVersion();
+    }
+
+    @Override
+    public String getProvider() {
+        return MetadataUtil.getProvider("Gundram Leifert", "gundram.leifert@gmx.de");
     }
 
     public enum Stat {
@@ -109,6 +124,23 @@ public class Text2ImageParser extends HTRParser implements IText2Image {
         return res;
     }
 
+    private HTRParserPlus parserPlus = new HTRParserPlus();
+    private HTRParser parser = new HTRParser();
+
+    public HTR getHTR(String folderHTR, String charMap, String storageDir) {
+        try {
+            return parser.getHTR(folderHTR, null, charMap, storageDir, null);
+        } catch (RuntimeException ex) {
+            try {
+                return parserPlus.getHTR(folderHTR, null, charMap, storageDir, null);
+            } catch (RuntimeException ex2) {
+                LOG.error("cannot load HTR and HTR+. Error HTR: ", ex);
+                LOG.error("cannot load HTR and HTR+. Error HTR+:", ex2);
+                throw ex;
+            }
+        }
+    }
+
     public void matchCollection(String pathToOpticalModel, String pathToLanguageModel, String pathToCharacterMap, String pathToText, String[] images, String[] xmlInOut, String[] storages, String[] props) {
         LOG.info("process xmls {}...", Arrays.asList(images));
         List<PageStruct> pages = PageXmlUtil.getPages(images, xmlInOut);
@@ -121,9 +153,15 @@ public class Text2ImageParser extends HTRParser implements IText2Image {
         for (int i = 0; i < pages.size(); i++) {
             PageStruct page = pages.get(i);
             String storage = storages != null ? storages[i] : null;
-            HybridImage hi = ImageUtil.getHybridImage(page.getImg(), true);
+            HybridImage hi = null;
+            try {
+                hi = ImageUtil.getHybridImage(page.getImg(), true);
+            } catch (RuntimeException ex) {
+                LOG.info("loading image over transkribus throws error - use own method (errror = " + ex.getMessage() + ")");
+                hi = ImageUtil.getHybridImage(page.getPathImg(), true);
+            }
             List<TextRegionType> textRegions = PageXmlUtils.getTextRegions(page.getXml());
-            HTR htr = getHTR(pathToOpticalModel, pathToLanguageModel, pathToCharacterMap, storage, props);
+            HTR htr = getHTR(pathToOpticalModel, pathToCharacterMap, storage);
             for (TextRegionType textRegion : textRegions) {
                 List<TextLineType> linesInRegion1 = textRegion.getTextLine();
                 for (TextLineType textLineType : linesInRegion1) {
@@ -151,9 +189,12 @@ public class Text2ImageParser extends HTRParser implements IText2Image {
         Double costSkipWords = PropertyUtil.hasProperty(props, Key.T2I_SKIP_WORD) ? Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_SKIP_WORD)) : null;
         Double costSkipBaseline = PropertyUtil.hasProperty(props, Key.T2I_SKIP_BASELINE) ? Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_SKIP_BASELINE)) : null;
         Double costJumpBaseline = PropertyUtil.hasProperty(props, Key.T2I_JUMP_BASELINE) ? Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_JUMP_BASELINE)) : null;
+        Double bestPathOffset = PropertyUtil.hasProperty(props, Key.T2I_BEST_PATHES) ? Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_BEST_PATHES)) : null;
         int maxCount = PropertyUtil.hasProperty(props, Key.T2I_MAX_COUNT) ? Integer.parseInt(PropertyUtil.getProperty(props, Key.T2I_MAX_COUNT)) : -1;
         double threshold = Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_THRESH, "0.0"));
-        double nacOffset = -2.0;
+        if (threshold < 0) {
+            threshold = 0.0;
+        }
         String lbChars = " ";
         TextAligner textAligner = new TextAligner(
                 lbChars,
@@ -161,12 +202,23 @@ public class Text2ImageParser extends HTRParser implements IText2Image {
                 costSkipBaseline, //0.2
                 costJumpBaseline
         );
-        textAligner.setNacOffset(-2.0);
+//        textAligner.setUpdateScheme(PathCalculatorGraph.UpdateScheme.ALL);
+        textAligner.setNacOffset(0.0);
+        textAligner.setThreshold(threshold);
+        if (PropertyUtil.isPropertyTrue(props, Key.DEBUG)) {
+            File folder = PropertyUtil.hasProperty(props, Key.DEBUG_DIR)
+                    ? new File(PropertyUtil.getProperty(props, Key.DEBUG_DIR))
+                    : new File(pathToText).getParentFile();
+            folder.mkdirs();
+            String name = new File(pathToText).getName();
+            name = name.substring(0, name.lastIndexOf("."));
+            textAligner.setDebugOutput(3000, new File(folder, name + ".png"), false);
+        }
         if (maxCount > 0) {
             textAligner.setMaxVertexCount(maxCount);
         }
-        if (PropertyUtil.hasProperty(props, Key.T2I_BEST_PATHES)) {
-            throw new RuntimeException("path filter not implemented so far");
+        if (bestPathOffset != null) {
+            textAligner.setFilterOffset(bestPathOffset);
         }
         String property = PropertyUtil.getProperty(props, Key.T2I_HYPHEN);
         String lang = PropertyUtil.getProperty(props, Key.T2I_HYPHEN_LANG);
@@ -189,14 +241,14 @@ public class Text2ImageParser extends HTRParser implements IText2Image {
         }
         if (PropertyUtil.isPropertyTrue(props, Key.DEBUG)) {
             try {
-                double threshBaseline = Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_THRESH, "0.0"));
+                double threshBaseline = Math.abs(Double.parseDouble(PropertyUtil.getProperty(props, Key.T2I_THRESH, "0.0")));
                 for (PageStruct page : pages) {
                     File folder = PropertyUtil.hasProperty(props, Key.DEBUG_DIR)
                             ? new File(PropertyUtil.getProperty(props, Key.DEBUG_DIR))
                             : page.getPathXml().getParentFile();
                     folder.mkdirs();
                     {
-                        BufferedImage debugImage = ImageUtil.getDebugImage(page.getImg().getImageBufferedImage(true), page.getXml(), 1.0, false, true, threshBaseline, true, false);
+                        BufferedImage debugImage = ImageUtil.getDebugImage(page.getImg().getImageBufferedImage(true), page.getXml(), 1.0, false, true, threshBaseline, false, false);
                         debugImage = ImageUtil.resize(debugImage, 6000, debugImage.getHeight() * 6000 / debugImage.getWidth());
                         String imageFilename = page.getXml().getPage().getImageFilename();
                         imageFilename += ".jpg";

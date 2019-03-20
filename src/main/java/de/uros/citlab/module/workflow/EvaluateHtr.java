@@ -9,13 +9,13 @@ import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
+import de.planet.languagemodel.train.TrainLM;
 import de.uros.citlab.errorrate.HtrError;
 import de.uros.citlab.errorrate.types.Metric;
 import de.uros.citlab.errorrate.types.Result;
 import de.uros.citlab.module.baseline2polygon.B2PSeamMultiOriented;
 import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
-import de.uros.citlab.module.htr.HTRParser;
-import de.uros.citlab.module.types.ArgumentLine;
+import de.uros.citlab.module.htr.HTRParserPlus;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.ImageUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
@@ -37,7 +37,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
  * @author gundram
  */
 public class EvaluateHtr extends ParamTreeOrganizer {
@@ -70,7 +69,7 @@ public class EvaluateHtr extends ParamTreeOrganizer {
     }
 
     public EvaluateHtr(String htr, String lr, String gt, String out, boolean createDebugImg) {
-        this.htrInstance = new HTRParser();
+        this.htrInstance = new HTRParserPlus();
         b2p = new Baseline2PolygonParser(B2PSeamMultiOriented.class.getName());
         this.gt = gt;
         this.out = out;
@@ -96,14 +95,44 @@ public class EvaluateHtr extends ParamTreeOrganizer {
     }
 
     public double run(String[] props) throws MalformedURLException, JAXBException, IOException {
+        boolean runHTR = true;
+        List<String> refs = new LinkedList<>();
+        List<String> recos = new LinkedList<>();
         List<File> listFiles = FileUtil.listFiles(folderIn, "xml", true);
         FileUtil.deleteMetadataAndMetsFiles(listFiles);
         Collections.sort(listFiles);
-        folderOut.mkdirs();
-        List<String> refs = new LinkedList<>();
-        List<String> recos = new LinkedList<>();
-        LOG.info("found {} images...", listFiles.size());
-        if (htr != null && !htr.isEmpty()) {
+        if (runHTR) {
+            folderOut.mkdirs();
+            LOG.info("found {} images...", listFiles.size());
+            if (htr != null && !htr.isEmpty()) {
+                for (File fileInXml : listFiles) {
+                    File fileInImg = PageXmlUtil.getImagePath(fileInXml, true);
+                    File fileOutImg = FileUtil.getTgtFile(folderIn, folderOut, fileInImg);
+                    File fileOutXml = FileUtil.getTgtFile(folderIn, folderOut, fileInXml);
+                    refs.add(fileInXml.getPath());
+                    recos.add(fileOutXml.getPath());
+                    FileUtil.copyFile(fileInImg, fileOutImg);
+                    FileUtil.copyFile(fileInXml, fileOutXml);
+                    Image img = new Image(fileOutImg.toURI().toURL());
+                    b2p.process(img, fileOutXml.getAbsolutePath(), null, null);
+                    htrInstance.process(htr, lr, null, img, fileOutXml.getAbsolutePath(), null, null, props);
+                    if (debug) {
+                        BufferedImage imageBufferedImage = img.getImageBufferedImage(true);
+                        imageBufferedImage = ImageUtil.getDebugImage(imageBufferedImage, PageXmlUtil.unmarshal(fileOutXml), 1.0, false, false, false, true, true);
+                        ImageIO.write(imageBufferedImage, "png", new File(fileOutXml.getAbsoluteFile() + ".png"));
+                    }
+                }
+            } else {
+                refs = FileUtil.getStringList(listFiles);
+                List<File> listFiles2 = FileUtil.listFiles(folderOut, "xml", true);
+                FileUtil.deleteMetadataAndMetsFiles(listFiles2);
+                Collections.sort(listFiles2);
+                recos = FileUtil.getStringList(listFiles2);
+                if (recos.size() != refs.size()) {
+                    throw new RuntimeException("gt folder (" + refs.size() + ") and hyp folder (" + recos.size() + ") do not have the same number of files");
+                }
+            }
+        } else {
             for (File fileInXml : listFiles) {
                 File fileInImg = PageXmlUtil.getImagePath(fileInXml, true);
                 File fileOutImg = FileUtil.getTgtFile(folderIn, folderOut, fileInImg);
@@ -121,33 +150,40 @@ public class EvaluateHtr extends ParamTreeOrganizer {
                     ImageIO.write(imageBufferedImage, "png", new File(fileOutXml.getAbsoluteFile() + ".png"));
                 }
             }
-        } else {
-            refs = FileUtil.getStringList(listFiles);
-            List<File> listFiles2 = FileUtil.listFiles(folderOut, "xml", true);
-            FileUtil.deleteMetadataAndMetsFiles(listFiles2);
-            Collections.sort(listFiles2);
-            recos = FileUtil.getStringList(listFiles2);
-            if (recos.size() != refs.size()) {
-                throw new RuntimeException("gt folder (" + refs.size() + ") and hyp folder (" + recos.size() + ") do not have the same number of files");
-            }
         }
-        File fileRef = new File("ref.lst");
-        File fileReco = new File("reco.lst");
+        File fileRef = new File(folderOut, "ref.lst");
+        File fileReco = new File(folderOut, "reco.lst");
         FileUtil.writeLines(fileRef, refs);
         FileUtil.writeLines(fileReco, recos);
+        for (int i = 0; i < recos.size(); i++) {
+            List<String> recoList = PageXmlUtil.getText(PageXmlUtil.unmarshal(new File(recos.get(i))));
+            List<String> refList = PageXmlUtil.getText(PageXmlUtil.unmarshal(new File(refs.get(i))));
+            FileUtil.writeLines(new File("ref.txt"), refList);
+            FileUtil.writeLines(new File("raw.txt"), recoList);
+
+        }
         HtrError erp = new HtrError();
-        Result err = erp.run(("ref.lst reco.lst" + (wer ? " -w" : "")).split(" "));
+        Result err = erp.run((fileRef.getPath() + " " + fileReco.getPath() + (wer ? " -w" : "")).split(" "));
         FileUtils.deleteQuietly(fileRef);
         FileUtils.deleteQuietly(fileReco);
         return err.getMetric(Metric.ERR) * 100;
     }
 
+    public static void createLM_NGram(List<File> filesXML, File out) {
+        List<String> text = new LinkedList<>();
+        for (File file : filesXML) {
+            text.addAll(PageXmlUtil.getText(PageXmlUtil.unmarshal(file)));
+        }
+//        TrainLM.train(text, 6, out, String.valueOf(ConfMat.NaC));
+        TrainLM.train(text, 6, out, String.valueOf('@'));
+    }
+
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException, IOException, JAXBException, InterruptedException {
-        ArgumentLine al = new ArgumentLine();
-        al.addArgument("gt", HomeDir.getFile("data/val_b2p/val_a/"));
-        al.addArgument("out", HomeDir.getFile("tmp/val_b2p/val_a/"));
-        al.addArgument("htr", HomeDir.getFile("nets/ABP_KWS_Test/net.sprnn"));
-        args = al.getArgs();
+//        ArgumentLine al = new ArgumentLine();
+//        al.addArgument("gt", HomeDir.getFile("data/sets_b2p/valid/"));
+//        al.addArgument("out", HomeDir.getFile("tmp/sets_b2p/valid/geo/"));
+//        al.addArgument("htr", HomeDir.getFile("models/geo"));
+//        args = al.getArgs();
         EvaluateHtr instance = new EvaluateHtr();
         ParamSet ps = new ParamSet();
         ps.setCommandLineArgs(args);    // allow early parsing
@@ -157,6 +193,7 @@ public class EvaluateHtr extends ParamTreeOrganizer {
         instance.init();
         double run = instance.run(null);
         System.out.println(run + " %");
+//        System.out.println(Arrays.toString(al.getArgs()));
     }
 
 }
