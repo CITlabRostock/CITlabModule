@@ -224,7 +224,7 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
 //        System.out.println(Arrays.toString(remainingArgumentList));
         props = ArgumentLine.getPropertiesFromArgs(remainingArgumentList, props);
         LOG.info("set properties {}", Arrays.toString(props)); //        System.out.println("==>" + Arrays.toString(props));
-        instance = new Apply2Folder_ML(htr, lr, la, folder, folderOut, b2p, true, true, props);
+        instance = new Apply2Folder_ML(htr, lr, la, folder, folderOut, b2p, false, true, props);
         ps = new ParamSet();
         ps.setCommandLineArgs(args);    // allow early parsing
         ps = instance.getDefaultParamSet(ps);
