@@ -2,6 +2,7 @@
 
 # 2.2.1
 * bugfix LA Advanced: when region is given and rotated text lines are found, lines will now not rotated out of image 
+
 # 2.2.0
 * update to newer versions for bugfix in planets sources
 
