@@ -143,9 +143,9 @@ public class TestWorkflow {
             } catch (IOException ex) {
                 Assert.fail("creating test szenario did not work: (copy file for LA) " + ex.getMessage());
             }
-            if (TestFiles.skipLargeTests()) {
-                return;
-            }
+//            if (TestFiles.skipLargeTests()) {
+//                return;
+//            }
             File htr = TestFiles.getHtrDft();
             try {
                 testXmlFile_LA_HTR = new File(testFolder, testFileImgBase + "_la_htr.xml");
