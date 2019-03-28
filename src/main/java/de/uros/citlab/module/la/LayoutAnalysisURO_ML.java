@@ -254,7 +254,7 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
     private PageType buildRegs(HybridImage hi, PageType page, List<TrpRegionType> globRegs, List<TextRegionType> reducedTextRegions, List<Polygon2DInt> bls, String thisRotateScheme) {
 
         if (reducedTextRegions == null || reducedTextRegions.isEmpty()) {
-            List<Cluster> cluster = clusterBLs(hi, bls, thisRotateScheme, true);
+            List<Cluster> cluster = clusterBLs(hi, bls, thisRotateScheme, true, true);
             int cntRegion = 0;
 
             for (Cluster aCluster : cluster) {
@@ -296,11 +296,12 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
                     }
                 }
                 List<Cluster> regCluster;
-                if (thisRotateScheme.equals(ROT_DFT)) {
-                    regCluster = clusterBLs(hi, regBLs, thisRotateScheme, false);
-                } else {
-                    regCluster = clusterBLs(hi, regBLs, ROT_HOM, false);
-                }
+                regCluster = clusterBLs(
+                        hi,
+                        regBLs,
+                        thisRotateScheme.equals(ROT_HETRO) ? ROT_HOM : thisRotateScheme,
+                        false,
+                        false);
                 if (regCluster == null || regCluster.isEmpty()) {
                     continue;
                 }
@@ -329,7 +330,7 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
         return page;
     }
 
-    private List<Cluster> clusterBLs(HybridImage hi, List<Polygon2DInt> bls, String thisRotateScheme, boolean clustLeft2Right) {
+    private List<Cluster> clusterBLs(HybridImage hi, List<Polygon2DInt> bls, String thisRotateScheme, boolean rotateBaselines, boolean clustLeft2Right) {
         short[][] absSobelSum = null;
         if (!thisRotateScheme.equals(ROT_DFT)) {
             absSobelSum = ImageUtil.calcAbsSobelSum(hi.getAsOpenCVMatImage());
@@ -441,8 +442,12 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
             for (List<Polygon2DInt> aClust : clusters) {
                 Cluster aC = new Cluster(aAngle, hi.getHeight(), hi.getWidth());
                 for (Polygon2DInt aBL : aClust) {
-                    Polygon2DInt polygonRotated = PolygonUtil.rotate(aBL, aAngle);
-                    aC.addBL(polygonRotated);
+                    if (rotateBaselines) {
+                        Polygon2DInt polygonRotated = PolygonUtil.rotate(aBL, aAngle);
+                        aC.addBL(polygonRotated);
+                    } else {
+                        aC.addBL(aBL);
+                    }
                 }
                 aC.sort();
                 aC.calcSurr();
