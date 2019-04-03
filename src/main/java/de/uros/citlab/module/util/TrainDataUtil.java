@@ -115,7 +115,7 @@ public class TrainDataUtil {
 
     }
 
-    public static void createTrainData(String[] pageXmls, String outputDir, String pathToCharMap, String[] props) {
+    public static void createTrainData(String[] pageXmls, String outputDir, String pathToCharMap, String[] props, Observable observable) {
         boolean saveCharMap = pathToCharMap != null && !pathToCharMap.isEmpty();
         String[] propsTraindata = props;
         if (saveCharMap) {
@@ -141,12 +141,12 @@ public class TrainDataUtil {
         }
     }
 
-    public static int runCreateTraindata(File folderPageXml, File folderSnipets, File charMap, String[] props) {
+    public static int runCreateTraindata(File folderPageXml, File folderSnipets, File charMap, String[] props, Observable observable) {
         Collection<File> listFiles = FileUtil.listFiles(folderPageXml, "xml", true);
         FileUtil.deleteMetadataAndMetsFiles(listFiles);
         String[] names = FileUtil.asStringList(listFiles);
         props = PropertyUtil.setProperty(props, KEY_SRC_FOLDER, folderPageXml.getAbsolutePath());
-        createTrainData(names, folderSnipets == null ? null : folderSnipets.getAbsolutePath(), charMap == null ? null : charMap.getAbsolutePath(), props);
+        createTrainData(names, folderSnipets == null ? null : folderSnipets.getAbsolutePath(), charMap == null ? null : charMap.getAbsolutePath(), props,observable);
         return names.length;
     }
 
