@@ -2,6 +2,8 @@
 
 # 2.2.2
 * bugfix training: shuffle training list so that order is "randomly"
+* bugfix surrogates: if a line contains surrogates, it is ignored in training and validation
+* bugfix empty validation: If a validation set is given, but no lines are in, throw exception
 
 # 2.2.1
 * bugfix LA Advanced: when region is given and rotated text lines are found, lines will now not rotated out of image 

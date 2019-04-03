@@ -122,6 +122,11 @@ public class TrainDataUtil {
             propsTraindata = PropertyUtil.setProperty(props, Key.STATISTIC, "true");
         }
         TrainDataUtil.Statistic statistic = createTrainData(pageXmls, outputDir, propsTraindata);
+        if (statistic != null) {
+            if (statistic.statChar.isEmpty()) {
+                throw new RuntimeException("no lines with non-empty ground truth saved");
+            }
+        }
         if (PropertyUtil.isPropertyTrue(props, Key.STATISTIC)) {
             TrainDataUtil.saveCharacterStatistic(statistic.getStatChar(), new File(outputDir, cmLong));
         }
@@ -269,6 +274,7 @@ public class TrainDataUtil {
                         if (unicode == null || unicode.isEmpty()) {
                             continue;
                         }
+                        checkLine(unicode, pageType, l);
                         if (saveTrainData) {
                             if (l.getTextEquiv().getConf() == null || l.getTextEquiv().getConf() >= minConf) {
                                 tlts.add(l);
@@ -337,7 +343,7 @@ public class TrainDataUtil {
                             }
                             LoaderIO.saveImageHolder(f.getAbsolutePath(), new IImageLoader.ImageHolderDft(subImage, reference, new HashMap<>()));
                         } catch (Throwable t) {
-                            LOG.error("could not save ImageHolder", t);
+                            LOG.error("could not save ImageHolders for file " + fileXml.getName(), t);
                         } finally {
                             if (subImage != null) {
                                 subImage.clear(false);
@@ -348,11 +354,19 @@ public class TrainDataUtil {
                     hi.clear(false);
                 }
             } catch (Throwable t) {
-                LOG.error("could not save ImageHolders", t);
+                LOG.error("could not save ImageHolders for file " + fileXml.getName(), t);
             }
         }
 
         return stat;
+    }
+
+    private static void checkLine(String unicode, PcGtsType pageType, TextLineType l) {
+        for (char c : unicode.toCharArray()) {
+            if (Character.isSurrogate(c)) {
+                throw new RuntimeException("page " + pageType.getPage().getImageFilename() + " contains a surrogate in line " + l.getId() + " with integer value " + ((int) c) + ".");
+            }
+        }
     }
 
     public static void savePDict(ObjectCounter<String> oc, File path) {
