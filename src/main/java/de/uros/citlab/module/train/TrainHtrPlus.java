@@ -21,10 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Observable;
+import java.util.*;
 
 /**
  * @author gundram
@@ -252,7 +249,9 @@ public class TrainHtrPlus extends TrainHtr {
         }
         if (inputTrainDir != null && !inputTrainDir.isEmpty()) {
             fileListTrain = new File(folderLists, "train.lst");
-            FileUtil.writeLines(fileListTrain, FileUtil.getStringList(FileUtil.listFiles(new File(inputTrainDir), FileUtil.IMAGE_SUFFIXES, true)));
+            List<String> stringList = FileUtil.getStringList(FileUtil.listFiles(new File(inputTrainDir), FileUtil.IMAGE_SUFFIXES, true));
+            Collections.shuffle(stringList, new Random(1234));
+            FileUtil.writeLines(fileListTrain, stringList);
         }
         int gpu = getGPU(props);
 

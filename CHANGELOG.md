@@ -1,5 +1,8 @@
 # Change Log
 
+# 2.2.2
+* bugfix training: shuffle training list so that order is "randomly"
+
 # 2.2.1
 * bugfix LA Advanced: when region is given and rotated text lines are found, lines will now not rotated out of image 
 
