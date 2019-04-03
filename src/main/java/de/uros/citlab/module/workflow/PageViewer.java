@@ -75,7 +75,7 @@ public class PageViewer extends ParamTreeOrganizer {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InvalidParameterException, MalformedURLException {
-        args = ("-i " + HomeDir.getFile("racetrack/export_job_504245/104580")).split(" ");
+        args = ("-i /home/gundram/devel/projects/ICDAR_chinese/data/raw/task3GT/004709251_01138.jpg").split(" ");
 //        args=("-i "+HomeDir.getFile("tmp_20170308/xml_semi_0/")).split(" ");
         PageViewer instance = new PageViewer();
         ParamSet ps = new ParamSet();

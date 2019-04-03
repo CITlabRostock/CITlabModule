@@ -1,8 +1,10 @@
 package de.uros.citlab.module.workflow;
 
+import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.CharMap;
 import de.planet.imaging.types.HybridImage;
 import de.planet.imaging.util.ImageHelper;
+import de.planet.util.preproc.ContrastNormalizerSimple;
 import de.uro.citlab.cjk.Decomposer;
 import de.uro.citlab.cjk.util.DecomposerUtil;
 import de.uro.citlab.cjk.util.Gnuplot;
@@ -21,7 +23,7 @@ import java.util.*;
 
 public class SetUpData {
 
-    public static boolean saveImages = false;
+    public static boolean saveImages = true;
     public static double factorReduce = 0.9;
     public static double factorStart = 0.02;
     public static double sizeOffset = 1;
@@ -106,15 +108,39 @@ public class SetUpData {
         return ((double) out) / (in + out);
     }
 
-    public static void main(String[] args) throws IOException {
+    static ContrastNormalizerSimple cm;
 
+    static {
+        cm = new ContrastNormalizerSimple();
+        cm.setParamSet(cm.getDefaultParamSet(new ParamSet()));
+        cm.init();
+    }
+
+    public static double isWhiteOnBlack(HybridImage hi) {
+        HybridImage hybridImage = cm.preProcess(hi);
+        double[][] mat = hybridImage.getAsInverseGrayMatrix();
+        double c = 0;
+        for (double[] doubles : mat) {
+            for (double aDouble : doubles) {
+                c += aDouble;
+            }
+        }
+        c /= mat.length * mat[0].length;
+        return c;
+    }
+
+
+    public static void main(String[] args) throws IOException {
+        int count = 0;
+        ObjectCounter<String> ocOK = new ObjectCounter<>();
         File folderData = HomeDir.getFile("data");
         File folderCharmaps = HomeDir.getFile("charmaps");
         folderCharmaps.mkdirs();
         File folderLists = HomeDir.getFile("lists");
         folderLists.mkdirs();
         Path folderPath = folderData.toPath();
-        File folderRawTask1 = new File(folderData, "raw");
+        File folderRaw = new File(folderData, "raw");
+        File folderRawTask1 = new File(folderRaw, "task1LineImageAndGT");
         File folderBase = new File(folderData, "base");
         File folderVal = new File(folderBase, "val");
         File folderTrain = new File(folderBase, "train");
@@ -152,6 +178,24 @@ public class SetUpData {
                 File outFile = new File(pageFolder, image.getName());
                 HybridImage hi = HybridImage.newInstance(image);
                 hi = ImageHelper.rotate270(hi);
+                if (hi.getHeight() > hi.getWidth() && ref.length() > 1) {
+                    hi = ImageHelper.rotate90(hi);
+                    ocOK.add("wrong dimension");
+//                    Display.addPanel(new DisplayPlanet(hi), "dim " + outFile.getName());
+//                    count++;
+//                    continue;
+                } else if (isWhiteOnBlack(hi) > 0.5) {
+//                    Display.addPanel(new DisplayPlanet(hi), "white " + isWhiteOnBlack(hi) +" "+ outFile.getName());
+                    ocOK.add("white on black");
+//                    count++;
+//                    continue;
+                } else {
+                    ocOK.add("ok");
+                }
+//                if (count > 20) {
+//                    Display.show(true, true);
+//                    count = 0;
+//                }
                 hi.save(outFile.getAbsolutePath());
                 FileUtil.writeLine(new File(outFile.getPath().replace(".jpg", ".txt")), ref);
             }
@@ -166,11 +210,13 @@ public class SetUpData {
 
             }
         }
-        int[] maxLen = new int[]{16, 8, 10, 12, 14, 18};
+        System.out.println(ocOK);
+//        System.exit(-1);
+        int[] maxLen = new int[]{16, 8, 10, 12, 6};
         Decomposer.Coding[] codings = new Decomposer.Coding[]{Decomposer.Coding.UTF8, Decomposer.Coding.UTF8_IDC};
 //        int[] maxLen = new int[]{16};
-        for (Decomposer.Coding coding : codings) {
-            for (int len : maxLen) {
+        for (int len : maxLen) {
+            for (Decomposer.Coding coding : codings) {
                 String prefix = String.format("chinese_%02d%s", len, coding.equals(Decomposer.Coding.UTF8_IDC) ? "_IDC" : "");
                 File folderDecopmoseOut = new File(folderDecomposed, prefix);
                 Decomposer decomposer = getBestDecomposer(len, ocTrain.getMap(), coding);
@@ -181,7 +227,8 @@ public class SetUpData {
                     String ref = FileUtil.readLine(txt);
                     for (char aChar : ref.toCharArray()) {
                         if (aChar == ' ') {
-                            throw new RuntimeException("space in reference " + txt.getPath());
+                            LOG.error("space in reference " + txt.getPath() + " - ignore space ");
+//                            throw new RuntimeException("space in reference " + txt.getPath());
                         }
                         String decompose = decomposer.decompose("" + aChar);
                         if (decompose == null) {
@@ -193,6 +240,10 @@ public class SetUpData {
 //                        throw new RuntimeException("should not be larger than 16");
                         }
                         sb.append(decompose).append(' ');
+                    }
+                    ref = ref.replaceAll(" ", "");
+                    if (ref.contains(" ")) {
+                        throw new RuntimeException("space in reference " + txt.getPath());
                     }
                     String refNew = sb.toString().trim();
                     for (char c : refNew.toCharArray()) {
