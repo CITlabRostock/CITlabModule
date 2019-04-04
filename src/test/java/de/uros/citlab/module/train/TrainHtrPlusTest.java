@@ -43,7 +43,7 @@ public class TrainHtrPlusTest {
 
 
     static {
-        dirRoot = new File(TestFiles.getPrefix(), "test_trainHtrPlus");
+        dirRoot = new File(TestFiles.getPrefix(), "teouhast_trainHtrPlus");
         dirTraindata = new File(dirRoot, "traindata");
         dirTmp = new File(dirRoot, "tmp");
         dirHtr = new File(dirRoot, "network_v1");
@@ -256,11 +256,6 @@ public class TrainHtrPlusTest {
         HTRParserPlus parser = new HTRParserPlus();
         Image img = new Image(TestFiles.getTestFiles().get(0).toURI().toURL());
         PcGtsType page = PageXmlUtil.unmarshal(PageXmlUtil.getXmlPath(TestFiles.getTestFiles().get(0)));
-        System.out.println("before:###############################");
-        List<String> text = PageXmlUtil.getText(page);
-        for (String string : text) {
-            System.out.println(string);
-        }
         parser.process(new File(TestFiles.getPrefix(), "test_htr/HTR").getAbsolutePath(),
                 null,
                 null,
@@ -269,11 +264,10 @@ public class TrainHtrPlusTest {
                 null,
                 null,
                 null);
-        List<String> recoApply = PageXmlUtil.getText(page);
-        System.out.println("output of network:");
-        for (String line : recoApply) {
-            System.out.println(line);
-        }
+//        System.out.println("output of network:");
+//        for (String line : recoApply) {
+//            System.out.println(line);
+//        }
         String tgt = "d\n" +
                 "e Hagacfeee Foodeieen seiter\n" +
                 "ce s mes Gaeheh. hen.Gais mtganste\n" +
@@ -290,7 +284,7 @@ public class TrainHtrPlusTest {
                 "steh. dwisette Aahasst wdennn\n" +
                 "Vi. elllle\n" +
                 "CVVMCekebere";
-        String out = String.join("\n", recoApply);
+        String out = String.join("\n",  PageXmlUtil.getText(page));
         Assert.assertEquals("output between CITlab and this machine should be tze same", tgt, out);
 //        Collections.sort(recoApply);
 //        Collections.sort(recoTrain);

@@ -10,13 +10,10 @@ import com.achteck.misc.types.ConfMat;
 import com.achteck.misc.util.IO;
 import de.planet.citech.types.IDecodingType;
 import de.planet.imaging.types.HybridImage;
-import de.planet.itrtech.reco.IImagePreProcess;
 import de.planet.itrtech.reco.ISNetwork;
 import de.planet.langmod.LangModFullText;
 import de.planet.langmod.types.ILangMod;
 import de.planet.langmod.types.ILangMod.ILangModResult;
-import de.planet.tensorflow.types.SNetworkTF;
-import de.planet.util.ConfMatUtil;
 import de.uros.citlab.module.kws.ConfMatContainer;
 import de.uros.citlab.module.util.GroupUtil;
 import de.uros.citlab.module.util.IOUtil;
@@ -160,13 +157,9 @@ public class HTR {
         if (PropertyUtil.isPropertyTrue(props, Key.RAW) || lmImpl == null) {
             return new Result(confMat.toString(), confMat);
         }
-        ConfMatUtil.getProbMat(confMat).save(new File("debug_res", li.getTextLine().getId() + "_cm.png").getAbsolutePath());
-        ConfMatUtil.saveProbMat(new File("debug_res", li.getTextLine().getId() + "_pm.txt").getAbsolutePath(),confMat,"%.4e");
+//        ConfMatUtil.getProbMat(confMat).save(new File("debug_res", li.getTextLine().getId() + "_cm.png").getAbsolutePath());
+//        ConfMatUtil.saveProbMat(new File("debug_res", li.getTextLine().getId() + "_pm.txt").getAbsolutePath(),confMat,"%.4e");
         lmImpl.setConfMat(confMat);
-        if (li.getTextLine().getId().equals("r1l16")) {
-            System.out.println("stop");
-        }
-
         ILangModResult result = lmImpl.getResult();
         if (result == null) {
             LOG.error("no result returned from langMod.");
@@ -311,16 +304,16 @@ public class HTR {
             HybridImage subImage = lineImage.getSubImage();
 
             htrImpl.setInput(subImage);
-            IImagePreProcess preproc = ((SNetworkTF) htrImpl).getPreproc();
-            File folderOut = new File("debug_res");
-            folderOut.mkdir();
-            subImage.save(new File(folderOut, lineImage.getTextLine().getId() + ".png").getAbsolutePath());
-            preproc.preProcess(subImage).save(new File(folderOut, lineImage.getTextLine().getId() + "_pp.png").getAbsolutePath());
+//            IImagePreProcess preproc = ((SNetworkTF) htrImpl).getPreproc();
+//            File folderOut = new File("debug_res");
+//            folderOut.mkdir();
+//            subImage.save(new File(folderOut, lineImage.getTextLine().getId() + ".png").getAbsolutePath());
+//            preproc.preProcess(subImage).save(new File(folderOut, lineImage.getTextLine().getId() + "_pp.png").getAbsolutePath());
             htrImpl.update();
             subImage.clear();
             res = htrImpl.getConfMat();
 //            if (LOG.isDebugEnabled()) {
-            LOG.error("bestpath is '" + res.getBestPath().replace(ConfMat.NaC, '*') + "'");
+//            LOG.error("bestpath is '" + res.getBestPath().replace(ConfMat.NaC, '*') + "'");
 //            }
             if (cmc != null) {
                 cmc.add(res, lineImage.getTextLine());
