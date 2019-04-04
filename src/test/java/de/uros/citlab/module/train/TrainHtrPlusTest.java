@@ -247,6 +247,66 @@ public class TrainHtrPlusTest {
     }
 
     @Test
+    public void test05RunNetwork() throws MalformedURLException {
+//        if (TestFiles.skipLargeTests()) {
+//            return;
+//        }
+
+        System.out.println("runHTR");
+        HTRParserPlus parser = new HTRParserPlus();
+        Image img = new Image(TestFiles.getTestFiles().get(0).toURI().toURL());
+        PcGtsType page = PageXmlUtil.unmarshal(PageXmlUtil.getXmlPath(TestFiles.getTestFiles().get(0)));
+        System.out.println("before:###############################");
+        List<String> text = PageXmlUtil.getText(page);
+        for (String string : text) {
+            System.out.println(string);
+        }
+        parser.process(new File(TestFiles.getPrefix(), "test_htr/HTR").getAbsolutePath(),
+                null,
+                null,
+                img,
+                page,
+                null,
+                null,
+                null);
+        List<String> recoApply = PageXmlUtil.getText(page);
+        System.out.println("output of network:");
+        for (String line : recoApply) {
+            System.out.println(line);
+        }
+        String tgt = "d\n" +
+                "e Hagacfeee Foodeieen seiter\n" +
+                "ce s mes Gaeheh. hen.Gais mtganste\n" +
+                "wwoden, dasd sagele Rag deuhlsahen uh en\n" +
+                "Abunafaahut chr Voteon ehgeben Sdeiaee\n" +
+                "o gige iich hn. Fagaheennn Hadicg zal.\n" +
+                "diah mns dasd fat dn Mucht genr saßhte,\n" +
+                "ttioe dat aiesernsgen densshanstaas ee\n" +
+                "Aitgen Seno wedlennnn allte, ich\n" +
+                "den f wtseor sage mnieesllotennn gale.\n" +
+                "Giich de Ghen Gabe Brlestange aaee\n" +
+                "ge Gihan\n" +
+                "Henn. Sugeng.\n" +
+                "steh. dwisette Aahasst wdennn\n" +
+                "Vi. elllle\n" +
+                "CVVMCekebere";
+        String out = String.join("\n", recoApply);
+        Assert.assertEquals("output between CITlab and this machine should be tze same", tgt, out);
+//        Collections.sort(recoApply);
+//        Collections.sort(recoTrain);
+//        Assert.assertEquals("number of detected lines have to be the same", recoApply.size(), recoTrain.size());
+//        for (int i = 0; i < recoApply.size(); i++) {
+//            System.out.println("apply: " + recoApply.get(i));
+//            System.out.println("train: " + recoTrain.get(i));
+//            System.out.println("----------------------------------------");
+//        }
+//        for (int i = 0; i < recoApply.size(); i++) {
+//            Assert.assertEquals("output have to be the same", recoApply.get(i), recoTrain.get(i));
+//        }
+
+    }
+
+    @Test
     public void testHtrPlusTrainError_2019_04_03() {
         System.out.println("HtrPlusTrainError_2019-04-03");
         File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "HtrPlusTrainError_2019-04-03");
@@ -261,7 +321,7 @@ public class TrainHtrPlusTest {
         Assert.assertEquals("wrong number of snippets found for validation", 95, size);
     }
 
-//    @Test
+    //    @Test
     public void testID322223() throws MalformedURLException {
         System.out.println("testID32223");
         HTRParserPlus parser = new HTRParserPlus();
