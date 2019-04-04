@@ -16,6 +16,7 @@ import de.planet.langmod.LangModFullText;
 import de.planet.langmod.types.ILangMod;
 import de.planet.langmod.types.ILangMod.ILangModResult;
 import de.planet.tensorflow.types.SNetworkTF;
+import de.planet.util.ConfMatUtil;
 import de.uros.citlab.module.kws.ConfMatContainer;
 import de.uros.citlab.module.util.GroupUtil;
 import de.uros.citlab.module.util.IOUtil;
@@ -159,7 +160,12 @@ public class HTR {
         if (PropertyUtil.isPropertyTrue(props, Key.RAW) || lmImpl == null) {
             return new Result(confMat.toString(), confMat);
         }
+        ConfMatUtil.getProbMat(confMat).save(new File("debug_res", li.getTextLine().getId() + "_cm.png").getAbsolutePath());
         lmImpl.setConfMat(confMat);
+        if (li.getTextLine().getId().equals("r1l16")) {
+            System.out.println("stop");
+        }
+
         ILangModResult result = lmImpl.getResult();
         if (result == null) {
             LOG.error("no result returned from langMod.");
