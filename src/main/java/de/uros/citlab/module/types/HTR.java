@@ -161,6 +161,7 @@ public class HTR {
             return new Result(confMat.toString(), confMat);
         }
         ConfMatUtil.getProbMat(confMat).save(new File("debug_res", li.getTextLine().getId() + "_cm.png").getAbsolutePath());
+        ConfMatUtil.saveProbMat(new File("debug_res", li.getTextLine().getId() + "_pm.txt").getAbsolutePath(),confMat,"%.4e");
         lmImpl.setConfMat(confMat);
         if (li.getTextLine().getId().equals("r1l16")) {
             System.out.println("stop");
