@@ -277,8 +277,8 @@ public class TrainHtrPlus extends TrainHtr {
                         getFurtherTrainingProperties(trainingProperties, 1, true, true)
                 ) != 0) {
                     RuntimeException re = new RuntimeException(
-                            "pretraining of HTR+ ends with status !=0. last error messages: \n"
-                                    + String.join("\n" + processListener.getLastErrors()));
+                            "pretraining of HTR+ ends with status !=0. last messages: \n"
+                                    + String.join("\n" + processListener.getLastOutAndError()));
                     notifyObservers(new ErrorNotification(null, null, re, TrainHtrPlus.class));
                     LOG.error("pretraining of HTR+ ends with status !=0");
                     throw re;
@@ -292,8 +292,8 @@ public class TrainHtrPlus extends TrainHtr {
                     getFurtherTrainingProperties(trainingProperties, numEpochs, false, true)
             ) != 0) {
                 RuntimeException re = new RuntimeException(
-                        "training of HTR+ ends with status !=0. last error messages: \n"
-                                + String.join("\n" + processListener.getLastErrors()));
+                        "training of HTR+ ends with status !=0. last messages: \n"
+                                + String.join("\n" + processListener.getLastOutAndError()));
                 notifyObservers(new ErrorNotification(null, null, re, TrainHtrPlus.class));
                 LOG.error("training of HTR+ ends with status !=0");
                 throw re;
@@ -307,8 +307,8 @@ public class TrainHtrPlus extends TrainHtr {
                     trainingProperties
             ) != 0) {
                 RuntimeException re = new RuntimeException(
-                        "training of HTR+ ends with status !=0. last error messages: \n"
-                                + String.join("\n" + processListener.getLastErrors()));
+                        "training of HTR+ ends with status !=0. last messages: \n"
+                                + String.join("\n" + processListener.getLastOutAndError()));
                 notifyObservers(new ErrorNotification(null, null, re, TrainHtrPlus.class));
                 LOG.error("training of HTR+ ends with status !=0");
                 throw re;
@@ -566,14 +566,18 @@ public class TrainHtrPlus extends TrainHtr {
         double bestval = Double.NaN;
         boolean isBestVal = false;
         private Long processID = null;
-        private LinkedList<String> lastErrors = new LinkedList<>();
+        private LinkedList<String> lastOutAndError = new LinkedList<>();
 
-        public List<String> getLastErrors() {
-            return lastErrors;
+        public List<String> getLastOutAndError() {
+            return lastOutAndError;
         }
 
         @Override
         public void handleOutput(String line) {
+            lastOutAndError.add(line);
+            if (lastOutAndError.size() > 20) {
+                lastOutAndError.removeFirst();
+            }
             if (valFile != null && line.matches(".*Val: CER = .*")) {
                 String trim = line.split("Val: CER = ")[1].trim();
                 double val = Double.parseDouble(trim);
@@ -604,9 +608,9 @@ public class TrainHtrPlus extends TrainHtr {
 
         @Override
         public void handleError(String line) {
-            lastErrors.add(line);
-            if (lastErrors.size() > 20) {
-                lastErrors.removeFirst();
+            lastOutAndError.add("ERROR:" + line);
+            if (lastOutAndError.size() > 20) {
+                lastOutAndError.removeFirst();
             }
         }
 
