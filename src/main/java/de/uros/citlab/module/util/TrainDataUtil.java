@@ -13,6 +13,8 @@ import de.planet.math.util.PolygonHelper;
 import de.planet.util.LoaderIO;
 import de.uros.citlab.errorrate.normalizer.StringNormalizerDft;
 import de.uros.citlab.errorrate.util.ObjectCounter;
+import de.uros.citlab.module.train.TrainHtrPlus;
+import de.uros.citlab.module.types.ErrorNotification;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.types.LineImage;
 import de.uros.citlab.module.types.PageStruct;
@@ -121,19 +123,23 @@ public class TrainDataUtil {
         if (saveCharMap) {
             propsTraindata = PropertyUtil.setProperty(props, Key.STATISTIC, "true");
         }
-        TrainDataUtil.Statistic statistic = createTrainData(pageXmls, outputDir, propsTraindata);
+        Statistic statistic = createTrainData(pageXmls, outputDir, propsTraindata, observable);
         if (statistic != null) {
             if (statistic.statChar.isEmpty()) {
-                throw new RuntimeException("no lines with non-empty ground truth saved");
+                RuntimeException runtimeException = new RuntimeException("no lines with non-empty ground truth saved");
+                if (observable != null) {
+                    observable.notifyObservers(new ErrorNotification(null, null, runtimeException, TrainDataUtil.class));
+                }
+                throw runtimeException;
             }
         }
         if (PropertyUtil.isPropertyTrue(props, Key.STATISTIC)) {
-            TrainDataUtil.saveCharacterStatistic(statistic.getStatChar(), new File(outputDir, cmLong));
+            saveCharacterStatistic(statistic.getStatChar(), new File(outputDir, cmLong));
         }
         if (statistic != null) {
             if (statistic.getStatWord() != null) {
-                TrainDataUtil.savePDict(statistic.getStatWord(), new File(outputDir, dict));
-                TrainDataUtil.saveArpa(statistic.getStatWord(), new File(outputDir, dictArpa));
+                savePDict(statistic.getStatWord(), new File(outputDir, dict));
+                saveArpa(statistic.getStatWord(), new File(outputDir, dictArpa));
             }
             if (saveCharMap) {
                 CharMapUtil.saveCharMap(statistic.getStatChar(), new File(pathToCharMap));
@@ -146,7 +152,7 @@ public class TrainDataUtil {
         FileUtil.deleteMetadataAndMetsFiles(listFiles);
         String[] names = FileUtil.asStringList(listFiles);
         props = PropertyUtil.setProperty(props, KEY_SRC_FOLDER, folderPageXml.getAbsolutePath());
-        createTrainData(names, folderSnipets == null ? null : folderSnipets.getAbsolutePath(), charMap == null ? null : charMap.getAbsolutePath(), props,observable);
+        createTrainData(names, folderSnipets == null ? null : folderSnipets.getAbsolutePath(), charMap == null ? null : charMap.getAbsolutePath(), props, observable);
         return names.length;
     }
 
@@ -218,7 +224,7 @@ public class TrainDataUtil {
         return stat;
     }
 
-    public static Statistic createTrainData(String[] pageXmls, String outputDir, String[] props) {
+    public static Statistic createTrainData(String[] pageXmls, String outputDir, String[] props, Observable observable) {
 //        ObjectCounter<Character> statChar = (PropertyUtil.isPropertyTrue(props, Key.STATISTIC) || createCharacterStatistic) ? new ObjectCounter<Character>() : null;
 //        ObjectCounter<String> statWord = PropertyUtil.isPropertyTrue(props, Key.CREATEDICT) ? new ObjectCounter<String>() : null;
         IStringNormalizer sn = null;
@@ -274,7 +280,7 @@ public class TrainDataUtil {
                         if (unicode == null || unicode.isEmpty()) {
                             continue;
                         }
-                        checkLine(unicode, pageType, l);
+                        checkLine(unicode, pageType, l, observable);
                         if (saveTrainData) {
                             if (l.getTextEquiv().getConf() == null || l.getTextEquiv().getConf() >= minConf) {
                                 tlts.add(l);
@@ -344,6 +350,9 @@ public class TrainDataUtil {
                             LoaderIO.saveImageHolder(f.getAbsolutePath(), new IImageLoader.ImageHolderDft(subImage, reference, new HashMap<>()));
                         } catch (Throwable t) {
                             LOG.error("could not save ImageHolders for file " + fileXml.getName(), t);
+                            if (observable != null) {
+                                observable.notifyObservers(new ErrorNotification(pageType, line.getId(), t, TrainDataUtil.class));
+                            }
                         } finally {
                             if (subImage != null) {
                                 subImage.clear(false);
@@ -355,16 +364,28 @@ public class TrainDataUtil {
                 }
             } catch (Throwable t) {
                 LOG.error("could not save ImageHolders for file " + fileXml.getName(), t);
+                if (observable != null) {
+                    try {
+                        PcGtsType pageType = page.getXml();
+                        observable.notifyObservers(new ErrorNotification(pageType, null, t, TrainDataUtil.class));
+                    } catch (Throwable ex) {
+                        observable.notifyObservers(new ErrorNotification(null, null, t, TrainDataUtil.class));
+                    }
+                }
             }
         }
 
         return stat;
     }
 
-    private static void checkLine(String unicode, PcGtsType pageType, TextLineType l) {
+    private static void checkLine(String unicode, PcGtsType pageType, TextLineType l, Observable observable) {
         for (char c : unicode.toCharArray()) {
             if (Character.isSurrogate(c)) {
-                throw new RuntimeException("page " + pageType.getPage().getImageFilename() + " contains a surrogate in line " + l.getId() + " with integer value " + ((int) c) + ".");
+                RuntimeException runtimeException = new RuntimeException("transcription contains a surrogate in line " + l.getId() + " with integer value " + ((int) c) + ".");
+                if (observable != null) {
+                    observable.notifyObservers(new ErrorNotification(pageType, l.getId(), runtimeException, TrainHtrPlus.class));
+                }
+                throw runtimeException;
             }
         }
     }

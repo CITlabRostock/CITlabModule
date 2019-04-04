@@ -59,7 +59,6 @@ public class TrainHtr extends Observable implements ITrainHtr {
         }
 
     }
-
     public TrainHtr() {
 //        addReflection(this, TrainHtrSGD.class);
     }

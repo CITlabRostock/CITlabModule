@@ -179,7 +179,7 @@ public class TestB2P {
         if (TestFiles.skipLargeTests()) {
             return;
         }
-        TrainDataUtil.createTrainData(FileUtil.asStringList(xmlList), folderSnipets.getAbsolutePath(), null);
+        TrainDataUtil.createTrainData(FileUtil.asStringList(xmlList), folderSnipets.getAbsolutePath(), null,null);
         TrainHtr thtr = new TrainHtr();
         thtr.trainHtr(fileNet.getPath(), null, null, folderSnipets.getPath(), null);
         List<File> listFiles = FileUtil.listFiles(folderSnipets, "jpg".split(" "), true);

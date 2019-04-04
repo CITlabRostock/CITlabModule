@@ -22,7 +22,6 @@ import static de.uros.citlab.module.util.TrainDataUtil.cmLong;
 import static org.junit.Assert.fail;
 
 /**
- *
  * @author gundram
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -155,7 +154,20 @@ public class TrainHtrTest {
         }
         String[] props = PropertyUtil.setProperty(null, Key.CREATEDICT, "true");
         props = PropertyUtil.setProperty(props, Key.STATISTIC, "true");
-
+        MyObserver myObserver = new MyObserver();
+        {
+            try {
+                props = PropertyUtil.setProperty(props, Key.TRAIN_STATUS, "DONE");
+                TrainHtr instance = new TrainHtr();
+                instance.addObserver(myObserver);
+                instance.createTrainData(pageXmlsStr, dirTraindata.getAbsolutePath(), dirTraindata.getAbsolutePath() + File.separator + "chars.txt", props);
+            } catch (RuntimeException ex) {
+            }
+            Object observedObject = myObserver.observedObject;
+            Assert.assertNotNull("error (no lines with non-empty ground trutz saved) should be reported", observedObject);
+            File file = new File(dirTraindata + File.separator + cmLong);
+            Assert.assertFalse("file " + file.getAbsolutePath() + " should not exist", file.exists());
+        }
         {
             props = PropertyUtil.setProperty(props, Key.TRAIN_STATUS, "GT;DONE");
             TrainHtr instance = new TrainHtr();
@@ -163,12 +175,14 @@ public class TrainHtrTest {
             List<String> readLinesAfter = FileUtil.readLines(new File(dirTraindata + File.separator + cmLong));
             Assert.assertEquals("traindata should not be taken - resulting in emtpy statistic.", 49, readLinesAfter.size());
         }
-        {
-            props = PropertyUtil.setProperty(props, Key.TRAIN_STATUS, "DONE");
-            TrainHtr instance = new TrainHtr();
-            instance.createTrainData(pageXmlsStr, dirTraindata.getAbsolutePath(), dirTraindata.getAbsolutePath() + File.separator + "chars.txt", props);
-            List<String> readLinesAfter = FileUtil.readLines(new File(dirTraindata + File.separator + cmLong));
-            Assert.assertEquals("traindata should not be taken - resulting in emtpy statistic.", 0, readLinesAfter.size());
+    }
+
+    private static class MyObserver implements Observer {
+        private Object observedObject;
+
+        @Override
+        public void update(Observable o, Object arg) {
+            this.observedObject = arg;
         }
     }
 
