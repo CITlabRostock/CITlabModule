@@ -297,7 +297,7 @@ public class TrainHtrPlusTest {
         }
     }
 
-//    @Test
+    @Test
     public void testID32312() throws MalformedURLException {
         System.out.println("testID32312");
         HTRParserPlus parser = new HTRParserPlus();

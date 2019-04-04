@@ -5,22 +5,25 @@
  */
 package de.uros.citlab.module.types;
 
-import com.achteck.misc.log.Logger;
 import com.achteck.misc.types.CharMap;
 import com.achteck.misc.types.ConfMat;
 import com.achteck.misc.util.IO;
 import de.planet.citech.types.IDecodingType;
 import de.planet.imaging.types.HybridImage;
+import de.planet.itrtech.reco.IImagePreProcess;
 import de.planet.itrtech.reco.ISNetwork;
 import de.planet.langmod.LangModFullText;
 import de.planet.langmod.types.ILangMod;
 import de.planet.langmod.types.ILangMod.ILangModResult;
+import de.planet.tensorflow.types.SNetworkTF;
 import de.uros.citlab.module.kws.ConfMatContainer;
 import de.uros.citlab.module.util.GroupUtil;
 import de.uros.citlab.module.util.IOUtil;
 import de.uros.citlab.module.util.LangModConfigurator;
 import de.uros.citlab.module.util.PropertyUtil;
 import eu.transkribus.core.model.beans.customtags.CustomTag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +36,7 @@ import java.util.Objects;
  */
 public class HTR {
 
-    public static Logger LOG = Logger.getLogger(HTR.class.getName());
+    public static Logger LOG = LoggerFactory.getLogger(HTR.class);
     private final ISNetwork htrImpl;
     private ILangMod lmImpl;
     private final String om, lm, cm;
@@ -69,7 +72,7 @@ public class HTR {
         loadFromStorage = storageFile.exists();
         if (loadFromStorage) {
             cmc = (ConfMatContainer) IOUtil.load(storageFile);
-            LOG.log(Logger.DEBUG, "use stored ConfMats");
+            LOG.debug("use stored ConfMats");
         } else {
             cmc = new ConfMatContainer();
         }
@@ -153,14 +156,13 @@ public class HTR {
 //    }
     public Result getText(LineImage li, String[] props) {
         ConfMat confMat = getConfMat(li, props);
-
         if (PropertyUtil.isPropertyTrue(props, Key.RAW) || lmImpl == null) {
             return new Result(confMat.toString(), confMat);
         }
         lmImpl.setConfMat(confMat);
         ILangModResult result = lmImpl.getResult();
         if (result == null) {
-            LOG.log(Logger.ERROR, "no result returned from langMod.");
+            LOG.error("no result returned from langMod.");
             throw new RuntimeException("no result returned from langMod.");
         }
         return new Result(result.getText(), confMat);
@@ -300,10 +302,19 @@ public class HTR {
         }
         if (res == null) {
             HybridImage subImage = lineImage.getSubImage();
+
             htrImpl.setInput(subImage);
+            IImagePreProcess preproc = ((SNetworkTF) htrImpl).getPreproc();
+            File folderOut = new File("debug_res");
+            folderOut.mkdir();
+            subImage.save(new File(folderOut, lineImage.getTextLine().getId() + ".png").getAbsolutePath());
+            preproc.preProcess(subImage).save(new File(folderOut, lineImage.getTextLine().getId() + "_pp.png").getAbsolutePath());
             htrImpl.update();
             subImage.clear();
             res = htrImpl.getConfMat();
+//            if (LOG.isDebugEnabled()) {
+            LOG.error("bestpath is '" + res.getBestPath().replace(ConfMat.NaC, '*') + "'");
+//            }
             if (cmc != null) {
                 cmc.add(res, lineImage.getTextLine());
                 saveToFile = true;
