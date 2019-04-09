@@ -29,7 +29,7 @@
     <parent>
         <groupId>de.uros.citlab</groupId>
         <artifactId>parent_pom</artifactId>
-        <version>1.4</version>
+        <version>1.5</version>
     </parent>
 
     <dependencies>
@@ -152,6 +152,14 @@
         <dependency>
             <groupId>eu.transkribus</groupId>
             <artifactId>TranskribusXMLExtractor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>eu.transkribus</groupId>
+            <artifactId>TranskribusInterfaces</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-tiff</artifactId>
         </dependency>
 
         <!--CITLAB-->

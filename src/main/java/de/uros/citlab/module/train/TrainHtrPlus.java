@@ -379,10 +379,15 @@ public class TrainHtrPlus extends TrainHtr {
     public static File getCharMap(File folderHtr) {
         File file = new File(folderHtr, Key.GLOBAL_CHARMAP);
         if (!file.exists()) {
-            List<File> files = FileUtil.listFiles(new File(folderHtr, "export"), "txt", false);
-            if (files.size() == 1) {
-                file = files.get(0);
+            File exportFolder = new File(folderHtr, "export");
+            if (exportFolder.exists()) {
+                List<File> files = FileUtil.listFiles(exportFolder, "txt", false);
+                if (files.size() == 1) {
+                    return files.get(0);
+                }
             }
+            LOG.error("cannot find charmap, neither as file {} or *.txt in folder {}.", file, exportFolder);
+            throw new RuntimeException("cannot find charmap, neither as file " + file + " nor *.txt in folder " + exportFolder + ".");
         }
         return file;
     }
