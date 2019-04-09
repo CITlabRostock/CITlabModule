@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
+    <Metadata>
+        <Creator>prov=University of Rostock/Institute of Mathematics/CITlab/Tobias Gruening/tobias.gruening@uni-rostock.de:name=/net_tf/LA76_249_0mod90.pb:de.uros.citlab.segmentation.CITlab_LA_ML:v=?0.1
+TRP</Creator>
+        <Created>2019-03-20T09:54:02.118+01:00</Created>
+        <LastChange>2019-03-27T14:21:31.753+01:00</LastChange>
+        <TranskribusMetadata docId="6685" pageId="23854" pageNr="1" tsid="44527" status="NEW" userId="206" imgUrl="https://files-test.transkribus.eu/Get?id=HYNLQKQBHSOWAVMXDEZJVOTN&amp;fileType=view" xmlUrl="https://files-test.transkribus.eu/Get?id=IEUHOXBEWDFODPYMEPIBQZIP" imageId="26175"/>
+    </Metadata>
+    <Page imageFilename="00000052.tif" imageWidth="3154" imageHeight="4990">
+        <ReadingOrder>
+            <OrderedGroup id="ro_1553767612819" caption="Regions reading order">
+                <RegionRefIndexed index="0" regionRef="region_1553685692669_265"/>
+                <RegionRefIndexed index="1" regionRef="region_1553686123457_281"/>
+                <RegionRefIndexed index="2" regionRef="region_1553685708162_269"/>
+                <RegionRefIndexed index="3" regionRef="region_1553686058885_277"/>
+                <RegionRefIndexed index="4" regionRef="region_1553685798175_273"/>
+                <RegionRefIndexed index="5" regionRef="region_1553686158324_285"/>
+                <RegionRefIndexed index="6" regionRef="region_1553686232799_293"/>
+                <RegionRefIndexed index="7" regionRef="region_1553686178776_289"/>
+            </OrderedGroup>
+        </ReadingOrder>
+        <TextRegion id="region_1553685692669_265" custom="readingOrder {index:0;}">
+            <Coords points="412,51 750,51 750,193 389,190"/>
+        </TextRegion>
+        <TextRegion id="region_1553686123457_281" custom="readingOrder {index:1;}">
+            <Coords points="657,1349 621,219 3108,219 3108,2032 1907,2026 1903,1720 1613,1555 1552,1404"/>
+        </TextRegion>
+        <TextRegion id="region_1553685708162_269" custom="readingOrder {index:2;}">
+            <Coords points="16,238 608,222 595,860 699,1459 589,1452 463,1526 16,1575"/>
+        </TextRegion>
+        <TextRegion orientation="4.712389" id="region_1553686058885_277" custom="readingOrder {index:3;}">
+            <Coords points="1111,1746 1472,1681 1671,1613 1765,3472 1565,3540 1295,3537 1121,3446 959,3211 918,2844"/>
+        </TextRegion>
+        <TextRegion id="region_1553685798175_273" custom="readingOrder {index:4;}">
+            <Coords points="38,2957 238,1678 676,1520 1494,1475 1427,1691 1095,1720 1108,1932 744,2113 692,2374 686,2593 705,2754 969,3028 934,3137 1014,3334 1104,3446 1333,3566 1439,3550 1894,3656 1897,3798 1288,3846 789,4165 83,4133"/>
+        </TextRegion>
+        <TextRegion id="region_1553686158324_285" custom="readingOrder {index:5;}">
+            <Coords points="1981,2048 3105,2048 3105,2573 1981,2573"/>
+        </TextRegion>
+        <TextRegion id="region_1553686232799_293" custom="readingOrder {index:6;}">
+            <Coords points="1565,4558 1765,4290 1852,4200 2016,4187 1907,4007 1952,3685 1871,2818 3128,2818 3128,4941 1456,4919"/>
+        </TextRegion>
+        <TextRegion id="region_1553686178776_289" custom="readingOrder {index:7;}">
+            <Coords points="151,4203 876,4191 1240,3936 1762,3868 1897,4062 2013,4168 1794,4178 1749,4274 1639,4413 1446,4580 1485,4870 96,4870"/>
+        </TextRegion>
+    </Page>
+</PcGts>

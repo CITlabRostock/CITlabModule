@@ -56,21 +56,20 @@ public class HTRParserPlus implements IHtrCITlab {
                 throw new RuntimeException("cannot find folder '" + htrIn + "'");
             }
             //verify that Charmap is the same
+            File fileOrigCM = TrainHtrPlus.getCharMap(htrFolder);
             if (pathCharMap != null && !pathCharMap.isEmpty()) {
-                CharMap<Integer> origCM = CharMapUtil.loadCharMap(new File(htrFolder, Key.GLOBAL_CHARMAP));
+                CharMap<Integer> origCM = CharMapUtil.loadCharMap(fileOrigCM);
                 CharMap<Integer> newCM = CharMapUtil.loadCharMap(new File(pathCharMap));
                 if (CharMapUtil.equals(newCM, origCM)) {
                     throw new RuntimeException("Charmap in '" + pathCharMap + "' differs from Charmap in '" + htrIn + "'.");
                 }
             }
             IImagePreProcess preproc = TrainHtrPlus.loadPreProc(htrFolder);
-            CharMap<Integer> charMap = CharMapUtil.loadCharMap(new File(htrFolder, Key.GLOBAL_CHARMAP));
             File frozenModel = getFrozenModel(htrFolder);
             SNetworkTF network = new SNetworkTF(
                     preproc,
                     frozenModel.getAbsolutePath(),
-                    new File(htrFolder,
-                            Key.GLOBAL_CHARMAP).getAbsolutePath(),
+                    fileOrigCM.getAbsolutePath(),
                     getImgHeight(htrFolder));
             network.setParamSet(network.getDefaultParamSet(null));
             network.setGpuMode(false);

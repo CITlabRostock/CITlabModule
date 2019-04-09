@@ -32,7 +32,6 @@ import eu.transkribus.interfaces.IBaseline2Polygon;
 import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.ILayoutAnalysis;
 import eu.transkribus.interfaces.types.Image;
-import eu.transkribus.interfaces.types.util.ImageUtils;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -79,7 +78,7 @@ public class TestWorkflow {
             String testFileImgBase = testFileImg.substring(0, testFileImg.lastIndexOf("."));
             Image image = null;
             try {
-                image = new Image(ImageUtils.convertToBufferedImage(testImgFile.toURI().toURL()));
+                image = new Image(testImgFile.toURL());
             } catch (IOException ex) {
                 LOG.log(Logger.ERROR, ex);
                 Assert.fail("creating test szenario did not work: (load image) " + ex.getMessage());
@@ -143,9 +142,9 @@ public class TestWorkflow {
             } catch (IOException ex) {
                 Assert.fail("creating test szenario did not work: (copy file for LA) " + ex.getMessage());
             }
-            if (TestFiles.skipLargeTests()) {
-                return;
-            }
+//            if (TestFiles.skipLargeTests()) {
+//                return;
+//            }
             File htr = TestFiles.getHtrDft();
             try {
                 testXmlFile_LA_HTR = new File(testFolder, testFileImgBase + "_la_htr.xml");

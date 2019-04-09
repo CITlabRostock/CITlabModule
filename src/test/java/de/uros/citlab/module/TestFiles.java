@@ -19,7 +19,7 @@ public class TestFiles {
     private final static List<File> htrs = new LinkedList<>();
     private final static List<File> layoutAnalysis = new LinkedList<>();
     private final static List<File> snipets = new LinkedList<>();
-    private final static boolean skipLargeTests = false;
+    private final static boolean skipLargeTests = true;
 
     public static boolean skipLargeTests() {
         return skipLargeTests;

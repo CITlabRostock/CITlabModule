@@ -5,25 +5,23 @@
  */
 package de.uros.citlab.module.workflow;
 
-import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.log.Logger;
-import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ParamTreeOrganizer;
 import de.uros.citlab.module.htr.HTRParser;
-import de.uros.citlab.module.util.CharMapUtil;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import de.uros.citlab.module.util.TrainDataUtil;
 import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.types.Image;
+import org.apache.commons.io.FileUtils;
+
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -73,7 +71,7 @@ public class ExtractConfMats extends ParamTreeOrganizer {
             if (!tgtXml.equals(srcXml)) {
                 FileUtils.copyFile(srcXml, tgtXml);
             }
-            TrainDataUtil.createTrainData(new String[]{PageXmlUtil.getXmlPath(srcImg).getAbsolutePath()}, folderTraindata.getAbsolutePath(), null);
+            TrainDataUtil.createTrainData(new String[]{PageXmlUtil.getXmlPath(srcImg).getAbsolutePath()}, folderTraindata.getAbsolutePath(), null,null);
             htr.process(htrName.getAbsolutePath(), null, null, img, tgtXml.getAbsolutePath(), folderTraindata.getAbsolutePath(), null, null);
         }
     }

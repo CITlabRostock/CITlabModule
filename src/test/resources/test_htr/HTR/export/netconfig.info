@@ -1,0 +1,1 @@
+{"preprocId": "pp_deploy_A", "netId": "htrOut_2019-03-31", "inHeight": {"inImg": 64}, "charmaps": {"outConfMat": "chars.txt"}, "in": ["inImg", "inSeqLen"], "tfVersion": "1.8.0", "out": ["outConfMat", "outSeqLen"]}

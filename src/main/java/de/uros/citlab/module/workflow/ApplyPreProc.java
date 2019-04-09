@@ -149,13 +149,13 @@ public class ApplyPreProc extends ParamTreeOrganizer {
     public static void main(String[] args) throws InvalidParameterException, IOException {
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("in", HomeDir.PATH + "lines/val/6877/MM_1_005/");
-            al.addArgument("out", HomeDir.PATH + "samples_64_64_pp");
+            al.addArgument("in", HomeDir.PATH + "traindata/TEST_CITlab_Test_Tuni_duplicated");
+            al.addArgument("out", HomeDir.PATH + "preproced/TEST_CITlab_Test_Tuni_duplicated");
 //            al.addArgument("h", "64");
 //            al.addArgument("s", "64");
 //            al.addArgument("in", HomeDir.PATH + "lines/train");
 //            al.addArgument("out", HomeDir.PATH + "samples/train");
-            al.addArgument("pp", HomeDir.getFile("samples_64_64/preproc.bin"));
+            al.addArgument("pp", HomeDir.getFile("models/12113/preproc.bin"));
 //            al.addArgument("n", "20");
 //            al.addArgument("noise", "true");
 //            al.setHelp();

@@ -74,7 +74,7 @@ public class CreateTraindata extends ParamTreeOrganizer {
 
     public void run() {
         if (isValid(folderSnipets) && isValid(folderPageXml)) {
-            TrainDataUtil.runCreateTraindata(new File(folderPageXml), new File(folderSnipets), fileCharMap == null || fileCharMap.isEmpty() ? null : new File(fileCharMap), props);
+            TrainDataUtil.runCreateTraindata(new File(folderPageXml), new File(folderSnipets), fileCharMap == null || fileCharMap.isEmpty() ? null : new File(fileCharMap), props,null);
         }
     }
 
@@ -86,10 +86,10 @@ public class CreateTraindata extends ParamTreeOrganizer {
     public static void main(String[] args) throws InvalidParameterException, ClassNotFoundException, Exception {
         if (args.length == 0) {
             ArgumentLine al = new ArgumentLine();
-            al.addArgument("xml", HomeDir.getFile("data/linefeed_in_gt"));
-            al.addArgument("cm", HomeDir.getFile("data/linefeed_in_gt/cm.txt"));
-            al.addArgument("out", HomeDir.getFile("traindata/linefeed_in_gt"));
-            al.addArgument("create", false);
+            al.addArgument("xml", HomeDir.getFile("data/TRAIN_CITlab_Test_Tuni_duplicated"));
+            al.addArgument("cm", HomeDir.getFile("data/TRAIN_CITlab_Test_Tuni_duplicated/cm.txt"));
+            al.addArgument("out", HomeDir.getFile("traindata/TRAIN_CITlab_Test_Tuni_duplicated"));
+            al.addArgument("create", true);
             al.addArgument("stat", true);
             args = al.getArgs();
         }

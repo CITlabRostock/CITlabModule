@@ -13,6 +13,7 @@ import de.planet.reco.RecoGlobals;
 import de.planet.reco.preproc.*;
 import de.planet.reco.preproc.util.ResizeUtil.Algorithm;
 import de.planet.trainer.factory.ImagePreprocessDft;
+import de.uros.citlab.module.types.ErrorNotification;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.*;
 import org.apache.commons.io.FileUtils;
@@ -21,10 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Observable;
+import java.util.*;
 
 /**
  * @author gundram
@@ -227,7 +225,7 @@ public class TrainHtrPlus extends TrainHtr {
         double dropout = PropertyUtil.isProperty(props, Key.NOISE, "both", "net") ? 0.5 : 0.0;
         String learningRate = PropertyUtil.getProperty(props, Key.LEARNINGRATE, "1e-3");
         File tmpDir = getTmpDir(props);
-        File charMap = new File(fileHtrOut, Key.GLOBAL_CHARMAP);
+        File charMap = TrainHtrPlus.getCharMap(fileHtrOut);
         if (!fileHtrIn.equals(fileHtrOut)) {
             if (fileHtrOut.exists()) {
                 if (charMap.exists()) {
@@ -252,7 +250,9 @@ public class TrainHtrPlus extends TrainHtr {
         }
         if (inputTrainDir != null && !inputTrainDir.isEmpty()) {
             fileListTrain = new File(folderLists, "train.lst");
-            FileUtil.writeLines(fileListTrain, FileUtil.getStringList(FileUtil.listFiles(new File(inputTrainDir), FileUtil.IMAGE_SUFFIXES, true)));
+            List<String> stringList = FileUtil.getStringList(FileUtil.listFiles(new File(inputTrainDir), FileUtil.IMAGE_SUFFIXES, true));
+            Collections.shuffle(stringList, new Random(1234));
+            FileUtil.writeLines(fileListTrain, stringList);
         }
         int gpu = getGPU(props);
 
@@ -264,39 +264,54 @@ public class TrainHtrPlus extends TrainHtr {
         boolean hasBaseModel = new File(fileHtrOut, "export").exists();
         LOG.info("found base model = {}", hasBaseModel);
         if (hasBaseModel) {
-            boolean reinitLogits = reinitLogits(charMap, new File(new File(fileHtrOut, "export"), Key.GLOBAL_CHARMAP));
+            boolean reinitLogits = reinitLogits(charMap, TrainHtrPlus.getCharMap(fileHtrOut));
             //train further! -> 2 option:
             // 1. CharMap changed => reinit logits and train with continue point
             // 2. CharMap unchanged => train with continue point
             LOG.info("re-initialize upper layer because CharMap changed = {}", reinitLogits);
             if (reinitLogits) {
                 LOG.info("apply training one epoch only on the logit layer.");
+                ProcessListener processListener = getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props);
                 if (PythonUtil.runPythonFromFile("tf_htsr/models/trainer/trainer.py",
-                        getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props),
+                        processListener,
                         getFurtherTrainingProperties(trainingProperties, 1, true, true)
                 ) != 0) {
-                    LOG.error("training of HTR+ ends with status !=0");
-                    throw new RuntimeException("training of HTR+ ends with status !=0");
+                    RuntimeException re = new RuntimeException(
+                            "pretraining of HTR+ ends with status !=0. last messages: \n"
+                                    + String.join("\n" + processListener.getLastOutAndError()));
+                    notifyObservers(new ErrorNotification(null, null, re, TrainHtrPlus.class));
+                    LOG.error("pretraining of HTR+ ends with status !=0");
+                    throw re;
                 }
                 numEpochs--;
             }
             LOG.info("apply training {} epoch(s) on all layer.", numEpochs);
+            ProcessListener processListener = getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props);
             if (PythonUtil.runPythonFromFile("tf_htsr/models/trainer/trainer.py",
-                    getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props),
+                    processListener,
                     getFurtherTrainingProperties(trainingProperties, numEpochs, false, true)
             ) != 0) {
+                RuntimeException re = new RuntimeException(
+                        "training of HTR+ ends with status !=0. last messages: \n"
+                                + String.join("\n" + processListener.getLastOutAndError()));
+                notifyObservers(new ErrorNotification(null, null, re, TrainHtrPlus.class));
                 LOG.error("training of HTR+ ends with status !=0");
-                throw new RuntimeException("training of HTR+ ends with status !=0");
+                throw re;
             }
         } else {
             LOG.info("apply new training {} epoch(s).", numEpochs);
             //train without continue point
+            ProcessListener processListener = getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props);
             if (PythonUtil.runPythonFromFile("tf_htsr/models/trainer/trainer.py",
-                    getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props),
+                    processListener,
                     trainingProperties
             ) != 0) {
+                RuntimeException re = new RuntimeException(
+                        "training of HTR+ ends with status !=0. last messages: \n"
+                                + String.join("\n" + processListener.getLastOutAndError()));
+                notifyObservers(new ErrorNotification(null, null, re, TrainHtrPlus.class));
                 LOG.error("training of HTR+ ends with status !=0");
-                throw new RuntimeException("training of HTR+ ends with status !=0");
+                throw re;
             }
         }
     }
@@ -333,7 +348,7 @@ public class TrainHtrPlus extends TrainHtr {
         return -1;
     }
 
-    private PythonUtil.ProcessListener getProcessListener(String inputTrainDir, String inputValDir, File fileHtrOut, String[] props) {
+    private ProcessListener getProcessListener(String inputTrainDir, String inputValDir, File fileHtrOut, String[] props) {
         if (isValid(inputTrainDir) || isValid(inputValDir)) {
             return new ProcessListener(isValid(inputTrainDir) ? new File(fileHtrOut, Key.GLOBAL_CER_TRAIN) : null,
                     isValid(inputValDir) ? new File(fileHtrOut, Key.GLOBAL_CER_VAL) : null, this);
@@ -346,10 +361,35 @@ public class TrainHtrPlus extends TrainHtr {
     }
 
     public static IImagePreProcess loadPreProc(File folderHtr) {
-        IImagePreProcess pp = (IImagePreProcess) IOUtil.load(new File(folderHtr, NAME_PREPROC));
+        File file = new File(folderHtr, NAME_PREPROC);
+        if (!file.exists()) {
+            List<File> files = FileUtil.listFiles(new File(folderHtr, "export"), "bin", false);
+            if (files.size() == 1) {
+                file = files.get(0);
+            } else {
+                throw new RuntimeException("cannot find preprocess at " + file + " and found " + files.size() + " preprocs (*.bin) in export folder");
+            }
+        }
+        IImagePreProcess pp = (IImagePreProcess) IOUtil.load(file);
         pp.setParamSet(pp.getDefaultParamSet(null));
         pp.init();
         return pp;
+    }
+
+    public static File getCharMap(File folderHtr) {
+        File file = new File(folderHtr, Key.GLOBAL_CHARMAP);
+        if (!file.exists()) {
+            File exportFolder = new File(folderHtr, "export");
+            if (exportFolder.exists()) {
+                List<File> files = FileUtil.listFiles(exportFolder, "txt", false);
+                if (files.size() == 1) {
+                    return files.get(0);
+                }
+            }
+            LOG.error("cannot find charmap, neither as file {} or *.txt in folder {}.", file, exportFolder);
+            throw new RuntimeException("cannot find charmap, neither as file " + file + " nor *.txt in folder " + exportFolder + ".");
+        }
+        return file;
     }
 
     private void savePreProc(File folderHtr, IImagePreProcess pp) {
@@ -531,9 +571,18 @@ public class TrainHtrPlus extends TrainHtr {
         double bestval = Double.NaN;
         boolean isBestVal = false;
         private Long processID = null;
+        private LinkedList<String> lastOutAndError = new LinkedList<>();
+
+        public List<String> getLastOutAndError() {
+            return lastOutAndError;
+        }
 
         @Override
         public void handleOutput(String line) {
+            lastOutAndError.add(line);
+            if (lastOutAndError.size() > 20) {
+                lastOutAndError.removeFirst();
+            }
             if (valFile != null && line.matches(".*Val: CER = .*")) {
                 String trim = line.split("Val: CER = ")[1].trim();
                 double val = Double.parseDouble(trim);
@@ -564,6 +613,10 @@ public class TrainHtrPlus extends TrainHtr {
 
         @Override
         public void handleError(String line) {
+            lastOutAndError.add("ERROR:" + line);
+            if (lastOutAndError.size() > 20) {
+                lastOutAndError.removeFirst();
+            }
         }
 
         @Override

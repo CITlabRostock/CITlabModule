@@ -59,7 +59,6 @@ public class TrainHtr extends Observable implements ITrainHtr {
         }
 
     }
-
     public TrainHtr() {
 //        addReflection(this, TrainHtrSGD.class);
     }
@@ -72,7 +71,7 @@ public class TrainHtr extends Observable implements ITrainHtr {
 
     @Override
     public void createTrainData(String[] pageXmls, String outputDir, String pathToCharMap, String[] props) {
-        TrainDataUtil.createTrainData(pageXmls, outputDir, pathToCharMap, props);
+        TrainDataUtil.createTrainData(pageXmls, outputDir, pathToCharMap, props,this);
     }
 
     @Override
