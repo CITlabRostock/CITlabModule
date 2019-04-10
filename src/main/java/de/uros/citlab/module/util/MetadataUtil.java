@@ -25,10 +25,7 @@ public class MetadataUtil {
 
             MetadataType metadata = page.getMetadata();
             metadata.setLastChange(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()));
-            String version = metadata.getClass().getPackage().getImplementationVersion();
-            if (version == null) {
-                version = "?" + module.getVersion();
-            }
+            String version = module.getVersion();
             metadata.setCreator(("prov=" + module.getProvider() + ":name=" + module.getToolName() + ":v=" + version + "").replace("\n", "/") + "\n" + metadata.getCreator());
         } catch (Exception e) {
             LOG.log(Logger.ERROR, "cannot create metadata from file - ignore adding matadata", e);
@@ -42,7 +39,7 @@ public class MetadataUtil {
     }
 
     public static String getSoftwareVersion() {
-        return "2.2.2";
+        return "2.2.3";
     }
 
 }
