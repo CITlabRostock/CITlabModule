@@ -9,6 +9,7 @@ import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
+import com.achteck.misc.util.IO;
 import de.planet.citech.trainer.loader.IImageLoader;
 import de.planet.itrtech.reco.IImagePreProcess;
 import de.planet.util.LoaderIO;
@@ -111,7 +112,11 @@ public class ApplyPreProc extends ParamTreeOrganizer {
         File fIn = new File(in);
         File fOut = new File(out);
         fOut.mkdirs();
-        FileUtil.copyFile(new File(pp), new File(out, "preproc.bin"));
+        if (ppImplPreset != null) {
+            IO.save(ppImplPreset, new File(out, "preproc.bin"));
+        } else {
+            FileUtil.copyFile(new File(pp), new File(out, "preproc.bin"));
+        }
         String[] props = noise ? PropertyUtil.setProperty(null, Key.NOISE, "true") : null;
         List<File> listFiles = null;
         if (isFolder) {

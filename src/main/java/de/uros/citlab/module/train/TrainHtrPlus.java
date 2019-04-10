@@ -223,9 +223,9 @@ public class TrainHtrPlus extends TrainHtr {
         int trainSizePerEpoch = Integer.valueOf(PropertyUtil.getProperty(props, Key.TRAINSIZE, 1024 * 8));
         int numEpochs = Integer.valueOf(PropertyUtil.getProperty(props, Key.EPOCHS, 1));
         double dropout = PropertyUtil.isProperty(props, Key.NOISE, "both", "net") ? 0.5 : 0.0;
-        String learningRate = PropertyUtil.getProperty(props, Key.LEARNINGRATE, "1e-3");
+        String learningRate = null;// PropertyUtil.getProperty(props, Key.LEARNINGRATE, "1e-3");
         File tmpDir = getTmpDir(props);
-        File charMap = TrainHtrPlus.getCharMap(fileHtrOut);
+        File charMap = TrainHtrPlus.getCharMap(fileHtrOut, false);
         if (!fileHtrIn.equals(fileHtrOut)) {
             if (fileHtrOut.exists()) {
                 if (charMap.exists()) {
@@ -236,6 +236,7 @@ public class TrainHtrPlus extends TrainHtr {
             }
             try {
                 FileUtils.copyDirectory(fileHtrIn, fileHtrOut);
+                charMap = TrainHtrPlus.getCharMap(fileHtrOut);
             } catch (IOException ex) {
                 throw new RuntimeException("cannot copy folder", ex);
             }
@@ -377,6 +378,10 @@ public class TrainHtrPlus extends TrainHtr {
     }
 
     public static File getCharMap(File folderHtr) {
+        return getCharMap(folderHtr, true);
+    }
+
+    public static File getCharMap(File folderHtr, boolean forceExistance) {
         File file = new File(folderHtr, Key.GLOBAL_CHARMAP);
         if (!file.exists()) {
             File exportFolder = new File(folderHtr, "export");
@@ -386,8 +391,11 @@ public class TrainHtrPlus extends TrainHtr {
                     return files.get(0);
                 }
             }
-            LOG.error("cannot find charmap, neither as file {} or *.txt in folder {}.", file, exportFolder);
-            throw new RuntimeException("cannot find charmap, neither as file " + file + " nor *.txt in folder " + exportFolder + ".");
+            if (forceExistance) {
+                LOG.error("cannot find charmap, neither as file {} or *.txt in folder {}.", file, exportFolder);
+                throw new RuntimeException("cannot find charmap, neither as file " + file + " nor *.txt in folder " + exportFolder + ".");
+            }
+            return file;
         }
         return file;
     }
@@ -410,7 +418,7 @@ public class TrainHtrPlus extends TrainHtr {
     }
 
     public static final IImagePreProcess getPreProcess(int tgtHeight, double pquantil_p, int pquantil_height) {
-        ImagePreprocModules imagePreprocModules = new ImagePreprocModules("pp_deploy_As");
+        ImagePreprocModules imagePreprocModules = new ImagePreprocModules("pp_deploy_A");
         imagePreprocModules.addModule("contrast", new ContrastNormalizer6());
         imagePreprocModules.addModule("maskR", new MaskRemover());
         imagePreprocModules.addModule("coglshape", new COGLShapeNormalizer());

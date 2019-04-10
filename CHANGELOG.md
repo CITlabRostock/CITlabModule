@@ -1,5 +1,8 @@
 # Change Log
 
+# 2.2.3
+* bugfix training: charmap cannot be in htrOut
+
 # 2.2.2
 * bugfix training: shuffle training list so that order is "randomly"
 * bugfix surrogates: if a line contains surrogates, it is ignored in training and validation
