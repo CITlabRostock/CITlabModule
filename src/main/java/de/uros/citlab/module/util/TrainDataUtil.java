@@ -280,7 +280,9 @@ public class TrainDataUtil {
                         if (unicode == null || unicode.isEmpty()) {
                             continue;
                         }
-                        checkLine(unicode, pageType, l, observable);
+                        if (!checkLine(unicode, pageType, l, observable, false)) {
+                            continue;
+                        }
                         if (saveTrainData) {
                             if (l.getTextEquiv().getConf() == null || l.getTextEquiv().getConf() >= minConf) {
                                 tlts.add(l);
@@ -378,16 +380,20 @@ public class TrainDataUtil {
         return stat;
     }
 
-    private static void checkLine(String unicode, PcGtsType pageType, TextLineType l, Observable observable) {
+    private static boolean checkLine(String unicode, PcGtsType pageType, TextLineType l, Observable observable, boolean beStrict) {
         for (char c : unicode.toCharArray()) {
             if (Character.isSurrogate(c)) {
-                RuntimeException runtimeException = new RuntimeException("transcription contains a surrogate in line " + l.getId() + " with integer value " + ((int) c) + ".");
+                RuntimeException runtimeException = new RuntimeException("In line " + l.getId() + " transcription '" + unicode + "' contains a surrogate with integer value " + ((int) c) + ". Line will be ignored in trianing/validation.");
+                if (beStrict) {
+                    throw runtimeException;
+                }
                 if (observable != null) {
                     observable.notifyObservers(new ErrorNotification(pageType, l.getId(), runtimeException, TrainHtrPlus.class));
                 }
-                throw runtimeException;
+                return false;
             }
         }
+        return true;
     }
 
     public static void savePDict(ObjectCounter<String> oc, File path) {
