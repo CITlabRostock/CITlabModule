@@ -2,6 +2,8 @@
 
 # 2.2.3
 * bugfix training: charmap cannot be in htrOut
+* bugfix language model: exception for empty transcript caught and reported via ErrorNotification
+* feature: slightly better preproc
 
 # 2.2.2
 * bugfix training: shuffle training list so that order is "randomly"

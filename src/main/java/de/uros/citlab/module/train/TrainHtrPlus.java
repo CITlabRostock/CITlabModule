@@ -428,7 +428,7 @@ public class TrainHtrPlus extends TrainHtr {
         imagePreprocModules.addModule("si", new SizeNormalizerSimple());
         imagePreprocModules.setParamPrefix("");
         ParamSet ps = imagePreprocModules.getDefaultParamSet((ParamSet) null);
-        ps.getParam("coglshape/prescale_height").set(64);
+        ps.getParam("coglshape/prescale_height").set(128);
         ps.getParam("coglshape/subsample_x").set(100);
         ps.getParam("coglshape/subsample_y").set(10);
         ps.getParam("coglshape/degree_divisor").set(5);
