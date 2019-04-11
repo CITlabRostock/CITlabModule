@@ -1,6 +1,6 @@
 # Change Log
 
-# 2.2.3
+# 2.3.0
 * bugfix training: charmap cannot be in htrOut
 * bugfix language model: exception for empty transcript caught and reported via ErrorNotification
 * feature: slightly better preproc

@@ -459,7 +459,7 @@ public class TrainHtrPlusTest {
 //        }
 //    }
     @Test
-    public void testID32312_Innsbruck() throws MalformedURLException {
+    public void testID32312() throws MalformedURLException {
         System.out.println("testID32312");
         HTRParserPlus parser = new HTRParserPlus();
         File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
@@ -470,26 +470,6 @@ public class TrainHtrPlusTest {
         Baseline2PolygonParser b2pParser = new Baseline2PolygonParser(B2PSeamMultiOriented.class.getName());
         b2pParser.process(getImage(folder), page, null, null);
 
-        List<String> text = PageXmlUtil.getText(page);
-        for (String string : text) {
-            System.out.println(string);
-        }
-        parser.process(getHTR(folder), getDict(folder), null, getImage(folder), page, null, null, null);
-        List<String> recoApply = PageXmlUtil.getText(page);
-        System.out.println("output of network:");
-        for (String line : recoApply) {
-            System.out.println(line);
-        }
-    }
-
-    @Test
-    public void testID32312() throws MalformedURLException {
-        System.out.println("testID32312");
-        HTRParserPlus parser = new HTRParserPlus();
-        File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
-        Assume.assumeTrue(folder.exists());
-        PcGtsType page = getPage(folder);
-        System.out.println("before:###############################");
         List<String> text = PageXmlUtil.getText(page);
         for (String string : text) {
             System.out.println(string);
