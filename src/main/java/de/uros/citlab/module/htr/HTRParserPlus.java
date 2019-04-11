@@ -17,6 +17,7 @@ import de.uros.citlab.module.interfaces.IHtrCITlab;
 import de.uros.citlab.module.kws.ConfMatContainer;
 import de.uros.citlab.module.la.BaselineGenerationHist;
 import de.uros.citlab.module.train.TrainHtrPlus;
+import de.uros.citlab.module.types.ErrorNotification;
 import de.uros.citlab.module.types.HTR;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.types.LineImage;
@@ -31,15 +32,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author gundram
  */
-public class HTRParserPlus implements IHtrCITlab {
+public class HTRParserPlus extends Observable implements IHtrCITlab {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(HTRParserPlus.class.getName());
@@ -47,6 +45,12 @@ public class HTRParserPlus implements IHtrCITlab {
     private transient final HashMap<Integer, HTR> htrs = new HashMap<>();
     String nameCurrent = "?";
     private BaselineGenerationHist baselineGeneration = new BaselineGenerationHist();
+
+    @Override
+    public void notifyObservers(Object arg) {
+        super.setChanged();
+        super.notifyObservers(arg);
+    }
 
     private ISNetwork getNetwork(String htrIn, String pathCharMap) {
         String key = htrIn + (pathCharMap == null || pathCharMap.isEmpty() ? "" : File.pathSeparator + pathCharMap);
@@ -177,15 +181,21 @@ public class HTRParserPlus implements IHtrCITlab {
         HTR htr = getHTR(pathToOpticalModel, pathToLanguageModel, pathCharMap, storageDir, props);
         for (LineImage lineImage : linesExecution) {
             TextLineType textLine = lineImage.getTextLine();
-            HTR.Result text = htr.getText(lineImage, props);
-            String result = text.getText();
-            PageXmlUtil.deleteCustomTags(textLine, ReadingOrderTag.TAG_NAME);
-            PageXmlUtil.setTextEquiv(textLine, result);
-            if (text.getTags() != null && !text.getTags().isEmpty()) {
-                LOG.error("in line {} ignore tags {}", textLine.getId(), text.getTags());
-            }
+            try {
+                HTR.Result text = htr.getText(lineImage, props);
+                String result = text.getText();
+                PageXmlUtil.deleteCustomTags(textLine, ReadingOrderTag.TAG_NAME);
+                PageXmlUtil.setTextEquiv(textLine, result);
+                if (text.getTags() != null && !text.getTags().isEmpty()) {
+                    notifyObservers(new ErrorNotification(xmlFile, lineImage.getTextLine().getId(), new RuntimeException("ignore tags " + text.getTags()), TrainHtrPlus.class));
+                }
 //            textEquivType.setConf(new Float(result.getSecond()));
-            LOG.info("decoded '" + result + "' for textline " + textLine.getId() + " with" + ((PropertyUtil.isPropertyTrue(props, Key.RAW) || !useDict(pathToLanguageModel)) ? "out" : "") + " language model .");
+                LOG.info("decoded '" + result + "' for textline " + textLine.getId() + " with" + ((PropertyUtil.isPropertyTrue(props, Key.RAW) || !useDict(pathToLanguageModel)) ? "out" : "") + " language model .");
+            } catch (RuntimeException ex) {
+                notifyObservers(new ErrorNotification(xmlFile, lineImage.getTextLine().getId(), ex, TrainHtrPlus.class));
+                PageXmlUtil.deleteCustomTags(textLine, ReadingOrderTag.TAG_NAME);
+                PageXmlUtil.setTextEquiv(textLine, "");
+            }
         }
         htr.finalizePage();
         PageXmlUtil.copyTextEquivLine2Region(xmlFile);

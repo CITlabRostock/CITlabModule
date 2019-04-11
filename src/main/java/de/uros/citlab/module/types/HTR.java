@@ -161,10 +161,6 @@ public class HTR {
 //        ConfMatUtil.saveProbMat(new File("debug_res", li.getTextLine().getId() + "_pm.txt").getAbsolutePath(),confMat,"%.4e");
         lmImpl.setConfMat(confMat);
         ILangModResult result = lmImpl.getResult();
-        if (result == null) {
-            LOG.error("no result returned from langMod.");
-            throw new RuntimeException("no result returned from langMod.");
-        }
         return new Result(result.getText(), confMat);
     }
 

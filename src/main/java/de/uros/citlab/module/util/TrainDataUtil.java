@@ -383,7 +383,7 @@ public class TrainDataUtil {
     private static boolean checkLine(String unicode, PcGtsType pageType, TextLineType l, Observable observable, boolean beStrict) {
         for (char c : unicode.toCharArray()) {
             if (Character.isSurrogate(c)) {
-                RuntimeException runtimeException = new RuntimeException("In line " + l.getId() + " transcription '" + unicode + "' contains a surrogate with integer value " + ((int) c) + ". Line will be ignored in trianing/validation.");
+                RuntimeException runtimeException = new RuntimeException("In line " + l.getId() + " transcription '" + unicode + "' contains a surrogate with integer value " + ((int) c) + ". Line will be ignored in training/validation.");
                 if (beStrict) {
                     throw runtimeException;
                 }
