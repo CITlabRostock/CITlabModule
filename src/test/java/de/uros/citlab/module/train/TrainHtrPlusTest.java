@@ -338,17 +338,14 @@ public class TrainHtrPlusTest {
         int size = FileUtil.listFiles(folderSnippets, FileUtil.IMAGE_SUFFIXES, false).size();
         Assert.assertEquals("wrong number of snippets found for validation", 95, size);
     }
-
-    @Test
+    //this is only needed to compare old vs new preprocess
+//    @Test
     public void testDiagonalLine() throws IOException, InvalidParameterException, ClassNotFoundException {
         System.out.println("testDiagonalLine");
         LayoutAnalysisURO_ML parser = new LayoutAnalysisURO_ML(null);
         Baseline2PolygonParser polygonParser = new Baseline2PolygonParser(B2PSeamMultiOriented.class.getName());
         File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "diagonalLine");
-        File folderHtr = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32223_data");
         Assume.assumeTrue(folder.exists());
-        File htr = new File(folderHtr, "HTR");
-        File lr = new File(htr, "lr.txt");
         List<File> imgFiles = FileUtil.listFiles(folder, FileUtil.IMAGE_SUFFIXES, true);
         File folderXml = new File(dirDiagonalLine, "pagexml");
         folderXml.mkdirs();
