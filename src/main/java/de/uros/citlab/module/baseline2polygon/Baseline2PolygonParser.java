@@ -31,10 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author gundram
@@ -135,8 +132,16 @@ public class Baseline2PolygonParser implements IBaseline2Polygon {
         for (Double angle : mapTextLines.keySet()) {
             List<TextLineType> textLines = mapTextLines.get(angle);
             List<Polygon2DInt> baselines = new LinkedList<>();
-            for (TextLineType textLine : textLines) {
-                baselines.add(PolygonUtil.convert(PolygonUtil.getBaseline(textLine)));
+            Iterator<TextLineType> it = textLines.iterator();
+            while (it.hasNext()) {
+                TextLineType textLine = it.next();
+                try {
+                    baselines.add(PolygonUtil.convert(PolygonUtil.getBaseline(textLine)));
+                } catch (RuntimeException e) {
+                    //skip that line and remove it from the b2p input
+                    LOG.warn("Invalid baseline for line-ID {}  - ignore this text line.", textLine.getId(), e);
+                    it.remove();
+                }
             }
             if (Double.isNaN(angle)) {
                 angle = 0.0;
