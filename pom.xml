@@ -44,87 +44,108 @@
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>trainer</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>sprnn</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>util_pc</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>util</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>nnwrapper</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>tensorflow</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>math</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>math_pc</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>misc</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>misc_pc</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>imaging</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>imaging_pc</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>logging</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>roi_core</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>roi_historical</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>langmod</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>languagemodel</artifactId>
             <version>0.10.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>decoding</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>regexdecoding</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>citech</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>itrtech</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!--APACHE COMMONS-->
@@ -300,15 +321,15 @@
                     <!--<includeArtifactIds>jmxtools,mysql-connector,log4j,graphviz-api,graphviz-api,opencv,mpi,gcoj,trainer,executor,planet_ai,reco_deprecated,types,reco_lab,imaging_lab,ocrtech_lab,math_lab,featext_lab,ann_lab,dataproc_lab,ai_j,writingdecoder,ann,featext,dataproc,reco,concurrency,dbnn,hwreco,seqlabel,sprnn_moe,ocrtech,dacc,net,sprnn,dram,util_pc,util,nnwrapper,math,math_pc,misc,imaging,imaging_pc,logging,roi_core,evalbase,roi_historical,misc_pc,langmod,decoding,regexdecoding,tensorflow,citech,itrtech</includeArtifactIds>-->
                     <!--<includeArtifactIds>trainer,reco_lab</includeArtifactIds>-->
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <!--<executions>-->
+                <!--<execution>-->
+                <!--<id>copy-dependencies</id>-->
+                <!--<phase>package</phase>-->
+                <!--<goals>-->
+                <!--<goal>copy-dependencies</goal>-->
+                <!--</goals>-->
+                <!--</execution>-->
+                <!--</executions>-->
             </plugin>
         </plugins>
     </build>

@@ -1,5 +1,8 @@
 # Change Log
 
+# 2.3.2
+* make planet dependencies 'provided'
+
 # 2.3.1
 * bugfix B2P: ignores text lines while B2P, if they have invalid baselines.
 
