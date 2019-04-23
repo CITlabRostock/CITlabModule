@@ -1,5 +1,8 @@
 # Change Log
 
+# 2.3.1
+* bugfix B2P: ignores text lines while B2P, if they have invalid baselines.
+
 # 2.3.0
 * bugfix training: charmap cannot be in htrOut
 * bugfix language model: exception for empty transcript caught and reported via ErrorNotification
