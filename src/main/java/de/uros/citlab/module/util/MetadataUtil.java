@@ -39,7 +39,7 @@ public class MetadataUtil {
     }
 
     public static String getSoftwareVersion() {
-        return "2.3.1";
+        return "2.3.2";
     }
 
 }

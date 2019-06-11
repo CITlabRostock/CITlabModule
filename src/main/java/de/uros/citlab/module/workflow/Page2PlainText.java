@@ -19,7 +19,6 @@ import java.io.File;
 import java.util.List;
 
 /**
- *
  * @author gundram
  */
 public class Page2PlainText extends ParamTreeOrganizer {
@@ -41,7 +40,9 @@ public class Page2PlainText extends ParamTreeOrganizer {
         FileUtil.deleteMetadataAndMetsFiles(filesListsOrFolders);
         File out = o.isEmpty() ? null : new File(o);
         if (out != null) {
-            FileUtils.deleteQuietly(out);
+            if (!out.equals(new File(f))) {
+                FileUtils.deleteQuietly(out);
+            }
         }
         for (File filesListsOrFolder : filesListsOrFolders) {
             PcGtsType unmarshal = PageXmlUtil.unmarshal(filesListsOrFolder);

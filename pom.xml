@@ -298,15 +298,15 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
-                <!--<executions>-->
-                <!--<execution>-->
-                <!--<id>make-assembly</id> &lt;!&ndash; this is used for inheritance merges &ndash;&gt;-->
-                <!--<phase>package</phase> &lt;!&ndash; bind to the packaging phase &ndash;&gt;-->
-                <!--<goals>-->
-                <!--<goal>single</goal>-->
-                <!--</goals>-->
-                <!--</execution>-->
-                <!--</executions>-->
+                <executions>
+                <execution>
+                <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                <phase>package</phase> <!-- bind to the packaging phase -->
+                <goals>
+                <goal>single</goal>
+                </goals>
+                </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -321,15 +321,15 @@
                     <!--<includeArtifactIds>jmxtools,mysql-connector,log4j,graphviz-api,graphviz-api,opencv,mpi,gcoj,trainer,executor,planet_ai,reco_deprecated,types,reco_lab,imaging_lab,ocrtech_lab,math_lab,featext_lab,ann_lab,dataproc_lab,ai_j,writingdecoder,ann,featext,dataproc,reco,concurrency,dbnn,hwreco,seqlabel,sprnn_moe,ocrtech,dacc,net,sprnn,dram,util_pc,util,nnwrapper,math,math_pc,misc,imaging,imaging_pc,logging,roi_core,evalbase,roi_historical,misc_pc,langmod,decoding,regexdecoding,tensorflow,citech,itrtech</includeArtifactIds>-->
                     <!--<includeArtifactIds>trainer,reco_lab</includeArtifactIds>-->
                 </configuration>
-                <!--<executions>-->
-                <!--<execution>-->
-                <!--<id>copy-dependencies</id>-->
-                <!--<phase>package</phase>-->
-                <!--<goals>-->
-                <!--<goal>copy-dependencies</goal>-->
-                <!--</goals>-->
-                <!--</execution>-->
-                <!--</executions>-->
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
