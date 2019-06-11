@@ -2,6 +2,7 @@
 
 # 2.3.2
 * bugfix format characters in transcripts: ignore lines and characters, when they are from an unknown category and report to observer. 
+* bugfix T2I: do not delete folder, if input and ouput is the same
 
 # 2.3.1
 * bugfix B2P: ignores text lines while B2P, if they have invalid baselines.
