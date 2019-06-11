@@ -90,6 +90,17 @@ public class TrainDataUtil {
         }
 
         private void addLine(String line) {
+            List<String> tokens = null;
+            //Dryrun without adding something
+            if (tokenizer != null) {
+                tokens = tokenizer.tokenize(line);
+                for (String string : tokens) {
+                    if (onlyLetter) {
+                        categorizer.getCategory(string.charAt(0)).equals("L");
+                    }
+                }
+            }
+            //ok - go ahead with statistic
             if (languageResource != null) {
                 languageResource.add(line == null ? "" : line);
             }
@@ -99,11 +110,8 @@ public class TrainDataUtil {
             if (normalizer != null) {
                 line = normalizer.normalize(line);
             }
-            for (char c : line.toCharArray()) {
-                statChar.add(c);
-            }
-            if (tokenizer != null) {
-                for (String string : tokenizer.tokenize(line)) {
+            if (tokens != null) {
+                for (String string : tokens) {
                     if (onlyLetter) {
                         if (categorizer.getCategory(string.charAt(0)).equals("L")) {
                             statWord.add(string);
@@ -113,8 +121,10 @@ public class TrainDataUtil {
                     }
                 }
             }
+            for (char c : line.toCharArray()) {
+                statChar.add(c);
+            }
         }
-
     }
 
     public static void createTrainData(String[] pageXmls, String outputDir, String pathToCharMap, String[] props, Observable observable) {
@@ -290,7 +300,13 @@ public class TrainDataUtil {
                             }
                         }
                         if (stat != null) {
-                            stat.addLine(unicode);
+                            try {
+                                stat.addLine(unicode);
+                            } catch (RuntimeException ex) {
+                                if (observable != null) {
+                                    observable.notifyObservers(new ErrorNotification(pageType, l.getId(), ex, TrainDataUtil.class));
+                                }
+                            }
                         }
                     }
                     //if LR should be saved, add empty line in LR-file to indicate Region-End
