@@ -13,7 +13,6 @@ import de.planet.math.util.PolygonHelper;
 import de.planet.util.LoaderIO;
 import de.uros.citlab.errorrate.normalizer.StringNormalizerDft;
 import de.uros.citlab.errorrate.util.ObjectCounter;
-import de.uros.citlab.module.train.TrainHtrPlus;
 import de.uros.citlab.module.types.ErrorNotification;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.types.LineImage;
@@ -90,17 +89,6 @@ public class TrainDataUtil {
         }
 
         private void addLine(String line) {
-            List<String> tokens = null;
-            //Dryrun without adding something
-            if (tokenizer != null) {
-                tokens = tokenizer.tokenize(line);
-                for (String string : tokens) {
-                    if (onlyLetter) {
-                        categorizer.getCategory(string.charAt(0)).equals("L");
-                    }
-                }
-            }
-            //ok - go ahead with statistic
             if (languageResource != null) {
                 languageResource.add(line == null ? "" : line);
             }
@@ -110,8 +98,11 @@ public class TrainDataUtil {
             if (normalizer != null) {
                 line = normalizer.normalize(line);
             }
-            if (tokens != null) {
-                for (String string : tokens) {
+            for (char c : line.toCharArray()) {
+                statChar.add(c);
+            }
+            if (tokenizer != null) {
+                for (String string : tokenizer.tokenize(line)) {
                     if (onlyLetter) {
                         if (categorizer.getCategory(string.charAt(0)).equals("L")) {
                             statWord.add(string);
@@ -120,9 +111,6 @@ public class TrainDataUtil {
                         statWord.add(string);
                     }
                 }
-            }
-            for (char c : line.toCharArray()) {
-                statChar.add(c);
             }
         }
     }
@@ -244,8 +232,9 @@ public class TrainDataUtil {
             LOG.debug("uses Stringnormalizer with form " + formValue.toUpperCase() + ".");
         }
         boolean calcLR = PropertyUtil.hasProperty(props, Key.CREATE_LR);
+        CategorizerWordMergeGroups cat = new CategorizerWordMergeGroups();
         Statistic stat = PropertyUtil.isPropertyTrue(props, Key.CREATEDICT) || PropertyUtil.isPropertyTrue(props, Key.STATISTIC) || calcLR ?
-                new Statistic(sn, new CategorizerWordMergeGroups(), true, calcLR) : null;
+                new Statistic(sn, cat, true, calcLR) : null;
         final boolean saveTrainData = !PropertyUtil.isPropertyFalse(props, Key.CREATETRAINDATA);
         double minConf = Double.parseDouble(PropertyUtil.getProperty(props, Key.MIN_CONF, "0.0"));
         String[] statuses = PropertyUtil.hasProperty(props, Key.TRAIN_STATUS) ? PropertyUtil.getProperty(props, Key.TRAIN_STATUS).toUpperCase().split(";") : null;
@@ -290,7 +279,7 @@ public class TrainDataUtil {
                         if (unicode == null || unicode.isEmpty()) {
                             continue;
                         }
-                        if (!checkLine(unicode, pageType, l, observable, false)) {
+                        if (!checkLine(unicode, pageType, l, observable, cat, false)) {
                             continue;
                         }
                         if (saveTrainData) {
@@ -300,13 +289,13 @@ public class TrainDataUtil {
                             }
                         }
                         if (stat != null) {
-                            try {
-                                stat.addLine(unicode);
-                            } catch (RuntimeException ex) {
-                                if (observable != null) {
-                                    observable.notifyObservers(new ErrorNotification(pageType, l.getId(), ex, TrainDataUtil.class));
-                                }
-                            }
+//                            try {
+                            stat.addLine(unicode);
+//                            } catch (RuntimeException ex) {
+//                                if (observable != null) {
+//                                    observable.notifyObservers(new ErrorNotification(pageType, l.getId(), ex, TrainDataUtil.class));
+//                                }
+//                            }
                         }
                     }
                     //if LR should be saved, add empty line in LR-file to indicate Region-End
@@ -396,7 +385,7 @@ public class TrainDataUtil {
         return stat;
     }
 
-    private static boolean checkLine(String unicode, PcGtsType pageType, TextLineType l, Observable observable, boolean beStrict) {
+    private static boolean checkLine(String unicode, PcGtsType pageType, TextLineType l, Observable observable, ICategorizer cat, boolean beStrict) {
         for (char c : unicode.toCharArray()) {
             if (Character.isSurrogate(c)) {
                 RuntimeException runtimeException = new RuntimeException("In line " + l.getId() + " transcription '" + unicode + "' contains a surrogate with integer value " + ((int) c) + ". Line will be ignored in training/validation.");
@@ -404,10 +393,23 @@ public class TrainDataUtil {
                     throw runtimeException;
                 }
                 if (observable != null) {
-                    observable.notifyObservers(new ErrorNotification(pageType, l.getId(), runtimeException, TrainHtrPlus.class));
+                    observable.notifyObservers(new ErrorNotification(pageType, l.getId(), runtimeException, TrainDataUtil.class));
                 }
                 return false;
             }
+            try {
+                cat.getCategory(c);
+            } catch (RuntimeException ex) {
+                RuntimeException runtimeException = new RuntimeException("In line " + l.getId() + " transcription '" + unicode + "' contains an invalid character with integer value " + ((int) c) + ". Line will be ignored in training/validation.", ex);
+                if (beStrict) {
+                    throw runtimeException;
+                }
+                if (observable != null) {
+                    observable.notifyObservers(new ErrorNotification(pageType, l.getId(), runtimeException, TrainDataUtil.class));
+                }
+                return false;
+            }
+
         }
         return true;
     }

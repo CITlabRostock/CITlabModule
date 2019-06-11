@@ -24,7 +24,7 @@
     <name>CITlabModule</name>
     <groupId>de.uros.citlab</groupId>
     <artifactId>module</artifactId>
-    <version>2.3.1</version>
+    <version>2.3.2</version>
     <packaging>jar</packaging>
     <parent>
         <groupId>de.uros.citlab</groupId>
