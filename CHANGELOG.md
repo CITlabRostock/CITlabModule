@@ -1,5 +1,7 @@
 # Change Log
 
+# 2.4.1
+
 # 2.4.0
 * make planet and private dependencies 'provided'
 * make dependent on new tokenizer
