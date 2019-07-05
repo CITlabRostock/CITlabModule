@@ -1,7 +1,9 @@
 # Change Log
 
-# 2.3.3
-* make planet dependencies 'provided'
+# 2.4.0
+* make planet and private dependencies 'provided'
+* make dependent on new tokenizer
+* bugfix in Text2Image is used
 
 # 2.3.2
 * bugfix format characters in transcripts: ignore lines and characters, when they are from an unknown category and report to observer. 
