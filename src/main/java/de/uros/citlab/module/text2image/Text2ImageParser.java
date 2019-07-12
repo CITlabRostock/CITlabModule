@@ -23,7 +23,6 @@ import de.uros.citlab.textalignment.types.LineMatch;
 import eu.transkribus.core.model.beans.pagecontent.TextLineType;
 import eu.transkribus.core.model.beans.pagecontent.TextRegionType;
 import eu.transkribus.core.util.PageXmlUtils;
-import eu.transkribus.interfaces.IHtr;
 import eu.transkribus.interfaces.IText2Image;
 import eu.transkribus.interfaces.types.Image;
 import org.slf4j.Logger;
@@ -41,7 +40,8 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
 
     public static Logger LOG = LoggerFactory.getLogger(Text2ImageParser.class.getName());
     private ObjectCounter<Stat> oc = new ObjectCounter<>();
-    IHtr htrImpl = null;
+    //    IHtr htrImpl = null;
+    private String toolName = "T2I";
 
     @Override
     public String usage() {
@@ -51,7 +51,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
 
     @Override
     public String getToolName() {
-        return "Matcher(" + (htrImpl != null ? htrImpl.getToolName() : "?") + ")";
+        return toolName;
     }
 
     @Override
@@ -195,6 +195,16 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
         if (threshold < 0) {
             threshold = 0.0;
         }
+        toolName = "T2I(";
+        if (props != null) {
+            for (int i = 0; i < props.length; i += 2) {
+                toolName += props[i] + "=" + props[i + 1] + ";";
+            }
+            toolName = toolName.substring(0, toolName.length() - 1) + ")";
+        } else {
+            toolName = toolName.substring(0, toolName.length() - 1);
+        }
+
         String lbChars = " ";
         TextAligner textAligner = new TextAligner(
                 lbChars,

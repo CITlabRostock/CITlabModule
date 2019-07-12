@@ -262,6 +262,11 @@ public class TrainHtrPlus extends TrainHtr {
                 trainSizePerEpoch, numEpochs, pathToModelsOut, minibatch, charMap, fileListTrain, fileListVal);
 
         //check, if training is based on a further training or is a new training - different training strategies have to be done.
+        LOG.info("found base model folder = {}", fileHtrIn.exists());
+        if (fileHtrIn.exists()) {
+            LOG.info("subfiles: {}", fileHtrIn.list());
+        }
+
         boolean hasBaseModel = new File(fileHtrIn, "export").exists();
         LOG.info("found base model = {}", hasBaseModel);
         if (hasBaseModel) {
