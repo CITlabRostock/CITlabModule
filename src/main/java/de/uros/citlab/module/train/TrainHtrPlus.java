@@ -262,10 +262,10 @@ public class TrainHtrPlus extends TrainHtr {
                 trainSizePerEpoch, numEpochs, pathToModelsOut, minibatch, charMap, fileListTrain, fileListVal);
 
         //check, if training is based on a further training or is a new training - different training strategies have to be done.
-        boolean hasBaseModel = new File(fileHtrOut, "export").exists();
+        boolean hasBaseModel = new File(fileHtrIn, "export").exists();
         LOG.info("found base model = {}", hasBaseModel);
         if (hasBaseModel) {
-            boolean reinitLogits = reinitLogits(charMap, TrainHtrPlus.getCharMap(fileHtrOut));
+            boolean reinitLogits = reinitLogits(charMap, TrainHtrPlus.getCharMap(fileHtrIn));
             //train further! -> 2 option:
             // 1. CharMap changed => reinit logits and train with continue point
             // 2. CharMap unchanged => train with continue point

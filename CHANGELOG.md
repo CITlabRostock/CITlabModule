@@ -1,6 +1,7 @@
 # Change Log
 
 # 2.4.1
+* bugfix for HTR+ base model training
 
 # 2.4.0
 * make planet and private dependencies 'provided'
