@@ -105,6 +105,11 @@ public class TrainHtrPlus extends TrainHtr {
         if (PropertyUtil.hasProperty(props, Key.PATH_NET)) {
             String pathNet = PropertyUtil.getProperty(props, Key.PATH_NET);
             LOG.info("use network '{}' instead of create new network", pathNet);
+            try {
+                FileUtils.copyDirectory(new File(pathNet), new File(htrOut));
+            } catch (IOException e) {
+                throw new RuntimeException("cannot copy folder " + pathNet + " to " + htrOut + ".", e);
+            }
             // If we load a TensorFlow Network a CharMap is already linked
             if (pathToCharMapFile != null && !pathToCharMapFile.isEmpty()) {
                 if (charMapHtr.exists()) {
