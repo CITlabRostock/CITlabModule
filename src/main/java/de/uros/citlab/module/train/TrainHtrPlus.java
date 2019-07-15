@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author gundram
@@ -106,7 +108,7 @@ public class TrainHtrPlus extends TrainHtr {
             String pathNet = PropertyUtil.getProperty(props, Key.PATH_NET);
             LOG.info("use network '{}' instead of create new network", pathNet);
             try {
-                FileUtils.copyDirectory(new File(pathNet), new File(htrOut));
+                FileUtils.copyDirectory(new File(pathNet), folderHtrOut);
             } catch (IOException e) {
                 throw new RuntimeException("cannot copy folder " + pathNet + " to " + htrOut + ".", e);
             }
@@ -196,6 +198,26 @@ public class TrainHtrPlus extends TrainHtr {
         return propsTraining;
 
     }
+    public static void fixCheckpoints(File folderHTR){
+        File[] files = folderHTR.listFiles();
+        for (File file : files) {
+            if (!file.getName().startsWith("checkpoint")) {
+                continue;
+            }
+            List<String> strings = FileUtil.readLines(file);
+            String s = ".* \"(.*)\"";
+            Pattern p = Pattern.compile(s);
+            for (int i = 0; i < strings.size(); i++) {
+                String s1 = strings.get(i);
+                Matcher matcher = p.matcher(s1);
+                matcher.find();
+                String group = matcher.group(1);
+                File fileNew = new File(folderHTR, new File(group).getName());
+                strings.set(i, s1.replace(group, fileNew.getAbsolutePath()));
+            }
+            FileUtil.writeLines(file, strings);
+        }
+    }
 
     private String[] getFurtherTrainingProperties(
             String[] propsTraining,
@@ -275,6 +297,7 @@ public class TrainHtrPlus extends TrainHtr {
         boolean hasBaseModel = new File(fileHtrIn, "export").exists();
         LOG.info("found base model = {}", hasBaseModel);
         if (hasBaseModel) {
+            fixCheckpoints(fileHtrIn);
             boolean reinitLogits = reinitLogits(charMap, TrainHtrPlus.getCharMap(fileHtrIn));
             //train further! -> 2 option:
             // 1. CharMap changed => reinit logits and train with continue point

@@ -92,7 +92,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
 
     private static void deleteEmptyEntries(List<String> lst) {
         for (int i = 0; i < lst.size(); i++) {
-            String str = lst.get(i).replace("\n", "").replace("\r", "");
+            String str = lst.get(i).replace("\n", "").replace("\r", "").replaceAll("\\s+"," ").trim();
             if (str.isEmpty()) {
                 lst.remove(i--);
             } else {

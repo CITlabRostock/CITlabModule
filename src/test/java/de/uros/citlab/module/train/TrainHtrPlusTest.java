@@ -176,6 +176,7 @@ public class TrainHtrPlusTest {
 
     private static boolean test02CreateHtrOK = false;
     private static boolean test03TrainHtrOK = false;
+    private static boolean test04RerainHtrOK = false;
 
     /**
      * Test of createHtr method, of class TrainHtrSGD.
@@ -232,14 +233,41 @@ public class TrainHtrPlusTest {
 //        Assert.assertNotEquals("recognition result while traning must not be 0", 0, recoTrain.size());
 
     }
-//    private static List<String> recoTrain;
 
     @Test
-    public void test04LoadNetwork() throws MalformedURLException {
+    public void test04RetrainHtr() {
 //        if (TestFiles.skipLargeTests()) {
 //            return;
 //        }
         Assume.assumeTrue(test03TrainHtrOK);
+        System.out.println("RetrainHtr");
+        String[] props = PropertyUtil.setProperty(null, Key.EPOCHS, "2");
+//        props = PropertyUtil.setProperty(props, Key.LEARNINGRATE, "1e-3");
+//        props = PropertyUtil.setProperty(props, Key.MINI_BATCH, "16");
+//        props = PropertyUtil.setProperty(props, Key.NOISE, "preproc");
+        props = PropertyUtil.setProperty(props, Key.TRAINSIZE, "32");
+        props = PropertyUtil.setProperty(props, Key.TMP_FOLDER, dirTmp.getPath());
+        props = PropertyUtil.setProperty(props, Key.PATH_NET, dirHtr.getAbsolutePath());
+        TrainHtrPlus instance = new TrainHtrPlus();
+        instance.trainHtr(dirHtrTrained.getAbsolutePath(),
+                dirHtrTrained.getAbsolutePath(),
+                dirTraindata.getAbsolutePath(),
+                dirTraindata.getAbsolutePath(),
+                props);
+        test04RerainHtrOK = true;
+//        recoTrain = TrainHtrPlus.getReco();
+//        Assert.assertNotNull("recognition result while traning must not be null", recoTrain);
+//        Assert.assertNotEquals("recognition result while traning must not be 0", 0, recoTrain.size());
+
+    }
+//    private static List<String> recoTrain;
+
+    @Test
+    public void test05LoadNetwork() throws MalformedURLException {
+//        if (TestFiles.skipLargeTests()) {
+//            return;
+//        }
+        Assume.assumeTrue(test04RerainHtrOK);
         System.out.println("trainHtr");
         HTRParserPlus parser = new HTRParserPlus();
         Image img = new Image(TestFiles.getTestFiles().get(0).toURI().toURL());
@@ -270,7 +298,7 @@ public class TrainHtrPlusTest {
     }
 
     @Test
-    public void test05RunNetwork() throws MalformedURLException {
+    public void test06RunNetwork() throws MalformedURLException {
 //        if (TestFiles.skipLargeTests()) {
 //            return;
 //        }
@@ -338,6 +366,7 @@ public class TrainHtrPlusTest {
         int size = FileUtil.listFiles(folderSnippets, FileUtil.IMAGE_SUFFIXES, false).size();
         Assert.assertEquals("wrong number of snippets found for validation", 95, size);
     }
+
     //this is only needed to compare old vs new preprocess
 //    @Test
     public void testDiagonalLine() throws IOException, InvalidParameterException, ClassNotFoundException {
@@ -459,7 +488,53 @@ public class TrainHtrPlusTest {
 //        }
 //    }
     @Test
-    public void testID32312() throws MalformedURLException {
+    public void testID32312_01_Apply() throws MalformedURLException {
+        System.out.println("testID32312");
+        HTRParserPlus parser = new HTRParserPlus();
+        File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
+        Assume.assumeTrue(folder.exists());
+        PcGtsType page = getPage(folder);
+        System.out.println("before:###############################");
+
+        Baseline2PolygonParser b2pParser = new Baseline2PolygonParser(B2PSeamMultiOriented.class.getName());
+        b2pParser.process(getImage(folder), page, null, null);
+
+        List<String> text = PageXmlUtil.getText(page);
+        for (String string : text) {
+            System.out.println(string);
+        }
+        parser.process(getHTR(folder), getDict(folder), null, getImage(folder), page, null, null, null);
+        List<String> recoApply = PageXmlUtil.getText(page);
+        System.out.println("output of network:");
+        for (String line : recoApply) {
+            System.out.println(line);
+        }
+    }
+
+   @Test
+    public void testID32312_03_Retrain() throws IOException {
+        File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
+
+        System.out.println("RetrainHtr");
+        String[] props = PropertyUtil.setProperty(null, Key.EPOCHS, "2");
+        File dirTmp = new File(TrainHtrPlusTest.dirTmp, "testID32312_03_Retrain_tmp");
+        File dirHTR = new File(TrainHtrPlusTest.dirTmp, "testID32312_03_Retrain_HTR");
+        dirTmp.mkdirs();
+        dirHTR.mkdirs();
+        FileUtils.copyDirectory(new File(getHTR(folder)), dirHTR);
+        props = PropertyUtil.setProperty(props, Key.TRAINSIZE, "32");
+        props = PropertyUtil.setProperty(props, Key.TMP_FOLDER, dirTmp.getPath());
+        props = PropertyUtil.setProperty(props, Key.PATH_NET, new File(dirHTR,"checkpoint"));
+        TrainHtrPlus instance = new TrainHtrPlus();
+        instance.trainHtr(dirHTR.getAbsolutePath(),
+                dirHTR.getAbsolutePath(),
+                dirTraindata.getAbsolutePath(),
+                dirTraindata.getAbsolutePath(),
+                props);
+    }
+
+//    @Test
+    public void testID32312_05_Apply() throws MalformedURLException {
         System.out.println("testID32312");
         HTRParserPlus parser = new HTRParserPlus();
         File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
@@ -513,6 +588,6 @@ public class TrainHtrPlusTest {
     public static void main(String[] args) throws MalformedURLException {
         TrainHtrPlusTest p = new TrainHtrPlusTest();
 //        TrainHtrPlusTest.setUpClass();
-        p.test04LoadNetwork();
+        p.test05LoadNetwork();
     }
 }
