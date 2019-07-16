@@ -228,6 +228,7 @@ public class TrainHtrPlus extends TrainHtr {
         propsTraining = PropertyUtil.copy(propsTraining);
         propsTraining = PropertyUtil.setProperty(propsTraining, "epochs", numEpochs);
         if (continueTraining) {
+            propsTraining = PropertyUtil.setProperty(propsTraining, "reset_epochs", "True");
             propsTraining = PropertyUtil.setProperty(propsTraining, "continue_point", PropertyUtil.getProperty(propsTraining, "checkpoint_dir"));
         }
         if (finetuneOnlyLogits) {
@@ -419,7 +420,7 @@ public class TrainHtrPlus extends TrainHtr {
         File file = new File(folderHtr, Key.GLOBAL_CHARMAP);
         if (!file.exists()) {
             File charMapFromExport = getCharMapFromExport(folderHtr);
-            if(charMapFromExport!=null){
+            if (charMapFromExport != null) {
                 return charMapFromExport;
             }
             if (forceExistance) {

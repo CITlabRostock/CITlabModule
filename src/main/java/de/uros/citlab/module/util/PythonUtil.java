@@ -86,7 +86,8 @@ public class PythonUtil {
         for (String string : cmd) {
             sb.append(' ').append(string);
         }
-        System.out.println(sb.toString().trim());
+        LOG.info(sb.toString());
+//        System.out.println(sb.toString().trim());
         ProcessBuilder pb = new ProcessBuilder(cmd).directory(execFolder);
         try {
             Process p = pb.start();

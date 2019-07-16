@@ -513,6 +513,11 @@ public class TrainHtrPlusTest {
         }
     }
 
+    private static  File getBaseHTR(){
+        return dirHtrTrained;
+//        return new File(getHTR(new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data")));
+    }
+
     @Test
     public void testID32312_02_Retrain() throws IOException {
         File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
@@ -523,7 +528,7 @@ public class TrainHtrPlusTest {
         File dirHTR = new File(TrainHtrPlusTest.dirTmp, "testID32312_02_Retrain_HTR");
         dirTmp.mkdirs();
         dirHTR.mkdirs();
-        FileUtils.copyDirectory(new File(getHTR(folder)), dirHTR);
+        FileUtils.copyDirectory(getBaseHTR(), dirHTR);
         props = PropertyUtil.setProperty(props, Key.TRAINSIZE, "32");
         props = PropertyUtil.setProperty(props, Key.TMP_FOLDER, dirTmp.getPath());
         TrainHtrPlus instance = new TrainHtrPlus();
@@ -548,7 +553,7 @@ public class TrainHtrPlusTest {
         props = PropertyUtil.setProperty(props, Key.TRAINSIZE, "32");
         props = PropertyUtil.setProperty(props, Key.TMP_FOLDER, dirTmp.getPath());
         TrainHtrPlus instance = new TrainHtrPlus();
-        instance.trainHtr(getHTR(folder),
+        instance.trainHtr(getBaseHTR().getAbsolutePath(),
                 dirHTR.getAbsolutePath(),
                 dirTraindata.getAbsolutePath(),
                 dirTraindata.getAbsolutePath(),
@@ -565,7 +570,7 @@ public class TrainHtrPlusTest {
         File dirHTR = new File(TrainHtrPlusTest.dirTmp, "testID32312_04_Retrain_HTR");
         dirTmp.mkdirs();
         dirHTR.mkdirs();
-        FileUtils.copyDirectory(new File(getHTR(folder)), dirHTR);
+        FileUtils.copyDirectory(getBaseHTR(), dirHTR);
         {
             CharMap<Integer> charMap = CharMapUtil.loadCharMap(new File(dirHTR, Key.GLOBAL_CHARMAP));
             char c = 'a';
@@ -595,7 +600,7 @@ public class TrainHtrPlusTest {
         File dirHTROut = new File(TrainHtrPlusTest.dirTmp, "testID32312_05_Retrain_HTROut");
         dirTmp.mkdirs();
         dirHTR.mkdirs();
-        FileUtils.copyDirectory(new File(getHTR(folder)), dirHTR);
+        FileUtils.copyDirectory(getBaseHTR(), dirHTR);
         {
             CharMap<Integer> charMap = CharMapUtil.loadCharMap(new File(dirHTR, Key.GLOBAL_CHARMAP));
             char c = 'a';
@@ -638,7 +643,7 @@ public class TrainHtrPlusTest {
         }
     }
 
-    private String getDict(File folder) {
+    private static String getDict(File folder) {
         File dictFolder = new File(folder, "dict");
         if (dictFolder.exists()) {
             return FileUtil.listFiles(dictFolder, "dict", false).get(0).getAbsolutePath();
@@ -646,15 +651,15 @@ public class TrainHtrPlusTest {
         return null;
     }
 
-    private String getHTR(File folder) {
+    private static String getHTR(File folder) {
         return new File(folder, "HTR").exists() ? new File(folder, "HTR").getAbsolutePath() : null;
     }
 
-    private Image getImage(File folder) throws MalformedURLException {
+    private static Image getImage(File folder) throws MalformedURLException {
         return new Image(getImagePath(folder).toURL());
     }
 
-    private File getImagePath(File folder) {
+    private static File getImagePath(File folder) {
         List<File> files = FileUtil.listFiles(folder, FileUtil.IMAGE_SUFFIXES, false);
         if (files.size() != 1) {
             throw new RuntimeException("found " + files.size() + "images");
@@ -662,7 +667,7 @@ public class TrainHtrPlusTest {
         return files.get(0);
     }
 
-    private PcGtsType getPage(File folder) {
+    private static PcGtsType getPage(File folder) {
         return PageXmlUtil.unmarshal(PageXmlUtil.getXmlPath(PageXmlUtil.getXmlPath(getImagePath(folder))));
     }
 
