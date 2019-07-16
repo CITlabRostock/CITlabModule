@@ -198,7 +198,8 @@ public class TrainHtrPlus extends TrainHtr {
         return propsTraining;
 
     }
-    public static void fixCheckpoints(File folderHTR){
+
+    public static void fixCheckpoints(File folderHTR) {
         File[] files = folderHTR.listFiles();
         for (File file : files) {
             if (!file.getName().startsWith("checkpoint")) {
@@ -298,7 +299,7 @@ public class TrainHtrPlus extends TrainHtr {
         LOG.info("found base model = {}", hasBaseModel);
         if (hasBaseModel) {
             fixCheckpoints(fileHtrIn);
-            boolean reinitLogits = reinitLogits(charMap, TrainHtrPlus.getCharMap(fileHtrIn));
+            boolean reinitLogits = reinitLogits(charMap, TrainHtrPlus.getCharMapFromExport(fileHtrIn));
             //train further! -> 2 option:
             // 1. CharMap changed => reinit logits and train with continue point
             // 2. CharMap unchanged => train with continue point
@@ -417,20 +418,33 @@ public class TrainHtrPlus extends TrainHtr {
     public static File getCharMap(File folderHtr, boolean forceExistance) {
         File file = new File(folderHtr, Key.GLOBAL_CHARMAP);
         if (!file.exists()) {
-            File exportFolder = new File(folderHtr, "export");
-            if (exportFolder.exists()) {
-                List<File> files = FileUtil.listFiles(exportFolder, "txt", false);
-                if (files.size() == 1) {
-                    return files.get(0);
-                }
+            File charMapFromExport = getCharMapFromExport(folderHtr);
+            if(charMapFromExport!=null){
+                return charMapFromExport;
             }
             if (forceExistance) {
-                LOG.error("cannot find charmap, neither as file {} or *.txt in folder {}.", file, exportFolder);
-                throw new RuntimeException("cannot find charmap, neither as file " + file + " nor *.txt in folder " + exportFolder + ".");
+                LOG.error("cannot find charmap, neither as file {} or *.txt in HTR folder {}.", file, folderHtr);
+                throw new RuntimeException("cannot find charmap, neither as file " + file + " nor *.txt in HTR folder " + folderHtr + ".");
             }
-            return file;
         }
         return file;
+    }
+
+    /**
+     * assumes that in subfolder export there is only one file ending with *.txt, which is interpreted as charmap
+     *
+     * @param folderHtr
+     * @return charmap or null, if no or more than 1 file ends with *.txt
+     */
+    public static File getCharMapFromExport(File folderHtr) {
+        File exportFolder = new File(folderHtr, "export");
+        if (exportFolder.exists()) {
+            List<File> files = FileUtil.listFiles(exportFolder, "txt", false);
+            if (files.size() == 1) {
+                return files.get(0);
+            }
+        }
+        return null;
     }
 
     private void savePreProc(File folderHtr, IImagePreProcess pp) {

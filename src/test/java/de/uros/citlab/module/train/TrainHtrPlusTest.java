@@ -7,6 +7,7 @@ package de.uros.citlab.module.train;
 
 import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.param.ParamSet;
+import com.achteck.misc.types.CharMap;
 import com.achteck.misc.util.IO;
 import de.planet.imaging.panels.DisplayPlanet;
 import de.planet.imaging.types.HybridImage;
@@ -20,6 +21,7 @@ import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
 import de.uros.citlab.module.htr.HTRParserPlus;
 import de.uros.citlab.module.la.LayoutAnalysisURO_ML;
 import de.uros.citlab.module.types.Key;
+import de.uros.citlab.module.util.CharMapUtil;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
 import de.uros.citlab.module.util.PropertyUtil;
@@ -511,7 +513,7 @@ public class TrainHtrPlusTest {
         }
     }
 
-   @Test
+    @Test
     public void testID32312_03_Retrain() throws IOException {
         File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
 
@@ -524,7 +526,6 @@ public class TrainHtrPlusTest {
         FileUtils.copyDirectory(new File(getHTR(folder)), dirHTR);
         props = PropertyUtil.setProperty(props, Key.TRAINSIZE, "32");
         props = PropertyUtil.setProperty(props, Key.TMP_FOLDER, dirTmp.getPath());
-        props = PropertyUtil.setProperty(props, Key.PATH_NET, new File(dirHTR,"checkpoint"));
         TrainHtrPlus instance = new TrainHtrPlus();
         instance.trainHtr(dirHTR.getAbsolutePath(),
                 dirHTR.getAbsolutePath(),
@@ -533,7 +534,36 @@ public class TrainHtrPlusTest {
                 props);
     }
 
-//    @Test
+    @Test
+    public void testID32312_04_Retrain_New_CharMap() throws IOException {
+        File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
+
+        System.out.println("Retrain_New_CharMap");
+        String[] props = PropertyUtil.setProperty(null, Key.EPOCHS, "2");
+        File dirTmp = new File(TrainHtrPlusTest.dirTmp, "testID32312_04_Retrain_tmp");
+        File dirHTR = new File(TrainHtrPlusTest.dirTmp, "testID32312_04_Retrain_HTR");
+        dirTmp.mkdirs();
+        dirHTR.mkdirs();
+        FileUtils.copyDirectory(new File(getHTR(folder)), dirHTR);
+        {
+            CharMap<Integer> charMap = CharMapUtil.loadCharMap(new File(dirHTR, Key.GLOBAL_CHARMAP));
+            char c = 'a';
+            while (charMap.containsValue(c)) c++;
+            System.out.println("c = " + c);
+            charMap.put(charMap.keySet().size(), c);
+            CharMapUtil.saveCharMap(charMap, new File(dirHTR, Key.GLOBAL_CHARMAP));
+        }
+        props = PropertyUtil.setProperty(props, Key.TRAINSIZE, "32");
+        props = PropertyUtil.setProperty(props, Key.TMP_FOLDER, dirTmp.getPath());
+        TrainHtrPlus instance = new TrainHtrPlus();
+        instance.trainHtr(dirHTR.getAbsolutePath(),
+                dirHTR.getAbsolutePath(),
+                dirTraindata.getAbsolutePath(),
+                dirTraindata.getAbsolutePath(),
+                props);
+    }
+
+    //    @Test
     public void testID32312_05_Apply() throws MalformedURLException {
         System.out.println("testID32312");
         HTRParserPlus parser = new HTRParserPlus();
