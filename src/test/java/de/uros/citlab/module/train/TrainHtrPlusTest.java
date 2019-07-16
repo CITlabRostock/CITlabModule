@@ -514,13 +514,13 @@ public class TrainHtrPlusTest {
     }
 
     @Test
-    public void testID32312_03_Retrain() throws IOException {
+    public void testID32312_02_Retrain() throws IOException {
         File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
 
-        System.out.println("RetrainHtr");
+        System.out.println("02_Retrain");
         String[] props = PropertyUtil.setProperty(null, Key.EPOCHS, "2");
-        File dirTmp = new File(TrainHtrPlusTest.dirTmp, "testID32312_03_Retrain_tmp");
-        File dirHTR = new File(TrainHtrPlusTest.dirTmp, "testID32312_03_Retrain_HTR");
+        File dirTmp = new File(TrainHtrPlusTest.dirTmp, "testID32312_02_Retrain_tmp");
+        File dirHTR = new File(TrainHtrPlusTest.dirTmp, "testID32312_02_Retrain_HTR");
         dirTmp.mkdirs();
         dirHTR.mkdirs();
         FileUtils.copyDirectory(new File(getHTR(folder)), dirHTR);
@@ -528,6 +528,27 @@ public class TrainHtrPlusTest {
         props = PropertyUtil.setProperty(props, Key.TMP_FOLDER, dirTmp.getPath());
         TrainHtrPlus instance = new TrainHtrPlus();
         instance.trainHtr(dirHTR.getAbsolutePath(),
+                dirHTR.getAbsolutePath(),
+                dirTraindata.getAbsolutePath(),
+                dirTraindata.getAbsolutePath(),
+                props);
+    }
+
+    @Test
+    public void testID32312_03_Retrain() throws IOException {
+        File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
+
+        System.out.println("03_Retrain");
+        String[] props = PropertyUtil.setProperty(null, Key.EPOCHS, "2");
+        File dirTmp = new File(TrainHtrPlusTest.dirTmp, "testID32312_03_Retrain_tmp");
+        File dirHTR = new File(TrainHtrPlusTest.dirTmp, "testID32312_03_Retrain_HTR");
+        dirTmp.mkdirs();
+//        dirHTR.mkdirs();
+//        FileUtils.copyDirectory(new File(getHTR(folder)), dirHTR);
+        props = PropertyUtil.setProperty(props, Key.TRAINSIZE, "32");
+        props = PropertyUtil.setProperty(props, Key.TMP_FOLDER, dirTmp.getPath());
+        TrainHtrPlus instance = new TrainHtrPlus();
+        instance.trainHtr(getHTR(folder),
                 dirHTR.getAbsolutePath(),
                 dirTraindata.getAbsolutePath(),
                 dirTraindata.getAbsolutePath(),
@@ -563,9 +584,39 @@ public class TrainHtrPlusTest {
                 props);
     }
 
+    @Test
+    public void testID32312_05_Retrain_New_CharMap() throws IOException {
+        File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
+
+        System.out.println("Retrain_New_CharMap");
+        String[] props = PropertyUtil.setProperty(null, Key.EPOCHS, "2");
+        File dirTmp = new File(TrainHtrPlusTest.dirTmp, "testID32312_05_Retrain_tmp");
+        File dirHTR = new File(TrainHtrPlusTest.dirTmp, "testID32312_05_Retrain_HTR");
+        File dirHTROut = new File(TrainHtrPlusTest.dirTmp, "testID32312_05_Retrain_HTROut");
+        dirTmp.mkdirs();
+        dirHTR.mkdirs();
+        FileUtils.copyDirectory(new File(getHTR(folder)), dirHTR);
+        {
+            CharMap<Integer> charMap = CharMapUtil.loadCharMap(new File(dirHTR, Key.GLOBAL_CHARMAP));
+            char c = 'a';
+            while (charMap.containsValue(c)) c++;
+            System.out.println("c = " + c);
+            charMap.put(charMap.keySet().size(), c);
+            CharMapUtil.saveCharMap(charMap, new File(dirHTR, Key.GLOBAL_CHARMAP));
+        }
+        props = PropertyUtil.setProperty(props, Key.TRAINSIZE, "32");
+        props = PropertyUtil.setProperty(props, Key.TMP_FOLDER, dirTmp.getPath());
+        TrainHtrPlus instance = new TrainHtrPlus();
+        instance.trainHtr(dirHTR.getAbsolutePath(),
+                dirHTROut.getAbsolutePath(),
+                dirTraindata.getAbsolutePath(),
+                dirTraindata.getAbsolutePath(),
+                props);
+    }
+
     //    @Test
     public void testID32312_05_Apply() throws MalformedURLException {
-        System.out.println("testID32312");
+        System.out.println("testID32312_05_Apply");
         HTRParserPlus parser = new HTRParserPlus();
         File folder = new File(new File(TestFiles.getPrefix(), "test_htr_bug"), "job_err_id_32312_data");
         Assume.assumeTrue(folder.exists());

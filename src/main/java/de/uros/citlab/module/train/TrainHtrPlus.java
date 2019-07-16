@@ -298,7 +298,7 @@ public class TrainHtrPlus extends TrainHtr {
         boolean hasBaseModel = new File(fileHtrIn, "export").exists();
         LOG.info("found base model = {}", hasBaseModel);
         if (hasBaseModel) {
-            fixCheckpoints(fileHtrIn);
+            fixCheckpoints(fileHtrOut);
             boolean reinitLogits = reinitLogits(charMap, TrainHtrPlus.getCharMapFromExport(fileHtrIn));
             //train further! -> 2 option:
             // 1. CharMap changed => reinit logits and train with continue point
