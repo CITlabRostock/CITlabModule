@@ -305,9 +305,9 @@ public class TrainHtrPlus extends TrainHtr {
             // 1. CharMap changed => reinit logits and train with continue point
             // 2. CharMap unchanged => train with continue point
             LOG.info("re-initialize upper layer because CharMap changed = {}", reinitLogits);
+            ProcessListener processListener = getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props);
             if (reinitLogits) {
                 LOG.info("apply training one epoch only on the logit layer.");
-                ProcessListener processListener = getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props);
                 if (PythonUtil.runPythonFromFile("tf_htsr/models/trainer/trainer.py",
                         processListener,
                         getFurtherTrainingProperties(trainingProperties, 1, true, true)
@@ -322,7 +322,7 @@ public class TrainHtrPlus extends TrainHtr {
                 numEpochs--;
             }
             LOG.info("apply training {} epoch(s) on all layer.", numEpochs);
-            ProcessListener processListener = getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props);
+//            ProcessListener processListener = getProcessListener(inputTrainDir, inputValDir, fileHtrOut, props);
             if (PythonUtil.runPythonFromFile("tf_htsr/models/trainer/trainer.py",
                     processListener,
                     getFurtherTrainingProperties(trainingProperties, numEpochs, false, true)
