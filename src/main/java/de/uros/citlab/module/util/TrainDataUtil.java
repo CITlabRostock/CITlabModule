@@ -124,7 +124,7 @@ public class TrainDataUtil {
         Statistic statistic = createTrainData(pageXmls, outputDir, propsTraindata, observable);
         if (statistic != null) {
             if (statistic.statChar.isEmpty()) {
-                RuntimeException runtimeException = new RuntimeException("no lines with non-empty ground truth saved");
+                RuntimeException runtimeException = new RuntimeException("training of test/validation set contains no transriptions in " + pageXmls.length + " pages.");
                 if (observable != null) {
                     observable.notifyObservers(new ErrorNotification(null, null, runtimeException, TrainDataUtil.class));
                 }

@@ -213,11 +213,46 @@ public class TrainHtrPlus extends TrainHtr {
                 Matcher matcher = p.matcher(s1);
                 matcher.find();
                 String group = matcher.group(1);
-                File fileNew = new File(folderHTR, new File(group).getName());
+                String name = new File(group).getName();
+                File fileNew = new File(folderHTR, name);
                 strings.set(i, s1.replace(group, fileNew.getAbsolutePath()));
             }
             FileUtil.writeLines(file, strings);
         }
+    }
+
+    public static void removeUnusedModels(File folderHTR) {
+        File[] files = folderHTR.listFiles();
+        Set<String> models = new HashSet<>();
+        for (File file : files) {
+            if (!file.getName().startsWith("checkpoint")) {
+                continue;
+            }
+            List<String> strings = FileUtil.readLines(file);
+            String s = ".* \"(.*)\"";
+            Pattern p = Pattern.compile(s);
+            for (int i = 0; i < strings.size(); i++) {
+                String s1 = strings.get(i);
+                Matcher matcher = p.matcher(s1);
+                matcher.find();
+                String group = matcher.group(1);
+                String name = new File(group).getName();
+                models.add(name);
+            }
+        }
+        for (File file : files) {
+            String name = file.getName();
+            int i = name.lastIndexOf('.');
+            if (i < 0) {
+                continue;
+            }
+            name = name.substring(0, i);
+            if (!models.contains(name)) {
+                LOG.debug("delete model {} because it is not needed for possible further training", file);
+                file.delete();
+            }
+        }
+
     }
 
     private String[] getFurtherTrainingProperties(
@@ -350,6 +385,7 @@ public class TrainHtrPlus extends TrainHtr {
                 throw re;
             }
         }
+        removeUnusedModels(fileHtrOut);
     }
 
     private boolean reinitLogits(File charMapNew, File charMapExport) {
