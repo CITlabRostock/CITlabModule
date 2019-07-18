@@ -1,11 +1,9 @@
 # Change Log
 
-# 2.4.2
-* training snippets are greyscale to reduce disc storage
-
 # 2.4.1
 * bugfix for HTR+ base model training
 * needs tf_htsr version 3.0.5
+* training snippets are greyscale to reduce disc storage
 
 # 2.4.0
 * make planet and private dependencies 'provided'
