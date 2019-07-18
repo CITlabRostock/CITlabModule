@@ -318,7 +318,7 @@ public class TrainDataUtil {
                     if (PropertyUtil.hasProperty(props, KEY_SRC_FOLDER)) {
                         folderImage = FileUtil.getTgtFile(new File(PropertyUtil.getProperty(props, KEY_SRC_FOLDER)), fileFolderOut, page.getPathImg()).getParentFile();
                     }
-                    HybridImage hi = ImageUtil.getHybridImage(page.getImg());
+                    HybridImage hi = ImageUtil.getHybridImage(page.getImg(),true);
                     for (TextLineType line : tlts) {
                         TextRegionType region = regionMap.get(line);
                         HybridImage subImage = null;
