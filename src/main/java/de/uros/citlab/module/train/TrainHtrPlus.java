@@ -243,7 +243,7 @@ public class TrainHtrPlus extends TrainHtr {
         for (File file : files) {
             String name = file.getName();
             int i = name.lastIndexOf('.');
-            if (i < 0) {
+            if (i < 0 || !name.startsWith("model")) {
                 continue;
             }
             name = name.substring(0, i);
