@@ -17,6 +17,7 @@ import de.uros.citlab.module.types.ErrorNotification;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -253,7 +254,44 @@ public class TrainHtrPlus extends TrainHtr {
             }
         }
 
+        removeUnusedPbFiles(folderHTR);
     }
+
+    /**
+     * Clean outdated .pb files from {folderHTR}/export directory. Only most recent one is kept.
+     * 
+     * @param folderHTR
+     */
+    private static void removeUnusedPbFiles(File folderHTR) {
+    	File export = new File(folderHTR, "export");
+        if(!export.isDirectory()) {
+        	return;
+        }
+        List<File> pbFiles;
+        try {
+        	pbFiles = FileUtil.listFiles(export, "pb", false);
+        } catch (Exception e) {
+        	LOG.warn("Could not list .pb files in export dir! Skipping.", e);
+        	return;
+        }
+        if(pbFiles == null || pbFiles.size() < 2) {
+        	return;
+        }
+        
+        LOG.debug("Found {} .pb files. Doing cleanup.", pbFiles.size());
+        //find most recent, remove the rest.
+        Collections.sort(pbFiles, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
+        //first in the list is now the most recent one.
+        LOG.debug("Keeping most recent .pb file: {}", pbFiles.get(0));
+        for(int i = 1; i < pbFiles.size(); i++) {
+        	File pb = pbFiles.get(i);
+        	if(pb.delete()) {
+        		LOG.debug("Deleted old .pb file: {}", pb.getAbsolutePath());
+        	} else {
+        		LOG.warn("Could not delete obsolete .pb file: {}", pb.getAbsolutePath());
+        	}
+        }
+	}
 
     private String[] getFurtherTrainingProperties(
             String[] propsTraining,
