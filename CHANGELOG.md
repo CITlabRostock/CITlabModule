@@ -1,6 +1,7 @@
 # Change Log
 
 # 2.4.2
+* bugfix for HTR+ delete old *.pb in export folder
 
 # 2.4.1
 * bugfix for HTR+ base model training
