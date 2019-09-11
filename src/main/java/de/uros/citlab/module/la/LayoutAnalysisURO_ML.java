@@ -331,6 +331,9 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
     }
 
     private List<Cluster> clusterBLs(HybridImage hi, List<Polygon2DInt> bls, String thisRotateScheme, boolean rotateBaselines, boolean clustLeft2Right) {
+        if (rotateBaselines != clustLeft2Right) {
+            LOG.warn("rotation = {} and clusterLeft2Right = {} could cause errors for regions with angle != 0", rotateBaselines, clustLeft2Right);
+        }
         short[][] absSobelSum = null;
         if (!thisRotateScheme.equals(ROT_DFT)) {
             absSobelSum = ImageUtil.calcAbsSobelSum(hi.getAsOpenCVMatImage());

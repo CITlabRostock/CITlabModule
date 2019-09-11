@@ -239,6 +239,16 @@ public class Key {
      */
     public static final String KWS_UPPER = "kws_upper";
     /**
+     * if KW only is allowed at the start of a text line<br>
+     * value: true|false (default: false)
+     */
+    public static final String KWS_PREFIX = "kws_prefix";
+    /**
+     * if KW only is allowed at the end of a text line<br>
+     * value: true|false (default: false)
+     */
+    public static final String KWS_SUFFIX = "kws_suffix";
+    /**
      * activates the expert-modus<br>
      * some regular expressions are allowed<br>
      * value: true|false (default: false)

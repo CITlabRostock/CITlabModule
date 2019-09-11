@@ -11,6 +11,7 @@ import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
 import de.uros.citlab.module.baseline2polygon.Baseline2PolygonParser;
 import de.uros.citlab.module.htr.HTRParser;
+import de.uros.citlab.module.htr.HTRParserPlus;
 import de.uros.citlab.module.la.LayoutAnalysisURO_ML;
 import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.util.FileUtil;
@@ -38,6 +39,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
+
+//import de.uros.citlab.module.htr.HTRParserPlus;
 
 /**
  * @author gundram
@@ -72,7 +75,7 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
     private boolean debug = false;
 
     @ParamAnnotation(descr = "if htr is set, save cm-storage")
-    private boolean saveCM=false;
+    private boolean saveCM = false;
 
     @ParamAnnotation(descr = "link image file instead of copy")
     private boolean link = true;
@@ -84,7 +87,7 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
     }
 
     public Apply2Folder_ML(String htr, String lr, String la, String folderIn, String folderOut, String b2pClassName, boolean createDebugImg, boolean saveCM, String[] props) {
-        this.htr = new HTRParser();
+        this.htr = new HTRParserPlus();
         htr_path = htr;
         lr_path = lr;
         b2p = b2pClassName;
@@ -181,7 +184,18 @@ public class Apply2Folder_ML extends ParamTreeOrganizer {
                     storage.mkdirs();
                     storageDir = storage.getPath();
                 }
-                htr.process(htrName.getAbsolutePath(), lrName == null ? null : lrName.getAbsolutePath(), null, img, tgtXml.getAbsolutePath(), storageDir, null, null);
+                try {
+                    htr.process(htrName.getAbsolutePath(), lrName == null ? null : lrName.getAbsolutePath(), null, img, tgtXml.getAbsolutePath(), storageDir, null, null);
+                } catch (RuntimeException ex) {
+                    try {
+                        HTRParser fallback = new HTRParser();
+                        fallback.process(htrName.getAbsolutePath(), lrName == null ? null : lrName.getAbsolutePath(), null, img, tgtXml.getAbsolutePath(), storageDir, null, null);
+                        htr = fallback;
+                    } catch (RuntimeException ex2) {
+                        throw ex;
+                    }
+
+                }
             }
             if (debug) {
                 BufferedImage imageBufferedImage = img.getImageBufferedImage(true);
