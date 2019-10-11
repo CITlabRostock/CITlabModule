@@ -1,5 +1,8 @@
 # Change Log
 
+# 2.4.3
+* bugfix for HTR+ ignore very small line regions 
+
 # 2.4.2
 * bugfix for HTR+ delete old *.pb in export folder
 
