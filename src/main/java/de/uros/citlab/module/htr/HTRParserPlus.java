@@ -27,6 +27,8 @@ import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.pagecontent.TextLineType;
 import eu.transkribus.core.model.beans.pagecontent.TextRegionType;
 import eu.transkribus.core.util.PageXmlUtils;
+import eu.transkribus.core.util.SysResourcesUtil;
+import eu.transkribus.core.util.LogUtil.Level;
 import eu.transkribus.interfaces.types.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,6 +194,13 @@ public class HTRParserPlus extends Observable implements IHtrCITlab {
 //            textEquivType.setConf(new Float(result.getSecond()));
                 LOG.info("decoded '" + result + "' for textline " + textLine.getId() + " with" + ((PropertyUtil.isPropertyTrue(props, Key.RAW) || !useDict(pathToLanguageModel)) ? "out" : "") + " language model .");
             } catch (RuntimeException ex) {
+                notifyObservers(new ErrorNotification(xmlFile, lineImage.getTextLine().getId(), ex, TrainHtrPlus.class));
+                PageXmlUtil.deleteCustomTags(textLine, ReadingOrderTag.TAG_NAME);
+                PageXmlUtil.setTextEquiv(textLine, "");
+            } catch (OutOfMemoryError ex) {
+            	LOG.error("OutOfMemoryError at line "+textLine.getId()+" - msg: "+ex.getMessage());
+            	SysResourcesUtil.logMemUsage(LOG, Level.ERROR, true);
+            	System.gc();
                 notifyObservers(new ErrorNotification(xmlFile, lineImage.getTextLine().getId(), ex, TrainHtrPlus.class));
                 PageXmlUtil.deleteCustomTags(textLine, ReadingOrderTag.TAG_NAME);
                 PageXmlUtil.setTextEquiv(textLine, "");
