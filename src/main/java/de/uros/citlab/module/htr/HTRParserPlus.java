@@ -198,7 +198,7 @@ public class HTRParserPlus extends Observable implements IHtrCITlab {
 //                PageXmlUtil.deleteCustomTags(textLine, ReadingOrderTag.TAG_NAME);
 //                PageXmlUtil.setTextEquiv(textLine, "");
             } catch (OutOfMemoryError ex) {
-            	LOG.error("OutOfMemoryError at line "+textLine.getId()+" - msg: "+ex.getMessage());
+            	LOG.error("OutOfMemoryError at image "+xmlFile.getPage().getImageFilename()+", line "+textLine.getId());
             	SysResourcesUtil.logMemUsage(LOG, Level.ERROR, true);
             	System.gc();
                 notifyObservers(new ErrorNotification(xmlFile, lineImage.getTextLine().getId(), ex, TrainHtrPlus.class));
