@@ -30,10 +30,13 @@ import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.SysResourcesUtil;
 import eu.transkribus.core.util.LogUtil.Level;
 import eu.transkribus.interfaces.types.Image;
+import eu.transkribus.interfaces.types.Image.Type;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -158,6 +161,17 @@ public class HTRParserPlus extends Observable implements IHtrCITlab {
             }
         }
     }
+    
+    private String getPathFromImageOrPcGtsType(Image image, PcGtsType xmlFile) {
+        String imgPath=xmlFile.getPage().getImageFilename();
+        if (image.hasType(Type.URL)) {
+        	URL url = image.getImageUrl();
+        	if (url != null) {
+        		imgPath = url.toString();
+        	}
+        }
+    	return imgPath;
+    }
 
     @Override
     public void process(String pathToOpticalModel, String pathToLanguageModel, String pathCharMap, Image image, PcGtsType xmlFile, String storageDir, String[] lineIds, String[] props) {
@@ -198,7 +212,8 @@ public class HTRParserPlus extends Observable implements IHtrCITlab {
 //                PageXmlUtil.deleteCustomTags(textLine, ReadingOrderTag.TAG_NAME);
 //                PageXmlUtil.setTextEquiv(textLine, "");
             } catch (OutOfMemoryError ex) {
-            	LOG.error("OutOfMemoryError at image "+xmlFile.getPage().getImageFilename()+", line "+textLine.getId());
+            	String imgPath = getPathFromImageOrPcGtsType(image, xmlFile);
+            	LOG.error("OutOfMemoryError image="+imgPath+" lineid="+textLine.getId());
             	SysResourcesUtil.logMemUsage(LOG, Level.ERROR, true);
             	System.gc();
                 notifyObservers(new ErrorNotification(xmlFile, lineImage.getTextLine().getId(), ex, TrainHtrPlus.class));
