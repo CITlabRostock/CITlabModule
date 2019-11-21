@@ -171,28 +171,25 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
 
     public void deleteT2ITextLines(PageStruct struct) {
         struct.getXml().getPage();
-        if(isT2ITextLine(textLine,struct.getXml())){
+        if(PageXmlUtil.isT2ITextLine(textLine,struct.getXml())){
             //remove
         }
-    }
-
-    private static boolean isT2ITextLine(TextLineType textLine, PcGtsType page) {
-        Rectangle bounds = PolygonUtil.getPolygon(textLine).getBounds();
-        return bounds.x == 0 && bounds.y == 0 && bounds.height == page.getHeight() && bounds.width == page.getWidth();
     }
 
     public void matchCollection(String pathToOpticalModel, String pathToLanguageModel, String
             pathToCharacterMap, String pathToText, String[] images, String[] xmlInOut, String[] storages, String[] props) {
         LOG.info("process xmls {}...", Arrays.asList(images));
         List<PageStruct> pages = PageXmlUtil.getPages(images, xmlInOut);
-        List<String> in = loadReferencePrepareBidi(new File(pathToText));
+        List<String> in = pathToText!=null && !pathToText.isEmpty()?
+                loadReferencePrepareBidi(new File(pathToText)):
+                loadReferencesFromPageStruct(pages);
         final List<LineImage> linesExecution = new LinkedList<>();
         final List<PageStruct> pageExecution = new LinkedList<>();
         final List<ConfMat> confMats = new LinkedList<>();
         final Map<LineImage, HybridImage> lineMap = new LinkedHashMap<>();
         Set<HybridImage> freeImages = new LinkedHashSet<>();
         for (int i = 0; i < pages.size(); i++) {
-            PageStruct page = pages.get(i);
+            final PageStruct page = pages.get(i);
             String storage = storages != null ? storages[i] : null;
             HybridImage hi = null;
             try {
@@ -205,6 +202,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
             HTR htr = getHTR(pathToOpticalModel, pathToCharacterMap, storage);
             for (TextRegionType textRegion : textRegions) {
                 List<TextLineType> linesInRegion1 = textRegion.getTextLine();
+                linesInRegion1.removeIf(textLineType -> PageXmlUtil.isT2ITextLine(textLineType,page.getXml()));
                 for (TextLineType textLineType : linesInRegion1) {
                     LineImage lineImage = new LineImage(hi, textLineType, textRegion);
                     lineImage.deleteTextEquiv();

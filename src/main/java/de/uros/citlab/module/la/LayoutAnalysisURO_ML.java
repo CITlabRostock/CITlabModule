@@ -47,6 +47,7 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
     private String netPath = null;
 
     //    private static final String DEL_DEFAULT = "default";
+    public static final String DEL_ALL = "all";
     public static final String DEL_REGIONS = "regions";
     public static final String DEL_LINES = "lines";
 
@@ -132,16 +133,32 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
         if (deleteScheme != null) {
             doLA = true;
             switch (deleteScheme) {
-                case DEL_REGIONS:
+                case DEL_ALL:
                     if (!globRegs.isEmpty()) {
                         LOG.debug("delete {} text regions", globRegs.size());
                         globRegs.clear();
                         globTextRegs.clear();
                     }
                     break;
+                case DEL_REGIONS:
+                    if (!globRegs.isEmpty()) {
+                        int count = 0;
+                        for (int i = globTextRegs.size() - 1; i >= 0; i--) {
+                            if(!PageXmlUtil.isT2ITextRegion(globTextRegs.get(i))){
+                                globTextRegs.remove(globTextRegs.get(i));
+                                globRegs.remove(i);
+                                count++;
+                            }
+                        }
+                        LOG.debug("delete {} text regions, leave {} T2I Textregions", globTextRegs.size());
+                    }
+                    break;
                 case DEL_LINES:
                     //If Flag is set, delete all TextLines in given TextRegions
                     for (TextRegionType aTextReg : globTextRegs) {
+                        if(PageXmlUtil.isT2ITextRegion(aTextReg,xmlFile)){
+                            continue;
+                        }
                         List<TextLineType> textLine = aTextReg.getTextLine();
                         if (!textLine.isEmpty()) {
                             LOG.debug("delete " + textLine.size() + " text lines in TextRegion " + aTextReg.getId());
@@ -157,6 +174,9 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
         List<TextRegionType> reducedTextRegs = new ArrayList<>();
         List<Polygon2DInt> reducedTextRegsPoly = new ArrayList<>();
         for (TextRegionType aGlobTextRegion : globTextRegs) {
+            if(PageXmlUtil.isT2ITextRegion(globTextRegs,xmlFile)){
+                continue;
+            }
             if (ids == null || ArrayUtil.linearSearch(ids, aGlobTextRegion.getId()) >= 0) {
                 List<TextLineType> textLines = aGlobTextRegion.getTextLine();
                 if (textLines == null || textLines.isEmpty()) {
