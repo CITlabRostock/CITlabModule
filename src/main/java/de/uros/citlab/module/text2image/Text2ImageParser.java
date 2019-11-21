@@ -29,9 +29,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
+import java.util.List;
 
 /**
  * @author gundram
@@ -76,13 +78,17 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
         oc.reset();
     }
 
-    private List<String> loadReferencePrepareBidi(File inFile) {
+    private List<String> loadReferencePrepareBidi(File inFile, boolean ignoreHardLineBreaks) {
         List<String> in = FileUtil.readLines(inFile);
         deleteEmptyEntries(in);
+        if (ignoreHardLineBreaks) {
+            String oneline = BidiUtil.logical2visual(String.join(" ", in));
+            in = new LinkedList<>(Arrays.asList(oneline));
+            return in;
+        }
         for (int i = 0; i < in.size(); i++) {
             in.set(i, BidiUtil.logical2visual(in.get(i)));
         }
-        return in;
     }
 
     @Override
@@ -92,7 +98,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
 
     private static void deleteEmptyEntries(List<String> lst) {
         for (int i = 0; i < lst.size(); i++) {
-            String str = lst.get(i).replace("\n", "").replace("\r", "").replaceAll("\\s+"," ").trim();
+            String str = lst.get(i).replace("\n", "").replace("\r", "").replaceAll("\\s+", " ").trim();
             if (str.isEmpty()) {
                 lst.remove(i--);
             } else {
@@ -141,7 +147,42 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
         }
     }
 
-    public void matchCollection(String pathToOpticalModel, String pathToLanguageModel, String pathToCharacterMap, String pathToText, String[] images, String[] xmlInOut, String[] storages, String[] props) {
+    public List<String> loadReferencesFromPageStruct(List<PageStruct> pages, boolean ignoreHardLineBreaks) {
+        List<String> res = new LinkedList<>();
+        for (PageStruct page : pages) {
+            int width = page.getXml().getImageWidth();
+            int height = page.getXml().getImageHeight();
+            for (TextLineType textLine : PageXmlUtil.getTextLines(page.getXml())) {
+                if(isT2ITextLine(textLine,page.getXml())){
+                    res.add(PageXmlUtil.getTextEquiv(textLine));
+                }
+            }
+        }
+        deleteEmptyEntries(res);
+        if (ignoreHardLineBreaks) {
+            String oneline = BidiUtil.logical2visual(String.join(" ", res));
+            return new LinkedList<>(Arrays.asList(oneline));
+        }
+        for (int i = 0; i < res.size(); i++) {
+            res.set(i, BidiUtil.logical2visual(res.get(i)));
+        }
+        return res;
+    }
+
+    public void deleteT2ITextLines(PageStruct struct) {
+        struct.getXml().getPage();
+        if(isT2ITextLine(textLine,struct.getXml())){
+            //remove
+        }
+    }
+
+    private static boolean isT2ITextLine(TextLineType textLine, PcGtsType page) {
+        Rectangle bounds = PolygonUtil.getPolygon(textLine).getBounds();
+        return bounds.x == 0 && bounds.y == 0 && bounds.height == page.getHeight() && bounds.width == page.getWidth();
+    }
+
+    public void matchCollection(String pathToOpticalModel, String pathToLanguageModel, String
+            pathToCharacterMap, String pathToText, String[] images, String[] xmlInOut, String[] storages, String[] props) {
         LOG.info("process xmls {}...", Arrays.asList(images));
         List<PageStruct> pages = PageXmlUtil.getPages(images, xmlInOut);
         List<String> in = loadReferencePrepareBidi(new File(pathToText));
@@ -272,7 +313,8 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
     }
 
     @Override
-    public void matchRegions(String pathToOpticalModel, String pathToLanguageModel, String pathToCharacterMap, String[] pathToText, String images, String xmlInOut, String[] region_ids, String[] props) {
+    public void matchRegions(String pathToOpticalModel, String pathToLanguageModel, String
+            pathToCharacterMap, String[] pathToText, String images, String xmlInOut, String[] region_ids, String[] props) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
