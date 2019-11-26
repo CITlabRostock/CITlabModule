@@ -298,7 +298,10 @@ public class HTR {
         }
         if (res == null) {
             HybridImage subImage = lineImage.getSubImage();
-
+            if (subImage.getHeight() * subImage.getWidth() < 200 || subImage.getHeight() < 10 || subImage.getWidth() < 10) {
+                LOG.warn("line image {} is too small with h x w= {} x {}", lineImage.getTextLine().getId(), subImage.getHeight(), subImage.getWidth());
+                throw new RuntimeException("image is too small with hxw=" + subImage.getHeight() + "x" + subImage.getWidth());
+            }
             htrImpl.setInput(subImage);
 //            IImagePreProcess preproc = ((SNetworkTF) htrImpl).getPreproc();
 //            File folderOut = new File("debug_res");

@@ -5,6 +5,7 @@
  */
 package de.uros.citlab.module.util;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -39,6 +40,14 @@ import eu.transkribus.core.util.PageXmlUtils;
 public class PageXmlUtil {
 
     public static Logger LOG = Logger.getLogger(PageXmlUtil.class.getName());
+    public static boolean isT2ITextLine(TextLineType textLine, PcGtsType page) {
+        Rectangle bounds = PolygonUtil.getPolygon(textLine).getBounds();
+        return bounds.x == 0 && bounds.y == 0 && bounds.height == page.getHeight() && bounds.width == page.getWidth();
+    }
+    public static boolean isT2ITextRegion(TextRegionType textLine, PcGtsType page) {
+        Rectangle bounds = PolygonUtil.string2Polygon(textLine.getCoords()).getBounds();
+        return bounds.x == 0 && bounds.y == 0 && bounds.height == page.getHeight() && bounds.width == page.getWidth();
+    }
 
     public static File getFirstFileWithSuffix(File baseDir, String filename, String[] suffixes, boolean caseSensitve) {
         if (suffixes == null || filename == null || baseDir == null || !baseDir.isDirectory()) {
