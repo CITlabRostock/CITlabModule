@@ -126,7 +126,11 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
         PageType page = xmlFile.getPage();
         List<TrpRegionType> globRegs = page.getTextRegionOrImageRegionOrLineDrawingRegion();
         List<TextRegionType> globTextRegs = PageXmlUtils.getTextRegions(xmlFile);
-
+        TextRegionType t2ITextRegion = PageXmlUtil.getT2ITextRegion(globTextRegs, xmlFile);
+        if (t2ITextRegion != null) {
+            globRegs.remove(t2ITextRegion);
+            globTextRegs.remove(t2ITextRegion);
+        }
 //        List<TextRegionType> globTextRegs = PageXmlUtils.getTextRegions(xmlFile);
         String deleteScheme = PropertyUtil.getProperty(propCur, Key.LA_DELETESCHEME);
         boolean doLA = globTextRegs.isEmpty();
@@ -134,29 +138,22 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
             doLA = true;
             switch (deleteScheme) {
                 case DEL_ALL:
-                    if (!globRegs.isEmpty()) {
-                        LOG.debug("delete {} text regions", globRegs.size());
-                        globRegs.clear();
-                        globTextRegs.clear();
-                    }
-                    break;
                 case DEL_REGIONS:
                     if (!globRegs.isEmpty()) {
                         int count = 0;
                         for (int i = globTextRegs.size() - 1; i >= 0; i--) {
-                            if(!PageXmlUtil.isT2ITextRegion(globTextRegs.get(i))){
-                                globTextRegs.remove(globTextRegs.get(i));
-                                globRegs.remove(i);
-                                count++;
-                            }
+                            TextRegionType textRegion = globTextRegs.get(i);
+                            globTextRegs.remove(textRegion);
+                            globRegs.remove(textRegion);
+                            count++;
                         }
-                        LOG.debug("delete {} text regions, leave {} T2I Textregions", globTextRegs.size());
+                        LOG.debug("delete {} text regions", count);
                     }
                     break;
                 case DEL_LINES:
                     //If Flag is set, delete all TextLines in given TextRegions
                     for (TextRegionType aTextReg : globTextRegs) {
-                        if(PageXmlUtil.isT2ITextRegion(aTextReg,xmlFile)){
+                        if (PageXmlUtil.isT2ITextRegion(aTextReg, xmlFile)) {
                             continue;
                         }
                         List<TextLineType> textLine = aTextReg.getTextLine();
@@ -170,13 +167,11 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
                     throw new RuntimeException("cannot interprete key '" + Key.LA_DELETESCHEME + "' with value '" + deleteScheme + "'.");
             }
         }
+//        doLA |= !hasNativeTextRegions(globTextRegs, xmlFile);
         //All TextRegions NOT containing any TextLines are further processed.
         List<TextRegionType> reducedTextRegs = new ArrayList<>();
         List<Polygon2DInt> reducedTextRegsPoly = new ArrayList<>();
         for (TextRegionType aGlobTextRegion : globTextRegs) {
-            if(PageXmlUtil.isT2ITextRegion(globTextRegs,xmlFile)){
-                continue;
-            }
             if (ids == null || ArrayUtil.linearSearch(ids, aGlobTextRegion.getId()) >= 0) {
                 List<TextLineType> textLines = aGlobTextRegion.getTextLine();
                 if (textLines == null || textLines.isEmpty()) {
@@ -192,6 +187,11 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
         }
         if (!doLA) {
             MetadataUtil.addMetadata(xmlFile, this);
+            if (t2ITextRegion != null) {
+                if (!DEL_ALL.equals(deleteScheme)) {
+                    globRegs.add(t2ITextRegion);
+                }
+            }
             return true;
         }
         HybridImage hi = ImageUtil.getHybridImage(image, true);
@@ -233,7 +233,21 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
             hi.getOpenCVMatImage().release();
         }
 
+        if (t2ITextRegion != null) {
+            if (!DEL_ALL.equals(deleteScheme)) {
+                globRegs.add(t2ITextRegion);
+            }
+        }
         return true;
+    }
+
+    private boolean hasNativeTextRegions(List<TextRegionType> globTextRegs, PcGtsType page) {
+        for (TextRegionType globTextReg : globTextRegs) {
+            if (!PageXmlUtil.isT2ITextRegion(globTextReg, page)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

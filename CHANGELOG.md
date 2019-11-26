@@ -1,6 +1,10 @@
 # Change Log
 
-# 2.4.3
+# 2.5.0
+* feature T2I: if no file to a text file is given, method utilizes the special reference text lines in XML-file
+* feature T2I: new property: T2I_IGNORE_LB = "ig_lb": if "true", line breaks are substituted by spaces.
+* feature LA: leaves special reference text lines in XML-file. 
+* feature LA: if property LA_DELETESCHEME = "la_deletescheme" is set to DEL_ALL = "all", also the special reference text lines are deleted
 
 # 2.4.2
 * bugfix for HTR+ delete old *.pb in export folder

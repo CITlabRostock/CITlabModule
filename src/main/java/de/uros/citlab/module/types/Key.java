@@ -146,6 +146,13 @@ public class Key {
     public static final String T2I_SKIP_WORD = "skip_word";
 
     /**
+     * ignore in references. This property should be set to "true", if the given
+     * line breaks could be wrong.
+     * If value = true, line breaks were substituted by spaces, otherwise not.
+     */
+    public static final String T2I_IGNORE_LB = "ig_lb";
+
+    /**
      * makes it possible to skip a baseline (default: null). Sometimes the LA
      * finds a baseline in noise (aka false positive). It is possible to delete
      * those baselines instead of "pressing" a sequence into the line. The value

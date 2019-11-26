@@ -1,6 +1,8 @@
 package de.uros.citlab.module.text2image;
 
+import de.planet.imaging.types.HybridImage;
 import de.uros.citlab.module.TestFiles;
+import de.uros.citlab.module.la.LayoutAnalysisURO_ML;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.PageXmlUtil;
@@ -9,6 +11,7 @@ import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.pagecontent.TextEquivType;
 import eu.transkribus.core.model.beans.pagecontent.TextRegionType;
 import eu.transkribus.core.util.PageXmlUtils;
+import eu.transkribus.interfaces.types.Image;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -27,6 +30,9 @@ public class Text2ImageParserTest {
     static File outFolder = null;
     static File txtFile = null;
 
+    static File imgFileXML = null;
+    static File xmlFileCopyXML = null;
+
     @BeforeClass
     public static void setUp() throws Exception {
         TemporaryFolder folder = new TemporaryFolder();
@@ -42,6 +48,13 @@ public class Text2ImageParserTest {
         }
         FileUtil.copyFile(xmlFile, xmlFileCopy);
         FileUtil.writeLines(txtFile, textLines, false);
+
+        File folder_t2i = new File(TestFiles.getPrefix(), "test_t2i");
+        imgFileXML = new File(folder_t2i, "image1.jpg");
+        File xml = PageXmlUtil.getXmlPath(imgFileXML, true);
+        File outFolderXML = folder.newFolder("outXML");
+        xmlFileCopyXML = new File(outFolderXML, xml.getName());
+        FileUtil.copyFile(xml, xmlFileCopyXML);
     }
 
     public static List<String> getText(PcGtsType page) {
@@ -63,7 +76,7 @@ public class Text2ImageParserTest {
         return res;
     }
 
-//    @Test
+    //    @Test
     public void testBidiHtrPlus() throws IOException, JAXBException {
         Text2ImageParser parser = new Text2ImageParser();
         String[] props = PropertyUtil.setProperty(null, Key.T2I_SKIP_BASELINE, 0.4);
@@ -117,6 +130,30 @@ public class Text2ImageParserTest {
                 new String[]{imgFile.getAbsolutePath()},
                 new String[]{xmlFileCopy.getAbsolutePath()},
                 props);
+
+    }
+
+    @Test
+    public void matchCollectionFromPageXML() {
+        String[] propLA = PropertyUtil.setProperty(null, Key.LA_DELETESCHEME, LayoutAnalysisURO_ML.DEL_REGIONS);
+        LayoutAnalysisURO_ML parserLA = new LayoutAnalysisURO_ML(null);
+        Image image = new Image(HybridImage.newInstance(imgFileXML).getAsBufferedImage());
+        parserLA.process(image, xmlFileCopyXML.getAbsolutePath(), null, propLA);
+        parserLA.process(image, xmlFileCopyXML.getAbsolutePath(), null, null);
+        Text2ImageParser parser = new Text2ImageParser();
+        String[] props = PropertyUtil.setProperty(null, Key.T2I_SKIP_BASELINE, 1.0);
+        props = PropertyUtil.setProperty(props, Key.T2I_SKIP_WORD, 10.0);
+        props = PropertyUtil.setProperty(props, Key.T2I_THRESH, 0.0);
+        props = PropertyUtil.setProperty(props, Key.T2I_IGNORE_LB, true);
+        parser.matchCollection(
+                TestFiles.getHtrDft().getAbsolutePath(),
+                null,
+                null,
+                null,
+                new String[]{imgFileXML.getAbsolutePath()},
+                new String[]{xmlFileCopyXML.getAbsolutePath()},
+                props);
+        propLA=null;
 
     }
 

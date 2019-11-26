@@ -20,6 +20,7 @@ import de.uros.citlab.module.util.*;
 import de.uros.citlab.textalignment.HyphenationProperty;
 import de.uros.citlab.textalignment.TextAligner;
 import de.uros.citlab.textalignment.types.LineMatch;
+import eu.transkribus.core.model.beans.pagecontent.PageType;
 import eu.transkribus.core.model.beans.pagecontent.TextLineType;
 import eu.transkribus.core.model.beans.pagecontent.TextRegionType;
 import eu.transkribus.core.util.PageXmlUtils;
@@ -29,11 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
-import java.util.List;
 
 /**
  * @author gundram
@@ -89,6 +88,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
         for (int i = 0; i < in.size(); i++) {
             in.set(i, BidiUtil.logical2visual(in.get(i)));
         }
+        return in;
     }
 
     @Override
@@ -148,12 +148,11 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
     }
 
     public List<String> loadReferencesFromPageStruct(List<PageStruct> pages, boolean ignoreHardLineBreaks) {
+        LOG.debug("load text references from pageXML");
         List<String> res = new LinkedList<>();
         for (PageStruct page : pages) {
-            int width = page.getXml().getImageWidth();
-            int height = page.getXml().getImageHeight();
             for (TextLineType textLine : PageXmlUtil.getTextLines(page.getXml())) {
-                if(isT2ITextLine(textLine,page.getXml())){
+                if (PageXmlUtil.isT2ITextLine(textLine, page.getXml())) {
                     res.add(PageXmlUtil.getTextEquiv(textLine));
                 }
             }
@@ -170,19 +169,18 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
     }
 
     public void deleteT2ITextLines(PageStruct struct) {
-        struct.getXml().getPage();
-        if(PageXmlUtil.isT2ITextLine(textLine,struct.getXml())){
-            //remove
-        }
+        PageType page = struct.getXml().getPage();
+        PageXmlUtils.getTextRegions(struct.getXml()).removeIf(textRegionType -> PageXmlUtil.isT2ITextRegion(textRegionType, struct.getXml()));
     }
 
     public void matchCollection(String pathToOpticalModel, String pathToLanguageModel, String
             pathToCharacterMap, String pathToText, String[] images, String[] xmlInOut, String[] storages, String[] props) {
         LOG.info("process xmls {}...", Arrays.asList(images));
+        boolean deleteLineBreaks = PropertyUtil.isPropertyTrue(props, Key.T2I_IGNORE_LB);
         List<PageStruct> pages = PageXmlUtil.getPages(images, xmlInOut);
-        List<String> in = pathToText!=null && !pathToText.isEmpty()?
-                loadReferencePrepareBidi(new File(pathToText)):
-                loadReferencesFromPageStruct(pages);
+        List<String> in = pathToText != null && !pathToText.isEmpty() ?
+                loadReferencePrepareBidi(new File(pathToText), deleteLineBreaks) :
+                loadReferencesFromPageStruct(pages, deleteLineBreaks);
         final List<LineImage> linesExecution = new LinkedList<>();
         final List<PageStruct> pageExecution = new LinkedList<>();
         final List<ConfMat> confMats = new LinkedList<>();
@@ -202,7 +200,7 @@ public class Text2ImageParser extends ParamSetOrganizer implements IText2Image {
             HTR htr = getHTR(pathToOpticalModel, pathToCharacterMap, storage);
             for (TextRegionType textRegion : textRegions) {
                 List<TextLineType> linesInRegion1 = textRegion.getTextLine();
-                linesInRegion1.removeIf(textLineType -> PageXmlUtil.isT2ITextLine(textLineType,page.getXml()));
+                linesInRegion1.removeIf(textLineType -> PageXmlUtil.isT2ITextLine(textLineType, page.getXml()));
                 for (TextLineType textLineType : linesInRegion1) {
                     LineImage lineImage = new LineImage(hi, textLineType, textRegion);
                     lineImage.deleteTextEquiv();
