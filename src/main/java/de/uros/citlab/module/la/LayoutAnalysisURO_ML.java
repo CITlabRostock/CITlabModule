@@ -47,6 +47,7 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
     private String netPath = null;
 
     //    private static final String DEL_DEFAULT = "default";
+    public static final String DEL_ALL = "all";
     public static final String DEL_REGIONS = "regions";
     public static final String DEL_LINES = "lines";
 
@@ -125,23 +126,36 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
         PageType page = xmlFile.getPage();
         List<TrpRegionType> globRegs = page.getTextRegionOrImageRegionOrLineDrawingRegion();
         List<TextRegionType> globTextRegs = PageXmlUtils.getTextRegions(xmlFile);
-
+        TextRegionType t2ITextRegion = PageXmlUtil.getT2ITextRegion(globTextRegs, xmlFile);
+        if (t2ITextRegion != null) {
+            globRegs.remove(t2ITextRegion);
+            globTextRegs.remove(t2ITextRegion);
+        }
 //        List<TextRegionType> globTextRegs = PageXmlUtils.getTextRegions(xmlFile);
         String deleteScheme = PropertyUtil.getProperty(propCur, Key.LA_DELETESCHEME);
         boolean doLA = globTextRegs.isEmpty();
         if (deleteScheme != null) {
             doLA = true;
             switch (deleteScheme) {
+                case DEL_ALL:
                 case DEL_REGIONS:
                     if (!globRegs.isEmpty()) {
-                        LOG.debug("delete {} text regions", globRegs.size());
-                        globRegs.clear();
-                        globTextRegs.clear();
+                        int count = 0;
+                        for (int i = globTextRegs.size() - 1; i >= 0; i--) {
+                            TextRegionType textRegion = globTextRegs.get(i);
+                            globTextRegs.remove(textRegion);
+                            globRegs.remove(textRegion);
+                            count++;
+                        }
+                        LOG.debug("delete {} text regions", count);
                     }
                     break;
                 case DEL_LINES:
                     //If Flag is set, delete all TextLines in given TextRegions
                     for (TextRegionType aTextReg : globTextRegs) {
+                        if (PageXmlUtil.isT2ITextRegion(aTextReg, xmlFile)) {
+                            continue;
+                        }
                         List<TextLineType> textLine = aTextReg.getTextLine();
                         if (!textLine.isEmpty()) {
                             LOG.debug("delete " + textLine.size() + " text lines in TextRegion " + aTextReg.getId());
@@ -153,6 +167,7 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
                     throw new RuntimeException("cannot interprete key '" + Key.LA_DELETESCHEME + "' with value '" + deleteScheme + "'.");
             }
         }
+//        doLA |= !hasNativeTextRegions(globTextRegs, xmlFile);
         //All TextRegions NOT containing any TextLines are further processed.
         List<TextRegionType> reducedTextRegs = new ArrayList<>();
         List<Polygon2DInt> reducedTextRegsPoly = new ArrayList<>();
@@ -172,6 +187,11 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
         }
         if (!doLA) {
             MetadataUtil.addMetadata(xmlFile, this);
+            if (t2ITextRegion != null) {
+                if (!DEL_ALL.equals(deleteScheme)) {
+                    globRegs.add(t2ITextRegion);
+                }
+            }
             return true;
         }
         HybridImage hi = ImageUtil.getHybridImage(image, true);
@@ -213,7 +233,21 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
             hi.getOpenCVMatImage().release();
         }
 
+        if (t2ITextRegion != null) {
+            if (!DEL_ALL.equals(deleteScheme)) {
+                globRegs.add(t2ITextRegion);
+            }
+        }
         return true;
+    }
+
+    private boolean hasNativeTextRegions(List<TextRegionType> globTextRegs, PcGtsType page) {
+        for (TextRegionType globTextReg : globTextRegs) {
+            if (!PageXmlUtil.isT2ITextRegion(globTextReg, page)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -331,6 +365,9 @@ public class LayoutAnalysisURO_ML implements ILayoutAnalysis, Serializable {
     }
 
     private List<Cluster> clusterBLs(HybridImage hi, List<Polygon2DInt> bls, String thisRotateScheme, boolean rotateBaselines, boolean clustLeft2Right) {
+        if (rotateBaselines != clustLeft2Right) {
+            LOG.warn("rotation = {} and clusterLeft2Right = {} could cause errors for regions with angle != 0", rotateBaselines, clustLeft2Right);
+        }
         short[][] absSobelSum = null;
         if (!thisRotateScheme.equals(ROT_DFT)) {
             absSobelSum = ImageUtil.calcAbsSobelSum(hi.getAsOpenCVMatImage());

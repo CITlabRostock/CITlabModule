@@ -8,17 +8,15 @@ package de.uros.citlab.module.workflow;
 import com.achteck.misc.exception.InvalidParameterException;
 import com.achteck.misc.log.Logger;
 import com.achteck.misc.param.ParamSet;
-import com.achteck.misc.types.ConfMat;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
-import com.achteck.misc.util.IO;
-import com.achteck.misc.util.StopWatch;
 import de.uros.citlab.module.kws.KWSParser;
 import de.uros.citlab.module.types.ArgumentLine;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.FileUtil;
 import de.uros.citlab.module.util.PropertyUtil;
 import eu.transkribus.interfaces.IKeywordSpotter;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -60,8 +58,17 @@ public class RunKWS extends ParamTreeOrganizer {
     @ParamAnnotation(descr = "keyword can be substring of word")
     private boolean kws_part;
 
+    @ParamAnnotation(descr = "keyword only allowed as prefix of text line")
+    private boolean kws_prefix;
+
+    @ParamAnnotation(descr = "keyword only allowed as suffix of text line")
+    private boolean kws_suffix;
+
     @ParamAnnotation(descr = "keyword search is case-insensitive")
     private boolean kws_upper;
+
+    @ParamAnnotation(descr = "keyword search is in expert modus")
+    private boolean kws_expert;
 
     @ParamAnnotation(descr = "maximal size of loaded confmats in MB")
     private int kws_cache_size;
@@ -112,6 +119,18 @@ public class RunKWS extends ParamTreeOrganizer {
         this.kws_part = kws_part;
     }
 
+    public void setPrefix(boolean kws_prefix) {
+        this.kws_prefix = kws_prefix;
+    }
+
+    public void setSuffix(boolean kws_suffix) {
+        this.kws_suffix = kws_suffix;
+    }
+
+    public void setExpert(boolean kws_expert) {
+        this.kws_expert = kws_expert;
+    }
+
     public void run() {
         List<File> storage = FileUtil.getFilesListsOrFolders(s, "bin".split(" "), true);
         Collections.sort(storage);
@@ -123,6 +142,8 @@ public class RunKWS extends ParamTreeOrganizer {
                 throw new RuntimeException("number of storage files = " + storage.size() + " and image files = " + image.size());
 //            image=image.subList(0, storage.size());
             }
+        }else{
+            image=storage;
         }
         String[] storages = FileUtil.asStringList(storage);
         String[] images = FileUtil.asStringList(image);
@@ -131,7 +152,11 @@ public class RunKWS extends ParamTreeOrganizer {
         props = PropertyUtil.setProperty(props, Key.KWS_MIN_CONF, String.valueOf(kws_min_conf));
         props = PropertyUtil.setProperty(props, Key.KWS_MAX_ANZ, String.valueOf(kws_max_anz));
         props = PropertyUtil.setProperty(props, Key.KWS_PART, String.valueOf(kws_part));
+        props = PropertyUtil.setProperty(props, Key.KWS_PREFIX, String.valueOf(kws_prefix));
+        props = PropertyUtil.setProperty(props, Key.KWS_SUFFIX, String.valueOf(kws_suffix));
+        props = PropertyUtil.setProperty(props, Key.KWS_PART, String.valueOf(kws_part));
         props = PropertyUtil.setProperty(props, Key.KWS_CACHE_SIZE, String.valueOf(kws_cache_size));
+        props = PropertyUtil.setProperty(props, Key.KWS_EXPERT, String.valueOf(kws_expert));
         props = PropertyUtil.setProperty(props, Key.KWS_UPPER, String.valueOf(kws_upper));
         String process = impl.process(images, storages, queries, null, props);
         FileUtil.writeLines(new File(o), Arrays.asList(process));

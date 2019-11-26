@@ -8,11 +8,11 @@ package de.uros.citlab.module.train;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.util.IO;
 import de.planet.itrtech.reco.IImagePreProcess;
+import de.planet.ocrtech.normalization.shape.SizeNormalizationUtil;
 import de.planet.reco.ImagePreprocModules;
 import de.planet.reco.RecoGlobals;
 import de.planet.reco.preproc.*;
 import de.planet.reco.preproc.util.ResizeUtil.Algorithm;
-import de.planet.trainer.factory.ImagePreprocessDft;
 import de.uros.citlab.module.types.ErrorNotification;
 import de.uros.citlab.module.types.Key;
 import de.uros.citlab.module.util.*;
@@ -535,9 +535,65 @@ public class TrainHtrPlus extends TrainHtr {
             return getPreProcess(64, 0.5, 24);
         } catch (RuntimeException ex) {
             LOG.warn("use old and slow preprocess");
-            return ImagePreprocessDft.getPreProcess(64, 0.5, 20, true);
+            return getPreProcessOld(64, 0.5, 20, true);
         }
     }
+
+    public static final IImagePreProcess getPreProcessOld(int tgtHeight, double pquantil_p, int pquantil_height, boolean useNewCn) {
+        ImagePreprocModules imagePreprocModules = new ImagePreprocModules();
+        if (useNewCn) {
+            imagePreprocModules.addModule("contrast", new ContrastNormalizer6());
+        } else {
+            imagePreprocModules.addModule("contrast", new ContrastNormalizer2());
+        }
+
+        imagePreprocModules.addModule("size", new SizeNormalizer());
+        imagePreprocModules.addModule("norm", new BasicShapeNormalizer());
+        imagePreprocModules.addModule("size2", new SizeNormalizer());
+        imagePreprocModules.addModule("norm2", new BasicShapeNormalizer());
+        imagePreprocModules.addModule("slant", new SlantNormalizer());
+        imagePreprocModules.addModule("crop", new Cropper());
+        imagePreprocModules.addModule("squash", new BasicMainBodyNormalizer());
+        imagePreprocModules.setParamPrefix("");
+        ParamSet ps = imagePreprocModules.getDefaultParamSet((ParamSet)null);
+        double lower = (1.0D - pquantil_p) * 0.5D;
+        double upper = 1.0D - lower;
+        ps.getParam("size/size_normalizer_lower_hist_type").copyFrom(SizeNormalizationUtil.VHistType.COLOR_CHANGE.toString());
+        ps.getParam("size/size_normalizer_upper_hist_type").copyFrom(SizeNormalizationUtil.VHistType.COLOR_CHANGE.toString());
+        ps.getParam("size/size_normalizer_lower_quantil").copyFrom(upper);
+        ps.getParam("size/size_normalizer_upper_quantil").copyFrom(lower);
+        ps.getParam("size/size_normalizer_target_size").copyFrom(pquantil_height * 2);
+        ps.getParam("norm/basic_shape_normalizer_quantil").copyFrom("0.5");
+        ps.getParam("norm/basic_shape_normalizer_hist_window_radius").copyFrom(pquantil_height * 20);
+        ps.getParam("norm/basic_shape_normalizer_hist_step_size").copyFrom(pquantil_height * 2);
+        ps.getParam("size2/size_normalizer_lower_hist_type").copyFrom(SizeNormalizationUtil.VHistType.COLOR_CHANGE.toString());
+        ps.getParam("size2/size_normalizer_upper_hist_type").copyFrom(SizeNormalizationUtil.VHistType.COLOR_CHANGE.toString());
+        ps.getParam("size2/size_normalizer_lower_quantil").copyFrom(upper);
+        ps.getParam("size2/size_normalizer_upper_quantil").copyFrom(lower);
+        ps.getParam("size2/size_normalizer_target_size").copyFrom(pquantil_height);
+        ps.getParam("norm2/basic_shape_normalizer_quantil").copyFrom("0.5");
+        ps.getParam("norm2/basic_shape_normalizer_hist_window_radius").copyFrom(pquantil_height * 10);
+        ps.getParam("norm2/basic_shape_normalizer_hist_step_size").copyFrom(pquantil_height);
+        int nonlinearity = tgtHeight / 2;
+        int linearity = tgtHeight - nonlinearity;
+        int mb_lower = linearity / 2;
+        int mb_upper = linearity - mb_lower;
+        int descender = linearity / 2;
+        int ascender = linearity - descender - 1;
+        ps.getParam("squash/basic_main_body_normalizer_quantil").copyFrom("0.5");
+        ps.getParam("squash/basic_main_body_normalizer_squash_top").copyFrom(String.valueOf(ascender));
+        ps.getParam("squash/basic_main_body_normalizer_squash_bottom").copyFrom(String.valueOf(descender));
+        ps.getParam("squash/basic_main_body_normalizer_lower_border_size").copyFrom(String.valueOf(mb_lower));
+        ps.getParam("squash/basic_main_body_normalizer_upper_border_size").copyFrom(mb_upper);
+        if (!useNewCn) {
+            ps.getParam("contrast/bg_undercut").copyFrom("0");
+        }
+
+        imagePreprocModules.setParamSet(ps);
+        imagePreprocModules.init();
+        return imagePreprocModules;
+    }
+
 
     public static final IImagePreProcess getPreProcess(int tgtHeight, double pquantil_p, int pquantil_height) {
         ImagePreprocModules imagePreprocModules = new ImagePreprocModules("pp_deploy_A");
