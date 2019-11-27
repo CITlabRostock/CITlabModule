@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
+    <Metadata>
+        <Creator>TRP</Creator>
+        <Created>2019-05-22T18:22:26.536+02:00</Created>
+        <LastChange>2019-05-22T18:46:37.543+02:00</LastChange>
+    </Metadata>
+    <Page imageFilename="image1.jpg" imageWidth="2732" imageHeight="4184">
+        <ReadingOrder>
+            <OrderedGroup id="ro_1558543597635" caption="Regions reading order">
+                <RegionRefIndexed index="0" regionRef="region_1"/>
+            </OrderedGroup>
+        </ReadingOrder>
+        <TextRegion id="region_1" custom="readingOrder {index:0;}">
+            <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+            <TextLine id="line_1" custom="readingOrder {index:0;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode></Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_2" custom="readingOrder {index:1;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode></Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_3" custom="readingOrder {index:2;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Abschrift.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_4" custom="readingOrder {index:3;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>II 328/01.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_5" custom="readingOrder {index:4;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>44.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_6" custom="readingOrder {index:5;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Im Namen des Reichs.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_7" custom="readingOrder {index:6;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>In Sachen des Kaufmanns Max Hollaender zu Oberhausen,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_8" custom="readingOrder {index:7;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Beklagten und Revisionsklägers,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_9" custom="readingOrder {index:8;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode></Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_10" custom="readingOrder {index:9;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode></Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_11" custom="readingOrder {index:10;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>die  Riegel- und Schloßfabriken,  zu Velbert,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_12" custom="readingOrder {index:11;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Klägerin und Revisionsbeklagte,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_13" custom="readingOrder {index:12;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Prozeßbevollmächtigter: Geheimer Justizrath Fenner in Leipzig,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_14" custom="readingOrder {index:13;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>hat das Reichsgericht, II. Civilsenat,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_15" custom="readingOrder {index:14;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>auf die mündliche Verhandlung vom 31. Januar 1902</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_16" custom="readingOrder {index:15;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>unter Mitwirkung:</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_17" custom="readingOrder {index:16;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>des Präsidenten Wirklichen Geheimen Raths Dr. Bingner</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_18" custom="readingOrder {index:17;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>und der Reichsgerichtsräthe und viele andere Wüstenfeld, Remelé, von Baerenfels,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_19" custom="readingOrder {index:18;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Müller, Dr. Peez, Henderichs</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_20" custom="readingOrder {index:19;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>für Recht erkannt:</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_21" custom="readingOrder {index:20;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Die gegen das Urtheil des Dritten Civilsenats des Königlich Preußi¬</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_22" custom="readingOrder {index:21;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>schen Oberlandesgerichts zu Hamm vom 4. Juli 1901 eingelegte</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_23" custom="readingOrder {index:22;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Revision wird zurückgewiesen; die Kosten der Revisionsinstanz werden</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_24" custom="readingOrder {index:23;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>dem Revisionskläger auferlegt.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_25" custom="readingOrder {index:24;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Von Rechts Wegen.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_26" custom="readingOrder {index:25;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Thatbestand.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_27" custom="readingOrder {index:26;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>Auf Grund der Behauptung, daß der Beklagte durch seinen hierzu</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_28" custom="readingOrder {index:27;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>bevollmächtigten Handlungsgehilfen Klockers am 5. Juni 1900 von ihr</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_29" custom="readingOrder {index:28;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>3 Waggons Eisenschrott zu 10000 Kg zum Preise von 74 M. für 1000 Kg</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_30" custom="readingOrder {index:29;}">
+                <Coords points="0,0 2732,0 2732,4184 0,4184"/>
+                <TextEquiv>
+                    <Unicode>ge¬</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextEquiv>
+                <Unicode>
+
+Abschrift.
+II 328/01.
+44.
+Im Namen des Reichs.
+In Sachen des Kaufmanns Max Hollaender zu Oberhausen,
+Beklagten und Revisionsklägers,
+
+
+die  Riegel- und Schloßfabriken,  zu Velbert,
+Klägerin und Revisionsbeklagte,
+Prozeßbevollmächtigter: Geheimer Justizrath Fenner in Leipzig,
+hat das Reichsgericht, II. Civilsenat,
+auf die mündliche Verhandlung vom 31. Januar 1902
+unter Mitwirkung:
+des Präsidenten Wirklichen Geheimen Raths Dr. Bingner
+und der Reichsgerichtsräthe und viele andere Wüstenfeld, Remelé, von Baerenfels,
+Müller, Dr. Peez, Henderichs
+für Recht erkannt:
+Die gegen das Urtheil des Dritten Civilsenats des Königlich Preußi¬
+schen Oberlandesgerichts zu Hamm vom 4. Juli 1901 eingelegte
+Revision wird zurückgewiesen; die Kosten der Revisionsinstanz werden
+dem Revisionskläger auferlegt.
+Von Rechts Wegen.
+Thatbestand.
+Auf Grund der Behauptung, daß der Beklagte durch seinen hierzu
+bevollmächtigten Handlungsgehilfen Klockers am 5. Juni 1900 von ihr
+3 Waggons Eisenschrott zu 10000 Kg zum Preise von 74 M. für 1000 Kg
+ge¬</Unicode>
+            </TextEquiv>
+        </TextRegion>
+    </Page>
+</PcGts>

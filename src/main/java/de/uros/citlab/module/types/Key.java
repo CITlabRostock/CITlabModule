@@ -146,6 +146,13 @@ public class Key {
     public static final String T2I_SKIP_WORD = "skip_word";
 
     /**
+     * ignore in references. This property should be set to "true", if the given
+     * line breaks could be wrong.
+     * If value = true, line breaks were substituted by spaces, otherwise not.
+     */
+    public static final String T2I_IGNORE_LB = "ig_lb";
+
+    /**
      * makes it possible to skip a baseline (default: null). Sometimes the LA
      * finds a baseline in noise (aka false positive). It is possible to delete
      * those baselines instead of "pressing" a sequence into the line. The value
@@ -238,6 +245,16 @@ public class Key {
      * value: true|false (default: false)
      */
     public static final String KWS_UPPER = "kws_upper";
+    /**
+     * if KW only is allowed at the start of a text line<br>
+     * value: true|false (default: false)
+     */
+    public static final String KWS_PREFIX = "kws_prefix";
+    /**
+     * if KW only is allowed at the end of a text line<br>
+     * value: true|false (default: false)
+     */
+    public static final String KWS_SUFFIX = "kws_suffix";
     /**
      * activates the expert-modus<br>
      * some regular expressions are allowed<br>

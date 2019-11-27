@@ -38,27 +38,26 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 /**
- *
  * @author gundram
  */
 public class KWSParser extends Observable implements IKeywordSpotter {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(KWSParser.class.getName());
-//    private transient final HashMap<Integer, HTR> htrs = new HashMap<>();
+    //    private transient final HashMap<Integer, HTR> htrs = new HashMap<>();
 //    private transient final HashMap<String, ISNetwork> networks = new HashMap<>();
     private String nameCurrent = "?";
-//    @ParamAnnotation(descr = "maximal number of results")
+    //    @ParamAnnotation(descr = "maximal number of results")
 //    private int maxNum = 1000;
 //    private boolean toUpper = false;
 //    private boolean escape = false;
 //    private boolean expert = false;
     private boolean multiWords = false;
-//    private double minConf = 0.02;
+    //    private double minConf = 0.02;
 //    private int threads = 1;
     private RegexDecoder regexDec;
     private IDecodingOccurrence decoderOcc = new CTCbestPathShort();
-//    @ParamAnnotation(name = "sf", member = "sortFunction")
+    //    @ParamAnnotation(name = "sf", member = "sortFunction")
     private String sfName = SortFunctionOOVPrior.class.getName();
     protected ISortingFunction sortFunction;
 
@@ -125,6 +124,8 @@ public class KWSParser extends Observable implements IKeywordSpotter {
         double minConf = Double.parseDouble(PropertyUtil.getProperty(props, Key.KWS_MIN_CONF, "0.05"));
         boolean upper = PropertyUtil.isPropertyTrue(props, Key.KWS_UPPER);
         boolean expert = PropertyUtil.isPropertyTrue(props, Key.KWS_EXPERT);
+        boolean isPrefix = PropertyUtil.isPropertyTrue(props, Key.KWS_PREFIX);
+        boolean isSuffix = PropertyUtil.isPropertyTrue(props, Key.KWS_SUFFIX);
         int maxAnz = Integer.parseInt(PropertyUtil.getProperty(props, Key.KWS_MAX_ANZ, "-1"));
         boolean part = PropertyUtil.isPropertyTrue(props, Key.KWS_PART);
         int threads = Integer.valueOf(PropertyUtil.getProperty(props, Key.KWS_THREADS, "1"));
@@ -138,7 +139,7 @@ public class KWSParser extends Observable implements IKeywordSpotter {
         while (loadConfMats(imagesIn, storageIn, upper, cacheSize)) {
             workers = new LinkedList<>();
             for (int i = 0; i < threads; i++) {
-                workers.add(new FindResult(expert, part));
+                workers.add(new FindResult(expert, part, isPrefix, isSuffix));
             }
             int i = 0;
             for (KWS.Word word : res) {
@@ -180,22 +181,27 @@ public class KWSParser extends Observable implements IKeywordSpotter {
 
         private Iterator<ConfMat> cm;
         private KWS.Word kw;
-//        private RegexDecoder red = new RegexDecoder(true);
+        //        private RegexDecoder red = new RegexDecoder(true);
         private IDecodingOccurrence decOcc = new CTCbestPathShort();
-//        private ISortingFunction sf;
+        //        private ISortingFunction sf;
         private HashMap<ConfMat, String> confMatMap;
         private HashMap<ConfMat, ConfMatContainer> containerMap;
 
         private final boolean isExpert;
         private final boolean isPart;
+        private final boolean isPrefix;
+        private final boolean isSuffix;
         private String regex = null;
 
         public FindResult(boolean isExpert, boolean isPart) {
+            this(isExpert, isPart, false, false);
+        }
+
+        public FindResult(boolean isExpert, boolean isPart, boolean isPrefix, boolean isSuffix) {
             this.isExpert = isExpert;
             this.isPart = isPart;
-//            sf = new SortFunctionOOVPrior();
-//            sf.setParamSet(sf.getDefaultParamSet(null));
-//            sf.init();
+            this.isPrefix = isPrefix;
+            this.isSuffix = isSuffix;
         }
 
         public void setTask(Iterator<ConfMat> cm, KWS.Word kw, HashMap<ConfMat, String> confMatMap, HashMap<ConfMat, ConfMatContainer> containerMap) {
@@ -220,7 +226,13 @@ public class KWSParser extends Observable implements IKeywordSpotter {
                 } else {
                     String word = isExpert ? keyWord : RegExHelper.escapeControlChar(keyWord);
                     if (isPart) {
-                        regex = ".*(?<KW>" + word + ").*";
+                        regex = "(?<KW>" + word + ")";
+                        if (!isSuffix) {
+                            regex = regex + ".*";
+                        }
+                        if (!isPrefix) {
+                            regex = ".*" + regex;
+                        }
                     } else {
                         Pattern compile = Pattern.compile("[\\pZ\\pP\\pS]");
                         StringBuilder sb = new StringBuilder();
@@ -234,9 +246,15 @@ public class KWSParser extends Observable implements IKeywordSpotter {
                             prePost = prePost.replace("-", "") + "-";
                         }
                         prePost = prePost.replace("\\", "\\\\").replace("[", "\\[").replace("]", "\\]");
-                        String pre = "(?<PRE>[" + prePost + "])";
-                        String post = "(?<POST>[" + prePost + "])";
-                        regex = "(.*" + pre + ")?(?<KW>" + word + ")(" + post + "(.*))?";
+                        regex = "(?<KW>" + word + ")";
+                        if (!isSuffix) {
+                            String post = "((?<POST>[" + prePost + "])(.*))?";
+                            regex = regex + post;
+                        }
+                        if (!isPrefix) {
+                            String pre = "(.*(?<PRE>[" + prePost + "]))?";
+                            regex = pre + regex;
+                        }
                     }
                 }
             }
@@ -492,7 +510,7 @@ public class KWSParser extends Observable implements IKeywordSpotter {
                 }
             }
             try {
-                ConfMatContainer container = (ConfMatContainer) IO.load(storageFile,"de.uro.citlab","de.uros.citlab");
+                ConfMatContainer container = (ConfMatContainer) IO.load(storageFile, "de.uro.citlab", "de.uros.citlab");
                 if (container == null) {
                     throw new IOException("loading file '" + storageFile + "' produces a null element.");
                 }

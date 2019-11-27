@@ -5,24 +5,7 @@
  */
 package de.uros.citlab.module.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOCase;
-import org.apache.commons.io.filefilter.FalseFileFilter;
-import org.apache.commons.io.filefilter.SuffixFileFilter;
-import org.apache.commons.lang.ArrayUtils;
-
 import com.achteck.misc.log.Logger;
-
 import de.uros.citlab.module.types.PageStruct;
 import eu.transkribus.core.model.beans.customtags.CssSyntaxTag;
 import eu.transkribus.core.model.beans.customtags.ReadingOrderTag;
@@ -31,14 +14,47 @@ import eu.transkribus.core.model.beans.pagecontent.TextEquivType;
 import eu.transkribus.core.model.beans.pagecontent.TextLineType;
 import eu.transkribus.core.model.beans.pagecontent.TextRegionType;
 import eu.transkribus.core.util.PageXmlUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOCase;
+import org.apache.commons.io.filefilter.FalseFileFilter;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.lang.ArrayUtils;
+
+import javax.xml.bind.JAXBException;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- *
  * @author gundram
  */
 public class PageXmlUtil {
 
     public static Logger LOG = Logger.getLogger(PageXmlUtil.class.getName());
+
+    public static boolean isT2ITextLine(TextLineType textLine, PcGtsType page) {
+        Rectangle bounds = PolygonUtil.getPolygon(textLine).getBounds();
+        return bounds.x == 0 && bounds.y == 0 && bounds.height == page.getPage().getImageHeight() && bounds.width == page.getPage().getImageWidth();
+    }
+
+    public static TextRegionType getT2ITextRegion(List<TextRegionType> list, PcGtsType page){
+        for (TextRegionType textRegionType : list) {
+            if(isT2ITextRegion(textRegionType,page )){
+                return textRegionType;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isT2ITextRegion(TextRegionType textLine, PcGtsType page) {
+        Rectangle bounds = textLine.getBoundingBox();
+        return bounds.x == 0 && bounds.y == 0 && bounds.height == page.getPage().getImageHeight() && bounds.width == page.getPage().getImageWidth();
+    }
 
     public static File getFirstFileWithSuffix(File baseDir, String filename, String[] suffixes, boolean caseSensitve) {
         if (suffixes == null || filename == null || baseDir == null || !baseDir.isDirectory()) {
@@ -139,10 +155,10 @@ public class PageXmlUtil {
      * Deletes all custom tags. If specific tags should not be deleted, their
      * names can be given as argument list to keepTags
      *
-     * @see eu.transkribus.core.model.beans.customtags.CustomTag
-     * @see eu.transkribus.core.model.beans.customtags.ReadingOrderTag#TAG_NAME
      * @param tlt
      * @param keepTags
+     * @see eu.transkribus.core.model.beans.customtags.CustomTag
+     * @see eu.transkribus.core.model.beans.customtags.ReadingOrderTag#TAG_NAME
      */
     public static void deleteCustomTags(TextLineType tlt, String... keepTags) {
         String custom = tlt.getCustom();
@@ -204,7 +220,6 @@ public class PageXmlUtil {
     }
 
     /**
-     *
      * @param tlt
      * @return the VISUAL order from left to right and null if no textEquiv
      * given
